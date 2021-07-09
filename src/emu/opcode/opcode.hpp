@@ -23,8 +23,11 @@ namespace Giffi
     void CPU_16BIT_ADD (GBEmu* _emu, uint16_t& _reg, uint16_t _value);
 
     // Bitwise operations
+    void CPU_RRC(GBEmu* _emu, uint8_t& _reg);
+    void CPU_RR (GBEmu* _emu, uint8_t& _reg);
     void CPU_ROTATE_RIGHT(GBEmu* _emu, uint8_t& _reg, uint8_t _bit);
-    void CPU_ROTATE_LEFT (GBEmu* _emu, uint8_t& _reg, uint8_t _bit);
+    void CPU_ROTATE_LEFT(GBEmu* _emu, uint8_t& _reg, uint8_t _bit);
+
     void CPU_8BIT_COMPARE(GBEmu* _emu, uint8_t _bits);
     void CPU_8BIT_AND(GBEmu* _emu, uint8_t _mask);
     void CPU_8BIT_XOR(GBEmu* _emu, uint8_t _mask);

@@ -1,4 +1,5 @@
 #include "opcode.hpp"
+#include "cb_opcode.hpp"
 #include "../emu.hpp"
 
 namespace Giffi
@@ -366,6 +367,22 @@ void GBEmu::ExecuteNextOpcode()
                 uint8_t  data = ReadByte( 0xFF00 + mRegBC.low );
                 mRegAF.high = data;
                 mCyclesDone += 4;
+                break;
+            }
+        case 0xE8: // ADD SP, r8
+            {
+                int8_t   to_add = ReadByte(mRegPC.val++);
+                uint16_t before = mRegSP.val;
+                mRegSP.val += to_add ;
+
+                // Flags
+                mRegAF.low = 0x00;
+                if( (before + to_add) > 0xFFFF )
+                    mRegAF.low |= 1 << FLAG_C;
+                //if( (before & 0xF) + (to_add & 0xF) > 0xF )
+                if (( (before & 0xFF00) & 0xF) + ((to_add >> 8) & 0xF))
+                    mRegAF.low |= 1 << FLAG_H;
+                mCyclesDone += 12;
                 break;
             }
 
@@ -784,16 +801,16 @@ void GBEmu::ExecuteNextOpcode()
 
         // Shifts TODO: CHECK THESE
         case 0x07: // RLCA
-            CPU_ROTATE_RIGHT(this, mRegAF.high, 7);
+            CPU_RLC(this, mRegAF.high);
             break;
         case 0x0F: // RRCA
-            CPU_ROTATE_RIGHT(this, mRegAF.high, 0);
+            CPU_RRC(this, mRegAF.high);
             break;
         case 0x17: // RLA
-            CPU_ROTATE_LEFT(this, mRegAF.high, 7);
+            CPU_RL(this, mRegAF.high);
             break;
         case 0x1F: // RRA
-            CPU_ROTATE_LEFT(this, mRegAF.high, 0);
+            CPU_RR(this, mRegAF.high);
             break;
 
         // Jumps
@@ -1206,32 +1223,49 @@ void CPU_RESTART(GBEmu* _emu, uint8_t _addr)
     _emu->mCyclesDone += 12;
 }
 
-// !THIS IS STOLEN, AND GIVES ERRORS LOL, LEARN WHAT IT DOES AND RE WRITE IT!
+// FUCKING WORKS FINALLY! xd
 void CPU_DAA(GBEmu* _emu)
 {
-    
-	if ((_emu->mRegAF.low >> FLAG_N) & 1)
-	{
-		if( (_emu->mRegAF.high & 0x0F ) >0x09 || _emu->mRegAF.low &0x20 )
-		{
-			_emu->mRegAF.high -=0x06; //Half borrow: (0-1) = (0xF-0x6) = 9
-			if((_emu->mRegAF.high&0xF0)==0xF0) _emu->mRegAF.low|=0x10; else _emu->mRegAF.low&=~0x10;
-		}
+    // DAA
+    uint16_t RegA = (uint16_t)_emu->mRegAF.high;
+    uint8_t&  RegF = _emu->mRegAF.low;
 
-		if((_emu->mRegAF.high&0xF0)>0x90 || _emu->mRegAF.low&0x10) _emu->mRegAF.high-=0x60;
-	}
-	else
-	{
-		if((_emu->mRegAF.high&0x0F)>9 || _emu->mRegAF.low&0x20)
-		{
-			_emu->mRegAF.high+=0x06; //Half carry: (9+1) = (0xA+0x6) = 10
-			if((_emu->mRegAF.high&0xF0)==0) _emu->mRegAF.low|=0x10; else _emu->mRegAF.low&=~0x10;
-		}
+    if ( !((RegF >> FLAG_N) & 1) ) 
+    {
+        if ( ((RegF >> FLAG_H) & 1) || ((RegA & 0xF) > 9))
+        {
+            RegA += 0x6;
+        }
 
-		if((_emu->mRegAF.high&0xF0)>0x90 || _emu->mRegAF.low&0x10) _emu->mRegAF.high+=0x60;
-	}
+        if ( ((RegF >> FLAG_C) & 1) || (RegA > 0x9F))
+        {
+            RegA += 0x60;
+            RegF |= 1 << FLAG_C;
+        }
+    }
+    else
+    {
+        if ( (RegF >> FLAG_H) & 1 )
+        {
+            RegA -= 0x6;
+        }
 
-	if(_emu->mRegAF.high==0) _emu->mRegAF.low|=0x80; else _emu->mRegAF.low&=~0x80;
+        if ( (RegF >> FLAG_C) & 1)
+        {
+            RegA -= 0x60;
+        }
+    }
+
+    // Reset Flags
+    RegF &= ~(1 << FLAG_Z);
+    RegF &= ~(1 << FLAG_H);
+
+    if ( (RegA & 0xFF) == 0U)
+    {
+       RegF |= 1 << FLAG_Z; 
+    }
+
+    _emu->mRegAF.high = (uint8_t)RegA;
 }
 
 

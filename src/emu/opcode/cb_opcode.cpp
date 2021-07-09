@@ -457,6 +457,207 @@ void GBEmu::ExecuteExtendedOpcode()
         case 0xFF: // SET 7, A
             SET_BIT(this, mRegAF.high, 7);
             break;
+        
+        // Reset Bit
+        case 0x80: // RES 0, B
+            RESET_BIT(this, mRegBC.high, 0);
+            break;
+        case 0x88: // RES 1, B
+            RESET_BIT(this, mRegBC.high, 1);
+            break;
+        case 0x90: // RES 2, B
+            RESET_BIT(this, mRegBC.high, 2);
+            break;
+        case 0x98: // RES 3, B
+            RESET_BIT(this, mRegBC.high, 3);
+            break;
+        case 0xA0: // RES 4, B
+            RESET_BIT(this, mRegBC.high, 4);
+            break;
+        case 0xA8: // RES 5, B
+            RESET_BIT(this, mRegBC.high, 5);
+            break;
+        case 0xB0: // RES 6, B
+            RESET_BIT(this, mRegBC.high, 6);
+            break;
+        case 0xB8: // RES 7, B
+            RESET_BIT(this, mRegBC.high, 7);
+            break;
+        
+        case 0x81: // RES 0, C
+            RESET_BIT(this, mRegBC.low, 0);
+            break;
+        case 0x89: // RES 1, C
+            RESET_BIT(this, mRegBC.low, 1);
+            break;
+        case 0x91: // RES 2, C
+            RESET_BIT(this, mRegBC.low, 2);
+            break;
+        case 0x99: // RES 3, C
+            RESET_BIT(this, mRegBC.low, 3);
+            break;
+        case 0xA1: // RES 4, C
+            RESET_BIT(this, mRegBC.low, 4);
+            break;
+        case 0xA9: // RES 5, C
+            RESET_BIT(this, mRegBC.low, 5);
+            break;
+        case 0xB1: // RES 6, C
+            RESET_BIT(this, mRegBC.low, 6);
+            break;
+        case 0xB9: // RES 7, C
+            RESET_BIT(this, mRegBC.low, 7);
+            break;
+
+        case 0x82: // RES 0, D
+            RESET_BIT(this, mRegDE.high, 0);
+            break;
+        case 0x8A: // RES 1, D
+            RESET_BIT(this, mRegDE.high, 1);
+            break;
+        case 0x92: // RES 2, D
+            RESET_BIT(this, mRegDE.high, 2);
+            break;
+        case 0x9A: // RES 3, D
+            RESET_BIT(this, mRegDE.high, 3);
+            break;
+        case 0xA2: // RES 4, D
+            RESET_BIT(this, mRegDE.high, 4);
+            break;
+        case 0xAA: // RES 5, D
+            RESET_BIT(this, mRegDE.high, 5);
+            break;
+        case 0xB2: // RES 6, D
+            RESET_BIT(this, mRegDE.high, 6);
+            break;
+        case 0xBA: // RES 7, D
+            RESET_BIT(this, mRegDE.high, 7);
+            break;
+        
+        case 0x83: // RES 0, E
+            RESET_BIT(this, mRegDE.low, 0);
+            break;
+        case 0x8B: // RES 1, E
+            RESET_BIT(this, mRegDE.low, 1);
+            break;
+        case 0x93: // RES 2, E
+            RESET_BIT(this, mRegDE.low, 2);
+            break;
+        case 0x9B: // RES 3, E
+            RESET_BIT(this, mRegDE.low, 3);
+            break;
+        case 0xA3: // RES 4, E
+            RESET_BIT(this, mRegDE.low, 4);
+            break;
+        case 0xAB: // RES 5, E
+            RESET_BIT(this, mRegDE.low, 5);
+            break;
+        case 0xB3: // RES 6, E
+            RESET_BIT(this, mRegDE.low, 6);
+            break;
+        case 0xBB: // RES 7, E
+            RESET_BIT(this, mRegDE.low, 7);
+            break;
+
+        case 0x84: // RES 0, H
+            RESET_BIT(this, mRegHL.high, 0);
+            break;
+        case 0x8C: // RES 1, H
+            RESET_BIT(this, mRegHL.high, 1);
+            break;
+        case 0x94: // RES 2, H
+            RESET_BIT(this, mRegHL.high, 2);
+            break;
+        case 0x9C: // RES 3, H
+            RESET_BIT(this, mRegHL.high, 3);
+            break;
+        case 0xA4: // RES 4, H
+            RESET_BIT(this, mRegHL.high, 4);
+            break;
+        case 0xAC: // RES 5, H
+            RESET_BIT(this, mRegHL.high, 5);
+            break;
+        case 0xB4: // RES 6, H
+            RESET_BIT(this, mRegHL.high, 6);
+            break;
+        case 0xBC: // RES 7, H
+            RESET_BIT(this, mRegHL.high, 7);
+            break;
+
+        case 0x85: // RES 0, L
+            RESET_BIT(this, mRegHL.low, 0);
+            break;
+        case 0x8D: // RES 1, L
+            RESET_BIT(this, mRegHL.low, 1);
+            break;
+        case 0x95: // RES 2, L
+            RESET_BIT(this, mRegHL.low, 2);
+            break;
+        case 0x9D: // RES 3, L
+            RESET_BIT(this, mRegHL.low, 3);
+            break;
+        case 0xA5: // RES 4, L
+            RESET_BIT(this, mRegHL.low, 4);
+            break;
+        case 0xAD: // RES 5, L
+            RESET_BIT(this, mRegHL.low, 5);
+            break;
+        case 0xB5: // RES 6, L
+            RESET_BIT(this, mRegHL.low, 6);
+            break;
+        case 0xBD: // RES 7, L
+            RESET_BIT(this, mRegHL.low, 7);
+            break;
+
+        case 0x86: // RES 0, (HL)
+            RESET_BIT(this, mRom[mRegHL.val], 0);
+            break;
+        case 0x8E: // RES 1, (HL)
+            RESET_BIT(this, mRom[mRegHL.val], 1);
+            break;
+        case 0x96: // RES 2, (HL)
+            RESET_BIT(this, mRom[mRegHL.val], 2);
+            break;
+        case 0x9E: // RES 3, (HL)
+            RESET_BIT(this, mRom[mRegHL.val], 3);
+            break;
+        case 0xA6: // RES 4, (HL)
+            RESET_BIT(this, mRom[mRegHL.val], 4);
+            break;
+        case 0xAE: // RES 5, (HL)
+            RESET_BIT(this, mRom[mRegHL.val], 5);
+            break;
+        case 0xB6: // RES 6, (HL)
+            RESET_BIT(this, mRom[mRegHL.val], 6);
+            break;
+        case 0xBE: // RES 7, (HL)
+            RESET_BIT(this, mRom[mRegHL.val], 7);
+            break;
+        
+        case 0x87: // RES 0, A
+            RESET_BIT(this, mRegAF.high, 0);
+            break;
+        case 0x8F: // RES 1, A
+            RESET_BIT(this, mRegAF.high, 1);
+            break;
+        case 0x97: // RES 2, A
+            RESET_BIT(this, mRegAF.high, 2);
+            break;
+        case 0x9F: // RES 3, A
+            RESET_BIT(this, mRegAF.high, 3);
+            break;
+        case 0xA7: // RES 4, A
+            RESET_BIT(this, mRegAF.high, 4);
+            break;
+        case 0xAF: // RES 5, A
+            RESET_BIT(this, mRegAF.high, 5);
+            break;
+        case 0xB7: // RES 6, A
+            RESET_BIT(this, mRegAF.high, 6);
+            break;
+        case 0xBF: // RES 7, A
+            RESET_BIT(this, mRegAF.high, 7);
+            break;
 
         // SWAP
         case 0x30: // SWAP B
@@ -538,13 +739,6 @@ void GBEmu::ExecuteExtendedOpcode()
             CPU_SLA(this, mRegAF.high);
             break;
 
-        case 0x87: // RES 0, A
-            RESET_BIT(this, mRegAF.high, 0);
-            break;
-        case 0x86: // RES 0, (HL)
-            RESET_BIT(this, mRom[mRegHL.val], 0);
-            break;
-
         default:
             last_unkown_opcode = (0xCB00) + opcode; 
             break;
@@ -555,7 +749,7 @@ void GBEmu::ExecuteExtendedOpcode()
 void REG_SWAP(GBEmu* _emu, uint8_t& _reg)
 {
     // Operation
-    uint8_t old_high = (_reg & 0b11110000) >> 4;
+    uint8_t old_high = (_reg & 0xF0) >> 4;
     _reg <<= 4;
     _reg |= old_high;
 
@@ -589,49 +783,7 @@ void RESET_BIT(GBEmu* _emu, uint8_t& _reg, uint8_t _bit)
     _reg &= ~(1 << _bit);
 }
 
-void CPU_RLC(GBEmu* _emu, uint8_t& _reg)
-{
-	bool isMSBSet = (_reg >> 7) & 1;
-	_reg <<= 1;
-
-	_emu->mRegAF.low = 0x00;
-	if (isMSBSet)
-	{
-		_emu->mRegAF.low |= 1 << FLAG_C;
-		_reg |= 1;
-	}
-
-	if (_reg == 0)
-		_emu->mRegAF.low |= 1 << FLAG_Z;
-}
-
-void CPU_SRL(GBEmu* _emu, uint8_t& _reg)
-{
-	bool isLSBSet = _reg & 1;
-
-	_emu->mRegAF.low = 0x00;
-	_reg >>= 1;
-
-	if (isLSBSet)
-		_emu->mRegAF.low |= 1 << FLAG_C;
-
-	if (_reg == 0)
-		_emu->mRegAF.low |= 1 << FLAG_Z;
-
-}
-
-void CPU_SLA(GBEmu* _emu, uint8_t& _reg)
-{
-	bool isMSBSet = (_reg << 7) & 0b1;
-	_reg <<= 1;
-    _emu->mRegAF.low = 0x00;
-
-	if (isMSBSet)
-		_emu->mRegAF.low |= 1 << FLAG_C;
-
-	if (_reg == 0)
-		_emu->mRegAF.low |= 1 << FLAG_Z;
-}
+// SHIFTS
 
 void CPU_RR(GBEmu* _emu, uint8_t& _reg)
 {
@@ -651,6 +803,102 @@ void CPU_RR(GBEmu* _emu, uint8_t& _reg)
 		_emu->mRegAF.low |= 1 << FLAG_Z;
 }
 
+void CPU_RL(GBEmu* _emu, uint8_t& _reg)
+{
+	bool isCarrySet = (_emu->mRegAF.low >> FLAG_C) & 0b1;
+	bool isMSBSet = (_reg >> 7) & 0b1;
+
+	_emu->mRegAF.low = 0x00;
+	_reg <<= 1 ;
+
+	if (isMSBSet)
+    {
+		_emu->mRegAF.low |= 1 << FLAG_C;
+    }
+
+	if (isCarrySet)
+    {
+        _reg |= 0b1;
+    }
+
+	if (_reg == 0)
+    {
+        _emu->mRegAF.low |= 1 << FLAG_Z;
+    }
+}
+
+void CPU_SLA(GBEmu* _emu, uint8_t& _reg)
+{
+	bool isMSBSet = (_reg >> 7) & 0b1;
+	_reg <<= 1;
+    _emu->mRegAF.low = 0x00;
+
+	if (isMSBSet)
+		_emu->mRegAF.low |= 1 << FLAG_C;
+
+	if (_reg == 0)
+		_emu->mRegAF.low |= 1 << FLAG_Z;
+}
+
+void CPU_SRA(GBEmu* _emu, uint8_t& _reg)
+{
+	bool isLSBSet = (_reg >> 0) & 0b1;
+	bool isMSBSet = (_reg >> 7) & 0b1;
+
+	_emu->mRegAF.low = 0x00; // Reset Flags
+	_reg >>= 1;
+
+	if (isMSBSet)
+    {
+		_reg |= 1 << 7;
+    }
+	if (isLSBSet)
+    {
+		_emu->mRegAF.low |= 1 << FLAG_C;
+    }
+
+	if (_reg == 0)
+    {
+		_emu->mRegAF.low |= 1 << FLAG_Z;
+    }
+}
+
+void CPU_SRL(GBEmu* _emu, uint8_t& _reg)
+{
+	bool isLSBSet = (_reg >> 0) & 0b1;
+
+	_emu->mRegAF.low = 0x00;
+
+	_reg >>= 1;
+
+	if (isLSBSet)
+    {
+		_emu->mRegAF.low |= 1 << FLAG_C;
+    }
+	if (_reg == 0)
+    {
+		_emu->mRegAF.low |= 1 << FLAG_Z;
+    }
+}
+
+void CPU_RLC(GBEmu* _emu, uint8_t& _reg)
+{
+	bool isMSBSet = (_reg >> 7) & 1;
+	_reg <<= 1;
+
+	_emu->mRegAF.low = 0x00;
+	if (isMSBSet)
+	{
+		_emu->mRegAF.low |= 1 << FLAG_C;
+		_reg |= 1;
+	}
+
+	if (_reg == 0)
+    {
+		_emu->mRegAF.low |= 1 << FLAG_Z;
+    }
+}
+
 void CPU_RRC(GBEmu* _emu, uint8_t& _reg)
 {
 	bool isLSBSet = _reg & 0b1;
@@ -665,38 +913,6 @@ void CPU_RRC(GBEmu* _emu, uint8_t& _reg)
 
 	if (_reg == 0)
 		_emu->mRegAF.low |= 1 << FLAG_Z;
-}
-
-void CPU_ROTATE_RIGHT(GBEmu* _emu, uint8_t& _reg, uint8_t _bit)
-{
-    // Reset all flags
-    _emu->mRegAF.low = 0x0;
-    
-    // Set the old (7 or 0) bit to carryflag.
-    _emu->mRegAF.low |= ( (_reg >> _bit) & 1 ) << FLAG_C;
-    // Shift to right
-    _reg >>= 1;
-    // Set Zero flag
-    if (_reg == 0x0)
-    {
-        _emu->mRegAF.low |= 1 << FLAG_Z;
-    }
-}
-
-void CPU_ROTATE_LEFT(GBEmu* _emu, uint8_t& _reg, uint8_t _bit)
-{
-    // Reset all flags
-    _emu->mRegAF.low = 0x0;
-
-    // Set the old (7 or 0) bit to carryflag.
-    _emu->mRegAF.low |= ( (_reg >> _bit) & 1 ) << FLAG_C;
-    // Shift to left
-    _emu->mRegAF.low <<= 1;
-    // Set Zero flag
-    if (_reg == 0x0)
-    {
-        _emu->mRegAF.low |= 1 << FLAG_Z;
-    }
 }
 
 

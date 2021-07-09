@@ -40,11 +40,8 @@ void GBEmu::Run()
         
         if ( IsKeyReleased(KEY_R))
         {
-            /*
             Reset();
             LoadRom("tetris.gb");
-            */
-            mRom[0xFFFF] = 8;
         }
 
 
@@ -179,9 +176,6 @@ uint16_t GBEmu::ReadWord()
 	return res;
 }
 
-/*
-    TODO: For some reason some intstructions are not written into highram correctly, tetris don't launch because of it, fixed it
-*/
 void GBEmu::WriteByte(uint16_t _addr, uint8_t _data)
 {
     // Read only
@@ -196,7 +190,7 @@ void GBEmu::WriteByte(uint16_t _addr, uint8_t _data)
     else if ( _addr == 0xFF00) {}
     else if ( ( _addr >= 0xFEA0 ) && (_addr < 0xFEFF) ) {}                      // this area is restricted
     else if ( _addr == 0xFF04 ) { mRom[0xFF04] = 0x00; mDividerCounter = 0; } // Writing any value to this register resets it to $00
-	else if ( _addr == 0xFF46 ) // DMA transfer
+    else if ( _addr == 0xFF46 ) // DMA transfer
 	{
 	    uint8_t newAddress = (_data << 8);
 		for (uint8_t i = 0; i < 0xA0; i++)
@@ -354,7 +348,7 @@ void GBEmu::SetLCDStatus(int& retrace)
             mode_interupt = (LCD_STATUS >> 5) & 1; // Oam interrupt enable
 		}
 		else if (retrace >= mode3Bounds)       // Transferring Data (0b11)
-		{
+		{   
 			LCD_STATUS |= 0b11;
 		}
 		else                                   //Hblank (0b00)
@@ -364,7 +358,6 @@ void GBEmu::SetLCDStatus(int& retrace)
 		}
 	}       
     // just entered a new mode. Request interupt
-    mRom[0xFF41] = LCD_STATUS;
     uint8_t new_mode = LCD_STATUS & 0b11;
 	if (mode_interupt && (old_mode != new_mode))
 		RequestInterupt(INTERUPT_LCD);
@@ -376,8 +369,11 @@ void GBEmu::SetLCDStatus(int& retrace)
             RequestInterupt(INTERUPT_LCD);
     }
     else
+    {
         LCD_STATUS &= ~(1 << 2);   // Reset LY=LYC flag on the lcd
-
+    }
+    
+    mRom[0xFF41] = LCD_STATUS;
 }
 
 void GBEmu::RenderScanline()
@@ -439,14 +435,19 @@ void GBEmu::RenderBackground()
 			uint8_t xPos     = pixel+scrollX;
 			uint16_t tileCol = (xPos/8);
 
-			int16_t tileNum = ReadByte(backgroundMemory + tileRow + tileCol);
-            
+			int16_t tileNum;
+			uint16_t tileLocation;
             if (unsig)
+            {
                 tileNum = (uint8_t)ReadByte(backgroundMemory + tileRow + tileCol);
+                tileLocation = tileData + (tileNum * 16);
+            }
             else
-                tileNum = (uint8_t) ReadByte(backgroundMemory + tileRow + tileCol);
+            {
+                tileNum = (int8_t) ReadByte(backgroundMemory + tileRow + tileCol);
+                tileLocation = tileData + ((tileNum+128)*16);
+            }
 
-			uint16_t tileLocation = tileData + (tileNum * 16);
 
 			uint8_t line = yPos % 8 ;
 			uint8_t data1 = ReadByte(tileLocation + (line * 2));
@@ -462,11 +463,11 @@ void GBEmu::RenderBackground()
 
 			Color col = GBGetColor(colourNum, 0xFF47);
 
-			if ((scanline < 0) || (scanline > 143) || (pixel < 0) || (pixel > 159))
+            if ((scanline < 0) || (scanline > 143) || (pixel < 0) || (pixel > 159))
 			{
-				continue ;
+				continue;
 			}
-
+    
 			ImageDrawPixel(&mCanvasBuffer, pixel, scanline, col);
 		}
 	}
@@ -477,11 +478,9 @@ void GBEmu::RenderSprites()
     uint8_t lcdControl = mRom[0xFF40];
     if ( (lcdControl >> 1) & 1)
 	{
-		int y_size = (lcdControl >> 2) & 1 ? 16 : 8; // Sprites can be either 8x8 or 8x16
-
 		for (int sprite = 0; sprite < 40; sprite++)
 		{
- 			uint8_t index = sprite*4 ;
+ 			uint8_t index = sprite*4;
  			uint8_t yPos = ReadByte(0xFE00+index) - 16;
  			uint8_t xPos = ReadByte(0xFE00+index+1) - 8;
  			uint8_t tileLocation = ReadByte(0xFE00+index+2);
@@ -491,6 +490,7 @@ void GBEmu::RenderSprites()
 			bool xFlip = (attributes >> 5) & 1;
 
 			int scanline = ReadByte(0xFF44);
+            int y_size = 8; // Sprites can be either 8x8 or 8x16 (lcdControl >> 2) & 1 ? 16 : 8
 
  			if ((scanline >= yPos) && (scanline < (yPos+y_size)))
  			{
@@ -505,8 +505,6 @@ void GBEmu::RenderSprites()
  				uint8_t data1 = ReadByte( (0x8000 + (tileLocation * 16)) + (line * 2) ) ;
  				uint8_t data2 = ReadByte( (0x8000 + (tileLocation * 16)) + (line * 2)+1 ) ;
 
-
-
  				for (int tilePixel = 7; tilePixel >= 0; tilePixel--)
  				{
 					int colourbit = tilePixel ;
@@ -515,11 +513,14 @@ void GBEmu::RenderSprites()
  						colourbit -= 7 ;
  						colourbit *= -1 ;
  					}
- 					int colourNum = ((data1 >> colourbit) & 0b1);
+ 					int colourNum = ((data2 >> colourbit) & 0b1);
  					colourNum <<= 1;
- 					colourNum |= ((data2 >> colourbit) & 0b1);
+ 					colourNum |= ((data1 >> colourbit) & 0b1);
 
-					Color col = GBGetColor(colourNum, 0xFF48); // 0xFF48 || 0xFF49;
+                    uint16_t colourAddress = (attributes >> 4 ) & 1?0xFF49:0xFF48;
+					Color col = GBGetColor(colourNum, colourAddress); // 0xFF48 || 0xFF49;
+                    /*if (col.r == 18)  // White = transparent
+                        continue;*/
 
  					int xPix = 0 - tilePixel ;
  					xPix += 7 ;
@@ -532,7 +533,7 @@ void GBEmu::RenderSprites()
 						continue ;
 					}
 
- 					ImageDrawPixel(&mCanvasBuffer, scanline, pixel, col);
+ 					ImageDrawPixel(&mCanvasBuffer, pixel, scanline, col);
  				}
  			}
 		}
@@ -625,7 +626,7 @@ void GBEmu::Reset()
     mRegSP.val = 0xFFFE;
 
     // Init Regs
-    mRom[0xFF00] = 0xDF;
+    mRom[0xFF00] = 0xFF;
 
     mRom[0xFF05] = 0x00;
     mRom[0xFF06] = 0x00;
@@ -657,20 +658,6 @@ void GBEmu::Reset()
     mRom[0xFF49] = 0xFF;
     mRom[0xFF4A] = 0x00;
     mRom[0xFF4B] = 0x00;
-
-    
-    /*
-    mRom[0xFFB6] = 0x3E;
-    mRom[0xFFB7] = 0xC0;
-    mRom[0xFFB8] = 0xE0;
-    mRom[0xFFB9] = 0x46;
-    mRom[0xFFBA] = 0x3E;
-    mRom[0xFFBB] = 0x28;
-    mRom[0xFFBC] = 0x3D;
-    mRom[0xFFBD] = 0x20;
-    mRom[0xFFBE] = 0xFD;
-    mRom[0xFFBF] = 0xC9;
-    */
 
     mRom[0xFFFF] = 0x00; 
 }
