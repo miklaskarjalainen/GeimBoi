@@ -38,6 +38,31 @@ void GBEmu::ExecuteExtendedOpcode()
             CPU_RLC(this, mRegAF.high);
             break;
 
+        case 0x08: // RLC B
+            CPU_RRC(this, mRegBC.high);
+            break;
+        case 0x09: // RLC C
+            CPU_RRC(this, mRegBC.low);
+            break;
+        case 0x0A: // RLC D
+            CPU_RRC(this, mRegDE.high);
+            break;
+        case 0x0B: // RLC E
+            CPU_RRC(this, mRegDE.low);
+            break;
+        case 0x0C: // RLC H
+            CPU_RRC(this, mRegHL.high);
+            break;
+        case 0x0D: // RLC L
+            CPU_RRC(this, mRegHL.low);
+            break;
+        case 0x0E: // RLC (HL)
+            CPU_RRC(this, mRom[mRegHL.val]);
+            mCyclesDone += 8;
+            break;
+        case 0x0F: // RLC A
+            CPU_RRC(this, mRegAF.high);
+            break;
 
         // GET BIT
         case 0x40: // BIT 0, B
@@ -680,6 +705,7 @@ void GBEmu::ExecuteExtendedOpcode()
             break;
         case 0x36: // SWAP (HL)
             REG_SWAP(this, mRom[mRegHL.val]);
+            mCyclesDone += 8;
             break;
         case 0x37: // SWAP A
             REG_SWAP(this, mRegAF.high);
@@ -711,6 +737,31 @@ void GBEmu::ExecuteExtendedOpcode()
             mCyclesDone += 8;
             break;
         
+        case 0x10: // RL B
+            CPU_RL(this, mRegBC.high);
+            break;
+        case 0x11: // RL C
+            CPU_RL(this, mRegBC.low);
+            break;
+        case 0x12: // RL D
+            CPU_RL(this, mRegDE.high);
+            break; 
+        case 0x13: // RL E
+            CPU_RL(this, mRegDE.low);
+            break;
+        case 0x14: // RL H
+            CPU_RL(this, mRegHL.high);
+            break; 
+        case 0x15: // RL  L
+            CPU_RL(this, mRegHL.low);
+            break;
+        case 0x16: // RL (HL)
+            CPU_RL(this, mRom[mRegHL.val]);
+            mCyclesDone += 8;
+            break;
+        case 0x17: // RL A
+            CPU_RL(this, mRegAF.high);
+            break;
 
         case 0x18: // RR B
             CPU_RR(this, mRegBC.high);
@@ -724,8 +775,15 @@ void GBEmu::ExecuteExtendedOpcode()
         case 0x1B: // RR E
             CPU_RR(this, mRegDE.low);
             break;
+        case 0x1C: // RR H
+            CPU_RR(this, mRegHL.high);
+            break; 
+        case 0x1D: // RR  L
+            CPU_RR(this, mRegHL.low);
+            break;
         case 0x1E: // RR (HL)
             CPU_RR(this, mRom[mRegHL.val]);
+            mCyclesDone += 8;
             break;
         case 0x1F: // RR A
             CPU_RR(this, mRegAF.high);
@@ -735,10 +793,52 @@ void GBEmu::ExecuteExtendedOpcode()
         case 0x20: // SLA B
             CPU_SLA(this, mRegBC.high);
             break;
+        case 0x21: // SLA C
+            CPU_SLA(this, mRegBC.low);
+            break;
+        case 0x22: // SLA D
+            CPU_SLA(this, mRegDE.high);
+            break;
+        case 0x23: // SLA E
+            CPU_SLA(this, mRegDE.low);
+            break;
+        case 0x24: // SLA H
+            CPU_SLA(this, mRegHL.high);
+            break;
+        case 0x25: // SLA L
+            CPU_SLA(this, mRegHL.low);
+            break;
+        case 0x26: // SLA (HL)
+            CPU_SLA(this, mRom[mRegHL.val]);
+            break;
         case 0x27: // SLA A
             CPU_SLA(this, mRegAF.high);
             break;
-
+        
+        case 0x28: // SRA B
+            CPU_SRA(this, mRegBC.high);
+            break;
+        case 0x29: // SRA C
+            CPU_SRA(this, mRegBC.low);
+            break;
+        case 0x2A: // SRA D
+            CPU_SRA(this, mRegDE.high);
+            break;
+        case 0x2B: // SRA E
+            CPU_SRA(this, mRegDE.low);
+            break;
+        case 0x2C: // SRA H
+            CPU_SRA(this, mRegHL.high);
+            break;
+        case 0x2D: // SRA L
+            CPU_SRA(this, mRegHL.low);
+            break;
+        case 0x2E: // SRA (HL)
+            CPU_SRA(this, mRom[mRegHL.val]);
+            break;
+        case 0x2F: // SRA A
+            CPU_SRA(this, mRegAF.high);
+            break;
         default:
             last_unkown_opcode = (0xCB00) + opcode; 
             break;
