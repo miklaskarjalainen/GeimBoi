@@ -112,19 +112,19 @@ void GBEmu::ExecuteNextOpcode()
             break;
         
         case 0x48: // LD C,B
-            CPU_REG_LOAD(this, mRegBC.low, mRegBC.low);
+            CPU_REG_LOAD(this, mRegBC.low, mRegBC.high);
             break;
         case 0x49: // LD C,C
-            CPU_REG_LOAD(this, mRegBC.low, mRegDE.high);
+            CPU_REG_LOAD(this, mRegBC.low, mRegBC.low);
             break;
         case 0x4A: // LD C,D
-            CPU_REG_LOAD(this, mRegBC.low, mRegDE.low);
+            CPU_REG_LOAD(this, mRegBC.low, mRegDE.high);
             break;
         case 0x4B: // LD C,E
-            CPU_REG_LOAD(this, mRegBC.low, mRegHL.high);
+            CPU_REG_LOAD(this, mRegBC.low, mRegDE.low);
             break;
         case 0x4C: // LD C,H
-            CPU_REG_LOAD(this, mRegBC.low, mRegHL.low);
+            CPU_REG_LOAD(this, mRegBC.low, mRegHL.high);
             break;
         case 0x4D: // LD C,L
             CPU_REG_LOAD(this, mRegBC.low, mRegHL.low);
@@ -164,19 +164,19 @@ void GBEmu::ExecuteNextOpcode()
             break;
         
         case 0x58: // LD E,B
-            CPU_REG_LOAD(this, mRegBC.low, mRegBC.low);
+            CPU_REG_LOAD(this, mRegDE.low, mRegBC.high);
             break;
         case 0x59: // LD E,C
-            CPU_REG_LOAD(this, mRegDE.low, mRegDE.high);
+            CPU_REG_LOAD(this, mRegDE.low, mRegBC.low);
             break;
         case 0x5A: // LD E,D
-            CPU_REG_LOAD(this, mRegDE.low, mRegDE.low);
+            CPU_REG_LOAD(this, mRegDE.low, mRegDE.high);
             break;
         case 0x5B: // LD E,E
-            CPU_REG_LOAD(this, mRegDE.low, mRegHL.high);
+            CPU_REG_LOAD(this, mRegDE.low, mRegDE.low);
             break;
         case 0x5C: // LD E,H
-            CPU_REG_LOAD(this, mRegDE.low, mRegHL.low);
+            CPU_REG_LOAD(this, mRegDE.low, mRegHL.high);
             break;
         case 0x5D: // LD E,L
             CPU_REG_LOAD(this, mRegDE.low, mRegHL.low);
@@ -216,19 +216,19 @@ void GBEmu::ExecuteNextOpcode()
             break;
 
         case 0x68: // LD L,B
-            CPU_REG_LOAD(this, mRegHL.low, mRegBC.low);
+            CPU_REG_LOAD(this, mRegHL.low, mRegBC.high);
             break;
         case 0x69: // LD L,C
-            CPU_REG_LOAD(this, mRegHL.low, mRegDE.high);
+            CPU_REG_LOAD(this, mRegHL.low, mRegBC.low);
             break;
         case 0x6A: // LD L,D
-            CPU_REG_LOAD(this, mRegHL.low, mRegDE.low);
+            CPU_REG_LOAD(this, mRegHL.low, mRegDE.high);
             break;
         case 0x6B: // LD L,E
-            CPU_REG_LOAD(this, mRegHL.low, mRegHL.high);
+            CPU_REG_LOAD(this, mRegHL.low, mRegDE.low);
             break;
         case 0x6C: // LD L,H
-            CPU_REG_LOAD(this, mRegHL.low, mRegHL.low);
+            CPU_REG_LOAD(this, mRegHL.low, mRegHL.high);
             break;
         case 0x6D: // LD L,L
             CPU_REG_LOAD(this, mRegHL.low, mRegHL.low);
@@ -997,17 +997,18 @@ void CPU_8BIT_SUB(GBEmu* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
     uint8_t before = _reg;
 
     // If add carry and carry flag is enabled
-    if (_add_carry && (_emu->mRegAF.low >> FLAG_C))
+    if (_add_carry)
     {
-        _amount++;
+        if ((_emu->mRegAF.low >> FLAG_C) & 0b1)
+        {
+            _amount++;
+        }
     }
 
     _reg -= _amount;
 
-    _emu->mRegAF.low |= (1 << FLAG_N);  // Set substract flag
-    _emu->mRegAF.low &= ~(1 << FLAG_Z); // Reset zero flag
-    _emu->mRegAF.low &= ~(1 << FLAG_H); // Reset halfcarry flag
-    _emu->mRegAF.low &= ~(1 << FLAG_C); // Reset carry flag
+    _emu->mRegAF.low = 0x00; // Reset All Flags
+    _emu->mRegAF.low |= (1 << FLAG_N); // Set substract flag
 
     if  (_reg == 0)
         _emu->mRegAF.low |= 1 << FLAG_Z;
@@ -1025,9 +1026,12 @@ void CPU_8BIT_ADD(GBEmu* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
     uint8_t before = _reg;
 
     // If add carry and carry flag is enabled
-    if (_add_carry && (_emu->mRegAF.low >> FLAG_C))
+    if (_add_carry)
     {
-        _amount++;
+        if ((_emu->mRegAF.low >> FLAG_C) & 0b1)
+        {
+            _amount++;
+        }
     }
     _reg += _amount;
 
@@ -1043,7 +1047,7 @@ void CPU_8BIT_ADD(GBEmu* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
 		_emu->mRegAF.low |= 1 << FLAG_C;
     }
 
-	int16_t htest = (before & 0xF) + (_amount & 0xF);
+	uint16_t htest = (before & 0xF) + (_amount & 0xF);
 	if (htest > 0xF)
     {
 		_emu->mRegAF.low |= 1 << FLAG_H;
@@ -1079,15 +1083,17 @@ void CPU_16BIT_ADD(GBEmu* _emu, uint16_t& _reg, uint16_t _value)
 
     // Reset substract flag
 	_emu->mRegAF.low &= ~(1 << FLAG_N);
+    _emu->mRegAF.low &= ~(1 << FLAG_C);
+    _emu->mRegAF.low &= ~(1 << FLAG_H);
 
 	if ( (before + _value) > 0xFFFF)
+    {
 		_emu->mRegAF.low |= 1 << FLAG_C;
-	else
-		_emu->mRegAF.low &= ~(1 << FLAG_C);
+    }
 	if (( (before & 0xFF00) & 0xF) + ((_value >> 8) & 0xF))
-		_emu->mRegAF.low |= 1 << FLAG_H;
-	else
-		_emu->mRegAF.low &= ~(1 << FLAG_H);
+    {
+        _emu->mRegAF.low |= 1 << FLAG_H;
+    }	
 }
 
 // Bitwise operations
