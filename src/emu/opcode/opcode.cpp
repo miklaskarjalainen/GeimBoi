@@ -7,13 +7,20 @@ namespace Giffi
     
 void GBEmu::ExecuteNextOpcode()
 {
-    uint8_t opcode = ReadByte(mRegPC.val);
+    uint8_t opcode = mRom[mRegPC.val];
+    if ((mRegPC.val >= 0x4000 && mRegPC.val <= 0x7FFF) || (mRegPC.val >= 0xA000 && mRegPC.val <= 0xBFFF))
+    {
+		opcode = ReadByte(mRegPC.val);
+    }
     mLastOpcode = opcode;
-    /*if ((mRegPC.val >= 0x4000 && mRegPC.val <= 0x7FFF) || (mRegPC.val >= 0xA000 && mRegPC.val <= 0xBFFF))
-		opcode = ReadByte(mRegPC.val) ;
-    */
     mCyclesDone += 4; 
+
     mRegPC.val++;
+    if (mHaltBug)
+    {
+        mRegPC.val--;
+        mHaltBug = false;
+    }
 
     // Every instrucitons take atleast 1 cycle (duh), some take longer than that.
     switch ( opcode )
@@ -28,8 +35,17 @@ void GBEmu::ExecuteNextOpcode()
             mRegPC.val++;
             break;
         case 0x76: // HALT
-            mIsHalted = true;
-            break;
+            {
+                uint8_t IE = mRom[0xFFFF];
+                uint8_t IF = mRom[0xFF0F];
+                if ( (IE && IF) != 0 && !mEnableInterrupts) // Halt Bug
+                {
+                    mHaltBug = true;
+                }
+                else {mIsHalted = true;}
+                break;
+
+            }
 
         // 8BIT INC & DEC      
         case 0x04: // INC B
@@ -54,9 +70,11 @@ void GBEmu::ExecuteNextOpcode()
             CPU_8BIT_INC(this, mRegAF.high);
             break;
         case 0x34: // INC (HL)
-            CPU_8BIT_INC(this, mRom[mRegHL.val]);
+        {
+            CPU_8BIT_INC(this, ReadByte(mRegHL.val));
             mCyclesDone+=8;
             break;
+        }
         
         case 0x05: // DEC B
             CPU_8BIT_DEC(this, mRegBC.high);
@@ -80,7 +98,7 @@ void GBEmu::ExecuteNextOpcode()
             CPU_8BIT_DEC(this, mRegAF.high);
             break;
         case 0x35: // DEC (HL)
-            CPU_8BIT_DEC(this, mRom[mRegHL.val]);
+            CPU_8BIT_DEC(this, ReadByte(mRegHL.val));
             mCyclesDone+=8;
             break;
 
@@ -355,14 +373,14 @@ void GBEmu::ExecuteNextOpcode()
             mCyclesDone += 8;
             break;
         
-        case 0xE2: // LD (C), A
+        case 0xE2: // LD (0xFF00 + C), A
             {
                 uint16_t addr = 0xFF00 + mRegBC.low;
                 WriteByte(addr, mRegAF.high);
                 mCyclesDone += 4;
                 break;
             }
-        case 0xF2: // LD A, (C)
+        case 0xF2: // LD A, (0xFF00 + C)
             {
                 uint8_t  data = ReadByte( 0xFF00 + mRegBC.low );
                 mRegAF.high = data;
@@ -371,17 +389,22 @@ void GBEmu::ExecuteNextOpcode()
             }
         case 0xE8: // ADD SP, r8
             {
-                int8_t   to_add = ReadByte(mRegPC.val++);
-                uint16_t before = mRegSP.val;
-                mRegSP.val += to_add ;
+                // Operation
+                uint16_t reg  = mRegSP.val;
+                int8_t value  = (int8_t)ReadByte(mRegPC.val++);
+                int    result = (int)(reg + value);
+                mRegSP.val    = (uint16_t)result;
 
                 // Flags
-                mRegAF.low = 0x00;
-                if( (before + to_add) > 0xFFFF )
-                    mRegAF.low |= 1 << FLAG_C;
-                //if( (before & 0xF) + (to_add & 0xF) > 0xF )
-                if (( (before & 0xFF00) & 0xF) + ((to_add >> 8) & 0xF))
+                mRegAF.low = 0x00; // Reset flags
+                if ( (reg & 0xF) + (value & 0xF) > 0xF)    // Half carry
+                {
                     mRegAF.low |= 1 << FLAG_H;
+                }
+                if ( (reg & 0xFF) + (value & 0xFF) > 0xFF) // Carry
+                {
+                    mRegAF.low |= 1 << FLAG_C;
+                }
                 mCyclesDone += 12;
                 break;
             }
@@ -541,7 +564,6 @@ void GBEmu::ExecuteNextOpcode()
             CPU_8BIT_ADD(this, mRegAF.high, ReadByte(mRegPC.val++), true);
             mCyclesDone += 4;
             break;
-        
 
 
         // Comparisions
@@ -722,18 +744,22 @@ void GBEmu::ExecuteNextOpcode()
             break;
         case 0xF8: // LD HL, SP+r8
 		{
-			int8_t byte = ReadByte(mRegPC.val++);
-			mRegAF.low = 0x00;
+            // Operation
+			uint16_t reg = mRegSP.val;
+            int8_t value = (int8_t)ReadByte(mRegPC.val++);
+            int result = (int)(reg + value);
+            mRegHL.val = (uint16_t)result;
 
-			uint16_t value = (mRegSP.val + byte);
-			mRegHL.val = value ;
-
-			if( value > 0xFFFF )
-				mRegAF.low |= 1 << FLAG_C;
-
-			if( (mRegSP.val & 0xF) + (value & 0xF) > 0xF )
-				mRegAF.low |= 1 << FLAG_H;
-            mCyclesDone += 8;
+            // Flags
+            mRegAF.low = 0x00; // Reset flags
+            if ( (reg & 0xF) + (value & 0xF) > 0xF)    // Half carry
+            {
+                mRegAF.low |= 1 << FLAG_H;
+            }
+            if ( (reg & 0xFF) + (value & 0xFF) > 0xFF) // Carry
+            {
+                mRegAF.low |= 1 << FLAG_C;
+            }            
 		}break ;
         case 0x08: // LD (a16),SP
         {
@@ -799,7 +825,7 @@ void GBEmu::ExecuteNextOpcode()
             mCyclesDone += 12;
             break;
 
-        // Shifts TODO: CHECK THESE
+        // Shifts
         case 0x07: // RLCA
             CPU_RLC(this, mRegAF.high);
             break;
@@ -974,7 +1000,9 @@ void CPU_8BIT_INC(GBEmu* _emu, uint8_t& _reg)
     if  (_reg == 0)
         _emu->mRegAF.low |= 1 << FLAG_Z;
     if ((before & 0xF) == 0xF)
-        _emu->mRegAF.low |= 1 << FLAG_H;        
+        _emu->mRegAF.low |= 1 << FLAG_H;  
+
+    return _reg;      
 }
 
 void CPU_8BIT_DEC(GBEmu* _emu, uint8_t& _reg)
@@ -992,66 +1020,73 @@ void CPU_8BIT_DEC(GBEmu* _emu, uint8_t& _reg)
         _emu->mRegAF.low |= 1 << FLAG_H;        
 }
 
-void CPU_8BIT_SUB(GBEmu* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
-{
-    uint8_t before = _reg;
-
-    // If add carry and carry flag is enabled
-    if (_add_carry)
-    {
-        if ((_emu->mRegAF.low >> FLAG_C) & 0b1)
-        {
-            _amount++;
-        }
-    }
-
-    _reg -= _amount;
-
-    _emu->mRegAF.low = 0x00; // Reset All Flags
-    _emu->mRegAF.low |= (1 << FLAG_N); // Set substract flag
-
-    if  (_reg == 0)
-        _emu->mRegAF.low |= 1 << FLAG_Z;
-	if (before < _amount)
-		_emu->mRegAF.low |= 1 << FLAG_C;
-
-	int16_t htest = (before & 0xF);
-	htest -= (_amount & 0xF) ;
-	if (htest < 0)
-		_emu->mRegAF.low |= 1 << FLAG_H;
-}
-
 void CPU_8BIT_ADD(GBEmu* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
 {
-    uint8_t before = _reg;
+    uint8_t carry = 0x00;
 
     // If add carry and carry flag is enabled
     if (_add_carry)
     {
         if ((_emu->mRegAF.low >> FLAG_C) & 0b1)
         {
-            _amount++;
+            carry = 1;
         }
     }
-    _reg += _amount;
+    int result_full = _reg + _amount + carry;
+    uint8_t result = (uint8_t)result_full;
 
     // Reset all flags
-    _emu->mRegAF.low = 0x0;
+    _emu->mRegAF.low = 0x00;
 
-    if  (_reg == 0)
+    if  (result == 0)
     {
         _emu->mRegAF.low |= 1 << FLAG_Z;
     }
-	if (before + _amount > 0xFF)
+	if (result_full > 0xFF)
     {
 		_emu->mRegAF.low |= 1 << FLAG_C;
     }
-
-	uint16_t htest = (before & 0xF) + (_amount & 0xF);
-	if (htest > 0xF)
+	if (((_reg & 0xF) + (_amount & 0xF) + carry) > 0xF)
     {
 		_emu->mRegAF.low |= 1 << FLAG_H;
     }
+
+    _reg = result;
+}
+
+void CPU_8BIT_SUB(GBEmu* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
+{
+    uint8_t carry = 0x00;
+
+    // If add carry and carry flag is enabled
+    if (_add_carry)
+    {
+        if ((_emu->mRegAF.low >> FLAG_C) & 0b1)
+        {
+            carry = 1;
+        }
+    }
+    int result_full = _reg - _amount - carry;
+    uint8_t result = (uint8_t)result_full;
+
+    // Reset all flags
+    _emu->mRegAF.low = 0x00;
+    _emu->mRegAF.low |= 1 << FLAG_N;
+
+    if  (result == 0)
+    {
+        _emu->mRegAF.low |= 1 << FLAG_Z;
+    }
+	if (result_full < 0)
+    {
+		_emu->mRegAF.low |= 1 << FLAG_C;
+    }
+	if (((_reg & 0xF) - (_amount & 0xF) - carry) < 0)
+    {
+		_emu->mRegAF.low |= 1 << FLAG_H;
+    }
+
+    _reg = result;
 }
 
 void CPU_REG_LOAD(GBEmu* _emu, uint8_t& _reg, uint8_t _data)
@@ -1078,22 +1113,22 @@ void CPU_16BIT_LOAD(GBEmu* _emu, uint16_t& _reg, uint16_t _data)
 
 void CPU_16BIT_ADD(GBEmu* _emu, uint16_t& _reg, uint16_t _value)
 {
-	uint16_t before = _reg;
-	_reg += _value;
+	unsigned int result = _reg + _value;
 
     // Reset substract flag
 	_emu->mRegAF.low &= ~(1 << FLAG_N);
     _emu->mRegAF.low &= ~(1 << FLAG_C);
     _emu->mRegAF.low &= ~(1 << FLAG_H);
 
-	if ( (before + _value) > 0xFFFF)
+	if ( (result & 0x10000) != 0)
     {
 		_emu->mRegAF.low |= 1 << FLAG_C;
     }
-	if (( (before & 0xFF00) & 0xF) + ((_value >> 8) & 0xF))
+	if ( (_reg & 0xFFF) + (_value & 0xFFF) > 0xFFF)
     {
         _emu->mRegAF.low |= 1 << FLAG_H;
-    }	
+    }
+    _reg = (uint16_t)result;	
 }
 
 // Bitwise operations

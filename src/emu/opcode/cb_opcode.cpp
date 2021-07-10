@@ -8,7 +8,9 @@ void GBEmu::ExecuteExtendedOpcode()
 {
     // All of these instructions take atleast 8 cycles
     uint8_t opcode = ReadByte( mRegPC.val );
+
     mRegPC.val++;
+
     mCyclesDone += 8; 
     switch (opcode)
     {
@@ -31,7 +33,7 @@ void GBEmu::ExecuteExtendedOpcode()
             CPU_RLC(this, mRegHL.low);
             break;
         case 0x06: // RLC (HL)
-            CPU_RLC(this, mRom[mRegHL.val]);
+            CPU_RLC(this, ReadByte(mRegHL.val));
             mCyclesDone += 8;
             break;
         case 0x07: // RLC A
@@ -57,7 +59,7 @@ void GBEmu::ExecuteExtendedOpcode()
             CPU_RRC(this, mRegHL.low);
             break;
         case 0x0E: // RLC (HL)
-            CPU_RRC(this, mRom[mRegHL.val]);
+            CPU_RRC(this, ReadByte(mRegHL.val));
             mCyclesDone += 8;
             break;
         case 0x0F: // RLC A
@@ -426,35 +428,35 @@ void GBEmu::ExecuteExtendedOpcode()
             break;
 
         case 0xC6: // SET 0, (HL)
-            SET_BIT(this, mRom[mRegHL.val], 0);
+            SET_BIT(this, ReadByte(mRegHL.val), 0);
             mCyclesDone += 8;
             break;
         case 0xCE: // SET 1, (HL)
-            SET_BIT(this, mRom[mRegHL.val], 1);
+            SET_BIT(this, ReadByte(mRegHL.val), 1);
             mCyclesDone += 8;
             break;
         case 0xD6: // SET 2, (HL)
-            SET_BIT(this, mRom[mRegHL.val], 2);
+            SET_BIT(this, ReadByte(mRegHL.val), 2);
             mCyclesDone += 8;
             break;
         case 0xDE: // SET 3, (HL)
-            SET_BIT(this, mRom[mRegHL.val], 3);
+            SET_BIT(this, ReadByte(mRegHL.val), 3);
             mCyclesDone += 8;
             break;
         case 0xE6: // SET 4, (HL)
-            SET_BIT(this, mRom[mRegHL.val], 4);
+            SET_BIT(this, ReadByte(mRegHL.val), 4);
             mCyclesDone += 8;
             break;
         case 0xEE: // SET 5, (HL)
-            SET_BIT(this, mRom[mRegHL.val], 5);
+            SET_BIT(this, ReadByte(mRegHL.val), 5);
             mCyclesDone += 8;
             break;
         case 0xF6: // SET 6, (HL)
-            SET_BIT(this, mRom[mRegHL.val], 6);
+            SET_BIT(this, ReadByte(mRegHL.val), 6);
             mCyclesDone += 8;
             break;
         case 0xFE: // SET 7, (HL)
-            SET_BIT(this, mRom[mRegHL.val], 7);
+            SET_BIT(this, ReadByte(mRegHL.val), 7);
             mCyclesDone += 8;
             break;
         
@@ -635,28 +637,28 @@ void GBEmu::ExecuteExtendedOpcode()
             break;
 
         case 0x86: // RES 0, (HL)
-            RESET_BIT(this, mRom[mRegHL.val], 0);
+            RESET_BIT(this, ReadByte(mRegHL.val), 0);
             break;
         case 0x8E: // RES 1, (HL)
-            RESET_BIT(this, mRom[mRegHL.val], 1);
+            RESET_BIT(this, ReadByte(mRegHL.val), 1);
             break;
         case 0x96: // RES 2, (HL)
-            RESET_BIT(this, mRom[mRegHL.val], 2);
+            RESET_BIT(this, ReadByte(mRegHL.val), 2);
             break;
         case 0x9E: // RES 3, (HL)
-            RESET_BIT(this, mRom[mRegHL.val], 3);
+            RESET_BIT(this, ReadByte(mRegHL.val), 3);
             break;
         case 0xA6: // RES 4, (HL)
-            RESET_BIT(this, mRom[mRegHL.val], 4);
+            RESET_BIT(this, ReadByte(mRegHL.val), 4);
             break;
         case 0xAE: // RES 5, (HL)
-            RESET_BIT(this, mRom[mRegHL.val], 5);
+            RESET_BIT(this, ReadByte(mRegHL.val), 5);
             break;
         case 0xB6: // RES 6, (HL)
-            RESET_BIT(this, mRom[mRegHL.val], 6);
+            RESET_BIT(this, ReadByte(mRegHL.val), 6);
             break;
         case 0xBE: // RES 7, (HL)
-            RESET_BIT(this, mRom[mRegHL.val], 7);
+            RESET_BIT(this, ReadByte(mRegHL.val), 7);
             break;
         
         case 0x87: // RES 0, A
@@ -704,7 +706,7 @@ void GBEmu::ExecuteExtendedOpcode()
             REG_SWAP(this, mRegHL.low);
             break;
         case 0x36: // SWAP (HL)
-            REG_SWAP(this, mRom[mRegHL.val]);
+            REG_SWAP(this, ReadByte(mRegHL.val));
             mCyclesDone += 8;
             break;
         case 0x37: // SWAP A
@@ -733,7 +735,7 @@ void GBEmu::ExecuteExtendedOpcode()
             CPU_SRL(this, mRegAF.high);
             break;
         case 0x3E: // SRL (HL)
-            CPU_SRL(this, mRom[mRegHL.val]);
+            CPU_SRL(this, ReadByte(mRegHL.val));
             mCyclesDone += 8;
             break;
         
@@ -756,7 +758,7 @@ void GBEmu::ExecuteExtendedOpcode()
             CPU_RL(this, mRegHL.low);
             break;
         case 0x16: // RL (HL)
-            CPU_RL(this, mRom[mRegHL.val]);
+            CPU_RL(this, ReadByte(mRegHL.val));
             mCyclesDone += 8;
             break;
         case 0x17: // RL A
@@ -782,7 +784,7 @@ void GBEmu::ExecuteExtendedOpcode()
             CPU_RR(this, mRegHL.low);
             break;
         case 0x1E: // RR (HL)
-            CPU_RR(this, mRom[mRegHL.val]);
+            CPU_RR(this, ReadByte(mRegHL.val));
             mCyclesDone += 8;
             break;
         case 0x1F: // RR A
@@ -809,7 +811,7 @@ void GBEmu::ExecuteExtendedOpcode()
             CPU_SLA(this, mRegHL.low);
             break;
         case 0x26: // SLA (HL)
-            CPU_SLA(this, mRom[mRegHL.val]);
+            CPU_SLA(this, ReadByte(mRegHL.val));
             break;
         case 0x27: // SLA A
             CPU_SLA(this, mRegAF.high);
@@ -834,7 +836,7 @@ void GBEmu::ExecuteExtendedOpcode()
             CPU_SRA(this, mRegHL.low);
             break;
         case 0x2E: // SRA (HL)
-            CPU_SRA(this, mRom[mRegHL.val]);
+            CPU_SRA(this, ReadByte(mRegHL.val));
             break;
         case 0x2F: // SRA A
             CPU_SRA(this, mRegAF.high);
@@ -887,38 +889,36 @@ void RESET_BIT(GBEmu* _emu, uint8_t& _reg, uint8_t _bit)
 
 void CPU_RR(GBEmu* _emu, uint8_t& _reg)
 {
-	bool isCarrySet = (_emu->mRegAF.low >> FLAG_C) & 1;
-	bool isLSBSet = _reg & 0b1;
-	_emu->mRegAF.low = 0x00;
-
-	_reg >>= 1 ;
-
-	if (isLSBSet)
-		_emu->mRegAF.low |= 1 << FLAG_C;
-
-	if (isCarrySet)
-		_reg |= 1 << 7;
-
-	if (_reg == 0)
-		_emu->mRegAF.low |= 1 << FLAG_Z;
-}
-
-void CPU_RL(GBEmu* _emu, uint8_t& _reg)
-{
-	bool isCarrySet = (_emu->mRegAF.low >> FLAG_C) & 0b1;
-	bool isMSBSet = (_reg >> 7) & 0b1;
+	uint8_t carry = (_emu->mRegAF.low >> FLAG_C) & 0b1;
+	bool will_carry = (_reg >> 0) & 0b1;
 
 	_emu->mRegAF.low = 0x00;
-	_reg <<= 1 ;
+	_reg >>= 1;
+    _reg |= (carry << 7);
 
-	if (isMSBSet)
+	if (will_carry)
     {
 		_emu->mRegAF.low |= 1 << FLAG_C;
     }
 
-	if (isCarrySet)
+	if (_reg == 0)
     {
-        _reg |= 0b1;
+        _emu->mRegAF.low |= 1 << FLAG_Z;
+    }
+}
+
+void CPU_RL(GBEmu* _emu, uint8_t& _reg)
+{
+	uint8_t carry = (_emu->mRegAF.low >> FLAG_C) & 0b1;
+	bool will_carry = (_reg >> 7) & 0b1;
+
+	_reg <<= 1;
+    _reg |= carry;
+
+	_emu->mRegAF.low = 0x00;
+	if (will_carry)
+    {
+		_emu->mRegAF.low |= 1 << FLAG_C;
     }
 
 	if (_reg == 0)
@@ -982,17 +982,16 @@ void CPU_SRL(GBEmu* _emu, uint8_t& _reg)
 }
 
 void CPU_RLC(GBEmu* _emu, uint8_t& _reg)
-{
-	bool isMSBSet = (_reg >> 7) & 1;
+{       
+	bool will_carry = (_reg >> 7) & 0b1;
 	_reg <<= 1;
 
 	_emu->mRegAF.low = 0x00;
-	if (isMSBSet)
+	if (will_carry)
 	{
 		_emu->mRegAF.low |= 1 << FLAG_C;
 		_reg |= 1;
 	}
-
 	if (_reg == 0)
     {
 		_emu->mRegAF.low |= 1 << FLAG_Z;
@@ -1001,18 +1000,20 @@ void CPU_RLC(GBEmu* _emu, uint8_t& _reg)
 
 void CPU_RRC(GBEmu* _emu, uint8_t& _reg)
 {
-	bool isLSBSet = _reg & 0b1;
-	_emu->mRegAF.low = 0x00;
+	bool will_carry = _reg & 0b1;
 	_reg >>= 1;
 
-	if (isLSBSet)
+	_emu->mRegAF.low = 0x00;
+	if (will_carry)
 	{
 		_emu->mRegAF.low |= 1 << FLAG_C;
 		_reg |= 1 << 7;
 	}
 
 	if (_reg == 0)
+    {
 		_emu->mRegAF.low |= 1 << FLAG_Z;
+    }
 }
 
 

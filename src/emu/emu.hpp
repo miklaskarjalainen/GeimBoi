@@ -29,7 +29,7 @@ public:
     void    AdvanceClock();
     void    AdvanceFrame();
 
-    uint8_t  ReadByte         (uint16_t _addr);
+    uint8_t& ReadByte         (uint16_t _addr);
     uint16_t ReadWord         ();
     void     WriteByte        (uint16_t _addr, uint8_t _byte);
     void     PushWordOntoStack(uint16_t _word);
@@ -56,6 +56,7 @@ public:
     uint16_t last_unkown_opcode = 0x0000;
     uint8_t mLastInterupt = 0x00;
     uint8_t mLastOpcode = 0x00;
+    bool mHaltBug = false;
 
     // Cpu //
     Reg16 mRegAF, mRegBC, mRegDE, mRegHL;
@@ -63,7 +64,8 @@ public:
     Reg16 mRegSP; // StackPointer
     unsigned int mCyclesDone = 0;
     unsigned int mDividerCounter = 0;
-    unsigned int mTimerCounter = 0;
+    unsigned int mCounterFreq = 0; // How many cycles does it take to count the counter once.
+    unsigned int mTimerCounter = 0; // Counts the timer cycles, till count up.
     bool mIsHalted = false;
     bool mEnableInterrupts = true;
 

@@ -23,12 +23,12 @@ void GBEmu::Run()
     while ( !WindowShouldClose() )
     {
         // Run
-        if ( IsKeyDown(KEY_SPACE) ) // 10 ticks (hold)
+        if ( IsKeyDown(KEY_SPACE) ) // run for a frame (hold)
         {
             AdvanceFrame();
         }
         // Run
-        if ( IsKeyReleased(KEY_W) ) // 10 ticks (hold)
+        if ( IsKeyReleased(KEY_W) ) // 100 ticks (once)
         {
             for (int i = 0; i < 100; i++)
             {
@@ -54,13 +54,13 @@ void GBEmu::Run()
             
             {
                 // Print Registers
-                DrawText( FormatText(" AF: 0x%04X\n BC: 0x%04X\n HL: 0x%04X\n DE:0x%04X\n PC: 0x%04X\n SP: 0x%04X\n CONTROL: 0x%02X\n STATUS: 0x%02X\n", mRegAF.val, mRegBC.val, mRegHL.val, mRegDE.val, mRegPC.val, mRegSP.val, mRom[0xFF40], mRom[0xFF41]), 20, 20, 18, RED );
-                DrawText( FormatText(" MBC1: %i MBC2: %i", mMBC1, mMBC2), 300, 20, 18, RED );
-                DrawText( FormatText(" Last OP: 0x%02X", mLastOpcode ), 300, 100, 18, RED );
-                DrawText( FormatText(" Next OP: 0x%02X", ReadByte(mRegPC.val + 1) ), 300, 120, 18, RED );
-                DrawText( FormatText(" TimerEnabled: %u Timer: 0x%02X", (mRom[0xFF07] >> 2) & 1, ReadByte(0xFF05) ), 300, 140, 18, RED );
-                DrawText( FormatText(" LY: %u", ReadByte(0xFF44) ), 300, 160, 18, RED );
-                DrawText( FormatText(" LastInterrupt: 0x%02x", mLastInterupt ), 300, 180, 18, RED );
+                DrawText( FormatText("AF: 0x%04X\n BC: 0x%04X\n HL: 0x%04X\n DE:0x%04X\n PC: 0x%04X\n SP: 0x%04X\n CONTROL: 0x%02X\n STATUS: 0x%02X\n", mRegAF.val, mRegBC.val, mRegHL.val, mRegDE.val, mRegPC.val, mRegSP.val, mRom[0xFF40], mRom[0xFF41]), 20, 20, 18, RED );
+                DrawText( FormatText("CartType: %u RomBanks: %u CurBank: %u", mCart[0x147], mCart[0x148] * 4, mCurRomBank), 300, 20, 18, RED );
+                DrawText( FormatText("Last OP: 0x%02X", mLastOpcode ), 300, 100, 18, RED );
+                DrawText( FormatText("Next OP: 0x%02X", ReadByte(mRegPC.val + 1) ), 300, 120, 18, RED );
+                DrawText( FormatText("TimerEnabled: %u Timer: 0x%02X", (mRom[0xFF07] >> 2) & 1, ReadByte(0xFF05) ), 300, 140, 18, RED );
+                DrawText( FormatText("LY: %u", ReadByte(0xFF44) ), 300, 160, 18, RED );
+                DrawText( FormatText("LastInterrupt: 0x%02x", mLastInterupt ), 300, 180, 18, RED );
 
                 // Print Registers  
                 DrawText( FormatText("Z"), 160, 80, 18, (mRegAF.low & ( 1 << FLAG_Z) ? GREEN : RED) );
@@ -135,10 +135,8 @@ void GBEmu::AdvanceClock()
 {
     int cur_cycle = mCyclesDone;
 
-    if (!mIsHalted)
-        ExecuteNextOpcode();
-    else
-        mCyclesDone += 4;
+    if (!mIsHalted) { ExecuteNextOpcode(); }
+    else            { mCyclesDone += 4; }
     
     int delta_cycles = mCyclesDone - cur_cycle;
 
@@ -147,20 +145,22 @@ void GBEmu::AdvanceClock()
     DoInterupts();
 }
 
-uint8_t GBEmu::ReadByte(uint16_t _addr)
+uint8_t& GBEmu::ReadByte(uint16_t _addr)
 {
+    static uint8_t ff = 0xFF;
+
     // are we reading from the rom memory bank?
     if ((_addr>=0x4000) && (_addr <= 0x7FFF))
     {
-        //uint16_t new_addr = _addr - 0x4000 ;
-        return mCart[_addr];
+        uint16_t new_addr = (_addr - 0x4000) + (0x4000 * mCurRomBank);
+        return mCart[new_addr];
     }
 
     // are we reading from ram memory bank?
     else if ((_addr >= 0xA000) && (_addr <= 0xBFFF))
     {
         uint16_t new_addr = _addr - 0xA000 ;
-        return mRam[new_addr + (mCurRamBank*0x2000)] ;
+        return ff;//mRam[new_addr + (mCurRamBank*0x2000)] ;
     }
 
     // else return memory
@@ -178,8 +178,33 @@ uint16_t GBEmu::ReadWord()
 
 void GBEmu::WriteByte(uint16_t _addr, uint8_t _data)
 {
-    // Read only
-    if (_addr < 0x8000) {} 
+    // ROM
+    if (_addr < 0x8000)
+    {
+        int x = _addr;
+        if ( _addr >= 0x2000 && _addr < 0x4000) // ROM Change
+        {
+            if (_data == 0x00) {_data++;}
+            _data &= 31;
+            mCurRomBank &= 224;
+			mCurRomBank |= _data;
+        }
+        else if ( _addr >= 0x4000 && _addr < 0x6000 ) // do ROM or RAM bank change
+        {
+            _data &= 3;
+            _data <<= 5;
+            if ((mCurRomBank & 31) == 0)
+            {
+                _data++;
+            }
+            mCurRomBank &= 31;
+			// Combine the written data with the register.
+			mCurRomBank |= _data;
+
+        } 
+
+        if (mCurRomBank == 0) {mCurRomBank = 1;} // Atleast 1
+    } 
 
     // Echo
     else if ( ( _addr >= 0xE000 ) && (_addr < 0xFE00) )
@@ -188,8 +213,28 @@ void GBEmu::WriteByte(uint16_t _addr, uint8_t _data)
         WriteByte(_addr-0x2000, _data);
     } 
     else if ( _addr == 0xFF00) {}
-    else if ( ( _addr >= 0xFEA0 ) && (_addr < 0xFEFF) ) {}                      // this area is restricted
-    else if ( _addr == 0xFF04 ) { mRom[0xFF04] = 0x00; mDividerCounter = 0; } // Writing any value to this register resets it to $00
+    else if ( ( _addr >= 0xFEA0 ) && (_addr < 0xFEFF) ) {}                     // this area is restricted
+    else if ( _addr == 0xFF04 ) { mRom[0xFF04] = 0x00; mDividerCounter = 0; } // Writing to Scanline counter resets it
+    else if ( _addr == 0xFF44 ) { mRom[0xFF44] = 0x00; }                       // Writing to Scanline counter resets it
+    else if ( _addr == 0xFF07) // Counter settings 
+    {
+        mRom[_addr] = _data; // Put in the data normally
+
+        // Get a new frequency for the counter
+        uint16_t new_freq = 0;
+        switch(_data & 0b11)
+		{
+			case 0b00: new_freq = 1024; break;
+			case 0b01: new_freq = 16;   break;
+			case 0b10: new_freq = 64;   break;
+			case 0b11: new_freq = 256;  break;
+		}
+        if (new_freq != mCounterFreq)
+        {
+            mTimerCounter = 0;
+            mCounterFreq = new_freq;
+        }
+    }
     else if ( _addr == 0xFF46 ) // DMA transfer
 	{
 	    uint8_t newAddress = (_data << 8);
@@ -227,33 +272,13 @@ void GBEmu::UpdateTimers( uint16_t cycles )
     uint8_t& timer     = mRom[0xFF05];
     uint8_t timer_set  = mRom[0xFF06];
 
-    unsigned int timer_freq = 0;
-    switch (mRom[0xFF07] & 0b11)
-    {
-        case 0b00:
-            timer_freq = 4096;
-            break;
-        case 0b01:
-            timer_freq = 262144;
-            break;
-        case 0b10:
-            timer_freq = 65536;
-            break;
-        case 0b11:
-            timer_freq = 16384;
-            break;
-        default:
-            timer_freq = 4096;
-            break;
-    }
-
     if ((mRom[0xFF07] >> 2) & 1) // Timer Enabled
     {
         mTimerCounter += cycles;
 
-        if (mTimerCounter >= timer_freq)
+        if (mTimerCounter >= mCounterFreq)
         {
-            mTimerCounter -= timer_freq;
+            mTimerCounter -= mCounterFreq;
             timer++;
 
             if (timer == 0xFF) // Overflow
@@ -549,33 +574,25 @@ void GBEmu::RequestInterupt(uint8_t _id)
    
 void GBEmu::DoInterupts()
 {
-    if (mEnableInterrupts)
+    uint8_t requested = mRom[0xFF0F];
+    uint8_t enabled   = mRom[0xFFFF];
+    
+    for (uint8_t i = 0 ; i < 5; i++)
     {
-        uint8_t req     = mRom[0xFF0F];
-        uint8_t enabled = mRom[0xFFFF];
-        
-        if (req > 0)
+        if ( ((enabled >> i) & 1) && ((requested >> i) & 1))
         {
-            for (uint8_t i = 0 ; i < 5; i++)
+            mIsHalted = false;
+            if (mEnableInterrupts)
             {
-                if ( (req >> i) & 1)
-                {
-                    if ( (enabled >> i) & 1 )
-                    {
-                        ServiceInterupt(i);
-                    }
-                }
+                ServiceInterupt(i);
             }
         }
-       
-    }
-
+    }  
 } 
 
 void GBEmu::ServiceInterupt(uint8_t _interrupt)
 {
     mEnableInterrupts = false;
-    mIsHalted = false;
 
     mRom[0xFF0F] &= ~(1 << _interrupt);
 
@@ -608,16 +625,28 @@ void GBEmu::LoadRom(const char* _file_path)
     // Init Ram
     memset( &mRam,0,sizeof(mRam) );
     mCurRamBank = 0;
+
+    // Setup rom banking, meaby use 1 variable to track which type currently using? can there be 2 different banking types on 1 rom?
+    mMBC1 = false;
+    mMBC2 = false;
+    
+    switch (mCart[0x147])
+    {
+        case 0x1: mMBC1 = true; break; // MBC1
+        case 0x2: mMBC1 = true; break; // MBC1+RAM
+        case 0x3: mMBC1 = true; break; // MBC1+RAM+BATTERY
+        case 0x5: mMBC2 = true; break; // MBC2
+        case 0x6: mMBC2 = true; break; // MBC2+BATTERY
+        default: break;
+    } 
 }
 
 void GBEmu::Reset()
 {
-    
-    // Setup rom banking
-    mMBC1 = false;
-    mMBC2 = false;
-
     mEnableInterrupts = false;
+    mCurRomBank = 1;
+    mCurRamBank = 0;
+
     mRegAF.val = 0x01B0;
     mRegBC.val = 0x0013;
     mRegDE.val = 0x00D8;
