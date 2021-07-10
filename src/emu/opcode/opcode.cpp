@@ -71,7 +71,7 @@ void GBEmu::ExecuteNextOpcode()
             break;
         case 0x34: // INC (HL)
         {
-            CPU_8BIT_INC(this, ReadByte(mRegHL.val));
+            CPU_8BIT_MEMORY_INC(this, mRegHL.val);
             mCyclesDone+=8;
             break;
         }
@@ -98,7 +98,7 @@ void GBEmu::ExecuteNextOpcode()
             CPU_8BIT_DEC(this, mRegAF.high);
             break;
         case 0x35: // DEC (HL)
-            CPU_8BIT_DEC(this, ReadByte(mRegHL.val));
+            CPU_8BIT_MEMORY_DEC(this, mRegHL.val);
             mCyclesDone+=8;
             break;
 
@@ -990,7 +990,6 @@ void CPU_8BIT_INC(GBEmu* _emu, uint8_t& _reg)
 {
     uint8_t before = _reg;
     _reg++;
-    _emu->mCyclesDone += 1;
 
     _emu->mRegAF.low &= ~(1 << FLAG_Z); // Reset zero flag
     _emu->mRegAF.low &= ~(1 << FLAG_N); // Reset substract flag
@@ -1001,8 +1000,21 @@ void CPU_8BIT_INC(GBEmu* _emu, uint8_t& _reg)
         _emu->mRegAF.low |= 1 << FLAG_Z;
     if ((before & 0xF) == 0xF)
         _emu->mRegAF.low |= 1 << FLAG_H;  
+}
 
-    return _reg;      
+void CPU_8BIT_MEMORY_INC(GBEmu* _emu, uint16_t _addr)
+{
+    uint8_t before = _emu->ReadByte(_addr);
+    _emu->WriteByte(_addr, before+1);
+
+    _emu->mRegAF.low &= ~(1 << FLAG_Z); // Reset zero flag
+    _emu->mRegAF.low &= ~(1 << FLAG_N); // Reset substract flag
+    _emu->mRegAF.low &= ~(1 << FLAG_H); // Reset halfcarry flag
+
+    if  ( (before + 1) == 0)
+        _emu->mRegAF.low |= 1 << FLAG_Z;
+    if ((before & 0xF) == 0xF)
+        _emu->mRegAF.low |= 1 << FLAG_H;  
 }
 
 void CPU_8BIT_DEC(GBEmu* _emu, uint8_t& _reg)
@@ -1010,14 +1022,29 @@ void CPU_8BIT_DEC(GBEmu* _emu, uint8_t& _reg)
     uint8_t before = _reg;
     _reg--;
 
-    _emu->mRegAF.low |=  (1 << FLAG_N); // Set substract flag
     _emu->mRegAF.low &= ~(1 << FLAG_Z); // Reset zero flag
+    _emu->mRegAF.low |=  (1 << FLAG_N); // Set substract flag
     _emu->mRegAF.low &= ~(1 << FLAG_H); // Reset halfcarry flag
 
     if  (_reg == 0)
         _emu->mRegAF.low |= 1 << FLAG_Z;
-    if ((before & 0b1111) == 0)
+    if ((before & 0xF) == 0)
         _emu->mRegAF.low |= 1 << FLAG_H;        
+}
+
+void CPU_8BIT_MEMORY_DEC(GBEmu* _emu, uint16_t _addr)
+{
+    uint8_t before = _emu->ReadByte(_addr);
+    _emu->WriteByte(_addr, before-1);
+
+    _emu->mRegAF.low &= ~(1 << FLAG_Z); // Reset zero flag
+    _emu->mRegAF.low |= ~(1 << FLAG_N); // Set substract flag
+    _emu->mRegAF.low &= ~(1 << FLAG_H); // Reset halfcarry flag
+
+    if  ( (before - 1) == 0)
+        _emu->mRegAF.low |= 1 << FLAG_Z;
+    if ((before & 0xF) == 0)
+        _emu->mRegAF.low |= 1 << FLAG_H;  
 }
 
 void CPU_8BIT_ADD(GBEmu* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)

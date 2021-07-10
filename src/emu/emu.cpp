@@ -181,29 +181,14 @@ void GBEmu::WriteByte(uint16_t _addr, uint8_t _data)
     // ROM
     if (_addr < 0x8000)
     {
-        int x = _addr;
         if ( _addr >= 0x2000 && _addr < 0x4000) // ROM Change
         {
-            if (_data == 0x00) {_data++;}
-            _data &= 31;
-            mCurRomBank &= 224;
-			mCurRomBank |= _data;
+            if (_data == 0x00) {mCurRomBank = 0x01; return;}
+            if (_data == 0x20) {mCurRomBank = 0x21; return;}
+            if (_data == 0x40) {mCurRomBank = 0x41; return;}
+            if (_data == 0x60) {mCurRomBank = 0x61; return;}
+            mCurRomBank = (_data & 0x1F);
         }
-        else if ( _addr >= 0x4000 && _addr < 0x6000 ) // do ROM or RAM bank change
-        {
-            _data &= 3;
-            _data <<= 5;
-            if ((mCurRomBank & 31) == 0)
-            {
-                _data++;
-            }
-            mCurRomBank &= 31;
-			// Combine the written data with the register.
-			mCurRomBank |= _data;
-
-        } 
-
-        if (mCurRomBank == 0) {mCurRomBank = 1;} // Atleast 1
     } 
 
     // Echo

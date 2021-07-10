@@ -75,7 +75,7 @@ public:
     // Rom //
     uint8_t mCart[0x200000]; 
     uint8_t mRom[0x10000];
-    uint8_t mCurRomBank = 1;
+    uint16_t mCurRomBank = 1;
     bool mMBC1 = false;
     bool mMBC2 = false;
 

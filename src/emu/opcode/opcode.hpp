@@ -16,6 +16,9 @@ namespace Giffi
     void CPU_8BIT_ADD(GBEmu* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry = false);
     void CPU_REG_LOAD(GBEmu* _emu, uint8_t& _reg, uint8_t _data);
 
+    void CPU_8BIT_MEMORY_INC(GBEmu* _emu, uint16_t _addr);
+    void CPU_8BIT_MEMORY_DEC(GBEmu* _emu, uint16_t _addr);
+
     // 16 Bit Operations
     void CPU_16BIT_INC (GBEmu* _emu, uint16_t& _reg);
     void CPU_16BIT_DEC (GBEmu* _emu, uint16_t& _reg);
