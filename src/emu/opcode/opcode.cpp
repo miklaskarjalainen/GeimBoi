@@ -1,26 +1,16 @@
 #include "opcode.hpp"
 #include "cb_opcode.hpp"
-#include "../emu.hpp"
+#include "../gbZ80.hpp"
 
 namespace Giffi
 {
     
-void GBEmu::ExecuteNextOpcode()
+void gbZ80::ExecuteNextOpcode()
 {
-    uint8_t opcode = mRom[mRegPC.val];
-    if ((mRegPC.val >= 0x4000 && mRegPC.val <= 0x7FFF) || (mRegPC.val >= 0xA000 && mRegPC.val <= 0xBFFF))
-    {
-		opcode = ReadByte(mRegPC.val);
-    }
-    mLastOpcode = opcode;
+    uint8_t opcode = ReadByte(mRegPC.val);
     mCyclesDone += 4; 
 
     mRegPC.val++;
-    if (mHaltBug)
-    {
-        mRegPC.val--;
-        mHaltBug = false;
-    }
 
     // Every instrucitons take atleast 1 cycle (duh), some take longer than that.
     switch ( opcode )
@@ -35,17 +25,8 @@ void GBEmu::ExecuteNextOpcode()
             mRegPC.val++;
             break;
         case 0x76: // HALT
-            {
-                uint8_t IE = mRom[0xFFFF];
-                uint8_t IF = mRom[0xFF0F];
-                if ( (IE && IF) != 0 && !mEnableInterrupts) // Halt Bug
-                {
-                    mHaltBug = true;
-                }
-                else {mIsHalted = true;}
-                break;
-
-            }
+            mIsHalted = true;
+            break;
 
         // 8BIT INC & DEC      
         case 0x04: // INC B
@@ -72,6 +53,7 @@ void GBEmu::ExecuteNextOpcode()
         case 0x34: // INC (HL)
         {
             CPU_8BIT_MEMORY_INC(this, mRegHL.val);
+            //CPU_8BIT_INC(this, ReadByte(mRegHL.val));
             mCyclesDone+=8;
             break;
         }
@@ -979,14 +961,14 @@ void GBEmu::ExecuteNextOpcode()
             ExecuteExtendedOpcode();
             break;
         default:
-            last_unkown_opcode = opcode;
+            //last_unkown_opcode = opcode;
             break;
     }
 }
 
 // 8 Bit Operations
 
-void CPU_8BIT_INC(GBEmu* _emu, uint8_t& _reg)
+void CPU_8BIT_INC(gbZ80* _emu, uint8_t& _reg)
 {
     uint8_t before = _reg;
     _reg++;
@@ -995,29 +977,28 @@ void CPU_8BIT_INC(GBEmu* _emu, uint8_t& _reg)
     _emu->mRegAF.low &= ~(1 << FLAG_N); // Reset substract flag
     _emu->mRegAF.low &= ~(1 << FLAG_H); // Reset halfcarry flag
 
-
     if  (_reg == 0)
         _emu->mRegAF.low |= 1 << FLAG_Z;
     if ((before & 0xF) == 0xF)
         _emu->mRegAF.low |= 1 << FLAG_H;  
 }
 
-void CPU_8BIT_MEMORY_INC(GBEmu* _emu, uint16_t _addr)
+void CPU_8BIT_MEMORY_INC(gbZ80* _emu, uint16_t _addr)
 {
     uint8_t before = _emu->ReadByte(_addr);
-    _emu->WriteByte(_addr, before+1);
+    _emu->WriteByte(_addr, before + 1);
 
     _emu->mRegAF.low &= ~(1 << FLAG_Z); // Reset zero flag
     _emu->mRegAF.low &= ~(1 << FLAG_N); // Reset substract flag
     _emu->mRegAF.low &= ~(1 << FLAG_H); // Reset halfcarry flag
 
-    if  ( (before + 1) == 0)
+    if  ((uint8_t)(before + 1) == 0U)
         _emu->mRegAF.low |= 1 << FLAG_Z;
     if ((before & 0xF) == 0xF)
         _emu->mRegAF.low |= 1 << FLAG_H;  
 }
 
-void CPU_8BIT_DEC(GBEmu* _emu, uint8_t& _reg)
+void CPU_8BIT_DEC(gbZ80* _emu, uint8_t& _reg)
 {
     uint8_t before = _reg;
     _reg--;
@@ -1032,13 +1013,13 @@ void CPU_8BIT_DEC(GBEmu* _emu, uint8_t& _reg)
         _emu->mRegAF.low |= 1 << FLAG_H;        
 }
 
-void CPU_8BIT_MEMORY_DEC(GBEmu* _emu, uint16_t _addr)
+void CPU_8BIT_MEMORY_DEC(gbZ80* _emu, uint16_t _addr)
 {
     uint8_t before = _emu->ReadByte(_addr);
     _emu->WriteByte(_addr, before-1);
 
     _emu->mRegAF.low &= ~(1 << FLAG_Z); // Reset zero flag
-    _emu->mRegAF.low |= ~(1 << FLAG_N); // Set substract flag
+    _emu->mRegAF.low |= 1 << FLAG_N; // Set substract flag
     _emu->mRegAF.low &= ~(1 << FLAG_H); // Reset halfcarry flag
 
     if  ( (before - 1) == 0)
@@ -1047,7 +1028,7 @@ void CPU_8BIT_MEMORY_DEC(GBEmu* _emu, uint16_t _addr)
         _emu->mRegAF.low |= 1 << FLAG_H;  
 }
 
-void CPU_8BIT_ADD(GBEmu* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
+void CPU_8BIT_ADD(gbZ80* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
 {
     uint8_t carry = 0x00;
 
@@ -1081,7 +1062,7 @@ void CPU_8BIT_ADD(GBEmu* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
     _reg = result;
 }
 
-void CPU_8BIT_SUB(GBEmu* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
+void CPU_8BIT_SUB(gbZ80* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
 {
     uint8_t carry = 0x00;
 
@@ -1116,29 +1097,29 @@ void CPU_8BIT_SUB(GBEmu* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
     _reg = result;
 }
 
-void CPU_REG_LOAD(GBEmu* _emu, uint8_t& _reg, uint8_t _data)
+void CPU_REG_LOAD(gbZ80* _emu, uint8_t& _reg, uint8_t _data)
 {
     _reg = _data;
 }
 
 // 16 Bit Operations
-void CPU_16BIT_INC(GBEmu* _emu, uint16_t& _reg)
+void CPU_16BIT_INC(gbZ80* _emu, uint16_t& _reg)
 {
     _reg++;
 }
 
-void CPU_16BIT_DEC(GBEmu* _emu, uint16_t& _reg)
+void CPU_16BIT_DEC(gbZ80* _emu, uint16_t& _reg)
 {
     _reg--;
 }
 
 // Loads the next "argument"
-void CPU_16BIT_LOAD(GBEmu* _emu, uint16_t& _reg, uint16_t _data) 
+void CPU_16BIT_LOAD(gbZ80* _emu, uint16_t& _reg, uint16_t _data) 
 {
     _reg = _data;
 }
 
-void CPU_16BIT_ADD(GBEmu* _emu, uint16_t& _reg, uint16_t _value)
+void CPU_16BIT_ADD(gbZ80* _emu, uint16_t& _reg, uint16_t _value)
 {
 	unsigned int result = _reg + _value;
 
@@ -1159,7 +1140,7 @@ void CPU_16BIT_ADD(GBEmu* _emu, uint16_t& _reg, uint16_t _value)
 }
 
 // Bitwise operations
-void CPU_8BIT_COMPARE(GBEmu* _emu, uint8_t _bits)
+void CPU_8BIT_COMPARE(gbZ80* _emu, uint8_t _bits)
 {
     // Substraction flag set, others reset
     uint8_t before = _emu->mRegAF.high;
@@ -1176,7 +1157,7 @@ void CPU_8BIT_COMPARE(GBEmu* _emu, uint8_t _bits)
 		_emu->mRegAF.low |= 1 << FLAG_H;
 }
 
-void CPU_8BIT_AND(GBEmu* _emu, uint8_t _mask)
+void CPU_8BIT_AND(gbZ80* _emu, uint8_t _mask)
 {
     // Set Halfcarry, reset everything else
     _emu->mRegAF.low = 0b0010 << 4; 
@@ -1187,7 +1168,7 @@ void CPU_8BIT_AND(GBEmu* _emu, uint8_t _mask)
         _emu->mRegAF.low |= 1 << FLAG_Z;
 }
 
-void CPU_8BIT_XOR(GBEmu* _emu, uint8_t _mask)
+void CPU_8BIT_XOR(gbZ80* _emu, uint8_t _mask)
 {
     // Reset Flags
     _emu->mRegAF.low = 0x00;
@@ -1198,7 +1179,7 @@ void CPU_8BIT_XOR(GBEmu* _emu, uint8_t _mask)
         _emu->mRegAF.low |= 1 << FLAG_Z;
 }
 
-void CPU_8BIT_OR(GBEmu* _emu, uint8_t _mask)
+void CPU_8BIT_OR(gbZ80* _emu, uint8_t _mask)
 {
     // Reset Flags
     _emu->mRegAF.low = 0x00;
@@ -1210,7 +1191,7 @@ void CPU_8BIT_OR(GBEmu* _emu, uint8_t _mask)
 }
 
 // Jumps
-void CPU_JUMP(GBEmu* _emu, bool _do_comprision, uint8_t _flag, bool _state)
+void CPU_JUMP(gbZ80* _emu, bool _do_comprision, uint8_t _flag, bool _state)
 {
 	uint16_t word = _emu->ReadWord( );
 	_emu->mRegPC.val += 2;
@@ -1229,7 +1210,7 @@ void CPU_JUMP(GBEmu* _emu, bool _do_comprision, uint8_t _flag, bool _state)
 
 }
 
-void CPU_JUMP_IMMEDIATE(GBEmu* _emu, bool _do_comprision, uint8_t _flag, bool _state)
+void CPU_JUMP_IMMEDIATE(gbZ80* _emu, bool _do_comprision, uint8_t _flag, bool _state)
 {
 	int8_t byte = (int8_t)_emu->ReadByte(_emu->mRegPC.val);
     _emu->mCyclesDone += 4; // Failed comparision takes 8 cycles (4 added before), on successful jump this takes 12 cycles
@@ -1248,8 +1229,7 @@ void CPU_JUMP_IMMEDIATE(GBEmu* _emu, bool _do_comprision, uint8_t _flag, bool _s
     _emu->mRegPC.val++;
 }
 
-
-void CPU_RET(GBEmu* _emu, bool _do_comprision, uint8_t _flag, bool _state)
+void CPU_RET(gbZ80* _emu, bool _do_comprision, uint8_t _flag, bool _state)
 {
     _emu->mCyclesDone += 4; // Failed comparision takes 8 cycles (4 added before), on successful jump this takes 20 cycles
 
@@ -1265,7 +1245,7 @@ void CPU_RET(GBEmu* _emu, bool _do_comprision, uint8_t _flag, bool _state)
 	}
 }
 
-void CPU_CALL(GBEmu* _emu, bool _do_comprision, uint8_t _flag, bool _state)
+void CPU_CALL(gbZ80* _emu, bool _do_comprision, uint8_t _flag, bool _state)
 {
     uint16_t word = _emu->ReadWord();
     _emu->mCyclesDone += 8; // Failed comparision takes 12 cycles (4 added before), on successful jump this takes 24 cycles
@@ -1284,7 +1264,7 @@ void CPU_CALL(GBEmu* _emu, bool _do_comprision, uint8_t _flag, bool _state)
 	}
 }
 
-void CPU_RESTART(GBEmu* _emu, uint8_t _addr)
+void CPU_RESTART(gbZ80* _emu, uint8_t _addr)
 {
     _emu->PushWordOntoStack( _emu->mRegPC.val );
     _emu->mRegPC.val = _addr;
@@ -1292,7 +1272,7 @@ void CPU_RESTART(GBEmu* _emu, uint8_t _addr)
 }
 
 // FUCKING WORKS FINALLY! xd
-void CPU_DAA(GBEmu* _emu)
+void CPU_DAA(gbZ80* _emu)
 {
     // DAA
     uint16_t RegA = (uint16_t)_emu->mRegAF.high;

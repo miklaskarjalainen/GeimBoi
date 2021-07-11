@@ -1,21 +1,28 @@
 #include <memory>
-#include "emu/emu.hpp"
+#include "emu/gbGameBoy.hpp"
 
 using namespace Giffi;
 
-int main(void)
+int main(int argc, char* argv[])
 {
     // Setup Window //
-    InitWindow(1280, 720, "GiffiPaint");
+    InitWindow(1280, 720, "GeimBoy");
     SetWindowState(FLAG_WINDOW_RESIZABLE);
 	SetTargetFPS(60);
 
     // Run Editor //
     {
-        std::unique_ptr<GBEmu> editor = std::make_unique<GBEmu>();
-        editor->Reset();
-        editor->LoadRom("tetris.gb");
-        editor->Run();
+        std::unique_ptr<gbGameBoy> emulator = std::make_unique<gbGameBoy>();
+        emulator->Reset();
+        if (argc > 1)
+        {
+            emulator->LoadRom(argv[1]);
+        }
+        else
+        {
+            emulator->LoadRom("tetris.gb");
+        }
+        emulator->Run();
     }
 
     return 0;

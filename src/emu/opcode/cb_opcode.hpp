@@ -1,24 +1,22 @@
 #pragma once
-#include <iostream>
-#include "../base.hpp"
-
+#include <cstdint>
 
 namespace Giffi
 {
-    class GBEmu;
+    class gbZ80;
 
-    void REG_SWAP(GBEmu* _emu, uint8_t& _reg);
-    void GET_BIT(GBEmu* _emu, uint8_t _reg, uint8_t _bit);
-    void SET_BIT(GBEmu* _emu, uint8_t& _reg, uint8_t _bit);
-    void RESET_BIT(GBEmu* _emu, uint8_t& _reg, uint8_t _bit);
+    void REG_SWAP(gbZ80* _emu, uint8_t& _reg);
+    void GET_BIT(gbZ80* _emu, uint8_t _reg, uint8_t _bit);
+    void SET_BIT(gbZ80* _emu, uint8_t& _reg, uint8_t _bit);
+    void RESET_BIT(gbZ80* _emu, uint8_t& _reg, uint8_t _bit);
 
-    void CPU_RR(GBEmu* _emu, uint8_t& _reg);
-    void CPU_RL(GBEmu* _emu, uint8_t& _reg);
-    void CPU_SLA(GBEmu* _emu, uint8_t& _reg);
-    void CPU_SRA(GBEmu* _emu, uint8_t& _reg);
-    void CPU_SRL(GBEmu* _emu, uint8_t& _reg);
-    void CPU_RLC(GBEmu* _emu, uint8_t& _reg);
-    void CPU_RRC(GBEmu* _emu, uint8_t& _reg);
+    void CPU_RR(gbZ80* _emu, uint8_t& _reg);
+    void CPU_RL(gbZ80* _emu, uint8_t& _reg);
+    void CPU_SLA(gbZ80* _emu, uint8_t& _reg);
+    void CPU_SRA(gbZ80* _emu, uint8_t& _reg); 
+    void CPU_SRL(gbZ80* _emu, uint8_t& _reg);
+    void CPU_RLC(gbZ80* _emu, uint8_t& _reg);
+    void CPU_RRC(gbZ80* _emu, uint8_t& _reg);
 }
 
 
