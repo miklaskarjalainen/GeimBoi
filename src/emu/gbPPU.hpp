@@ -11,7 +11,6 @@ namespace Giffi
     class gbPPU
     {
     public:
-        gbPPU() {};
         gbPPU(gbGameBoy* _gameboy)
             : mGameBoy(_gameboy) { mCanvasBuffer = GenImageColor(160, 144, WHITE); };
         ~gbPPU() = default;

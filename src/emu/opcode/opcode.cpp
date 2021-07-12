@@ -826,7 +826,7 @@ void gbZ80::ExecuteNextOpcode()
             mRegPC.val = mRegHL.val;
             break;
 		case 0xC3: // JP a16
-            CPU_JUMP(this, false, NULL, false);
+            CPU_JUMP(this, false, 0, false);
             break;
 		case 0xC2: // JP NZ, a16
             CPU_JUMP(this, true, FLAG_Z, false);
@@ -1040,7 +1040,7 @@ void CPU_8BIT_ADD(gbZ80* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
             carry = 1;
         }
     }
-    int result_full = _reg + _amount + carry;
+    uint16_t result_full = (uint16_t)(_reg + _amount + carry);
     uint8_t result = (uint8_t)result_full;
 
     // Reset all flags

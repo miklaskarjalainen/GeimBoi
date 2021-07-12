@@ -157,10 +157,10 @@ void gbPPU::RenderBackground()
         
         // Background Memory
         uint16_t backgroundMemory;
-        if (usingWindow)
-            backgroundMemory = (lcdControl >> 6) & 1 ? 0x9C00 : 0x9800;
+        if (usingWindow) 
+            { backgroundMemory = (lcdControl >> 6) & 1 ? 0x9C00 : 0x9800; }
         else
-            backgroundMemory = (lcdControl >> 3) & 1 ? 0x9C00 : 0x9800;
+            { backgroundMemory = (lcdControl >> 3) & 1 ? 0x9C00 : 0x9800; }
 
         uint8_t scrollY = mGameBoy->ReadByte(0xFF42); // Viewport y + current y scanline
         uint8_t scrollX = mGameBoy->ReadByte(0xFF43);
@@ -238,9 +238,11 @@ void gbPPU::RenderSprites()
                     line -= y_size ;
                     line *= -1 ;
                 }
-
-                uint8_t data1 = mGameBoy->ReadByte( (0x8000 + (tileLocation * 16)) + (line * 2) ) ;
-                uint8_t data2 = mGameBoy->ReadByte( (0x8000 + (tileLocation * 16)) + (line * 2)+1 ) ;
+                
+                line *= 2;
+                uint16_t dataAddress = (0x8000 + (tileLocation * 16)) + line;
+                uint8_t data1 = mGameBoy->ReadByte( dataAddress ) ;
+                uint8_t data2 = mGameBoy->ReadByte( dataAddress+1 ) ;
 
                 for (int tilePixel = 7; tilePixel >= 0; tilePixel--)
                 {
