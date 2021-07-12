@@ -8,7 +8,7 @@ namespace Giffi
 gbGameBoy::gbGameBoy()
     : mCpu(this), mPpu(this)
 {
-    mCart.Reset();
+    Reset();
 }
 
 void gbGameBoy::Run()
@@ -18,11 +18,12 @@ void gbGameBoy::Run()
     while ( !WindowShouldClose() )
     {
         // Run
-        /*if ( IsKeyDown(KEY_SPACE) ) // run for a frame (hold)
+        
+        if ( IsKeyDown(KEY_SPACE) ) // run for a frame (hold)
         {
-        }*/
-
+        }
         mCpu.FrameAdvance();
+        
         // Run
         if ( IsKeyReleased(KEY_W) ) // 100 ticks (once)
         {
@@ -43,6 +44,15 @@ void gbGameBoy::Run()
         {
             ReleaseButton(gbButton::START);
         }
+        if (IsKeyPressed(KEY_BACKSPACE))
+        {
+            PressButton(gbButton::SELECT);
+        }
+        if (IsKeyReleased(KEY_BACKSPACE))
+        {
+            ReleaseButton(gbButton::SELECT);
+        }
+
         if (IsKeyPressed(KEY_A))
         {
             PressButton(gbButton::A);
@@ -76,6 +86,22 @@ void gbGameBoy::Run()
         {
             ReleaseButton(gbButton::RIGHT);
         }
+        if (IsKeyPressed(KEY_UP))
+        {
+            PressButton(gbButton::UP);
+        }
+        if (IsKeyReleased(KEY_UP))
+        {
+            ReleaseButton(gbButton::UP);
+        }
+        if (IsKeyPressed(KEY_DOWN))
+        {
+            PressButton(gbButton::DOWN);
+        }
+        if (IsKeyReleased(KEY_DOWN))
+        {
+            ReleaseButton(gbButton::DOWN);
+        }
 
 
         BeginDrawing();
@@ -83,7 +109,7 @@ void gbGameBoy::Run()
 
             // Render Screen
             Texture2D text_screen = LoadTextureFromImage(mPpu.mCanvasBuffer);
-            DrawTextureEx(text_screen, {200, 160}, 0, 3.0f, WHITE);
+            DrawTextureEx(text_screen, {200, 200}, 0, 3.0f, WHITE);
             
             {
                 // Print Registers
@@ -109,13 +135,23 @@ void gbGameBoy::Run()
                 DrawText( FormatText("LV"), 170, 120, 18, (mRom[0xFF41] & ( 1 << 4) ? GREEN : RED) );
                 DrawText( FormatText("LO"), 200, 120, 18, (mRom[0xFF41] & ( 1 << 5) ? GREEN : RED) );
                 DrawText( FormatText("LY"), 230, 120, 18, (mRom[0xFF41] & ( 1 << 6) ? GREEN : RED) );
-                DrawText( FormatText("0x%02X", mRom[0xFF41] & 0b11), 255, 120, 18, RED );
 
                 // Enabled Interrupt
                 DrawText( FormatText("V"), 160, 140, 18, (mRom[0xFFFF] & ( 1 << INTERUPT_VBLANK) ? GREEN : RED) );
                 DrawText( FormatText("L"), 180, 140, 18, (mRom[0xFFFF] & ( 1 << INTERUPT_LCD)    ? GREEN : RED) );
                 DrawText( FormatText("T"), 200, 140, 18, (mRom[0xFFFF] & ( 1 << INTERUPT_TIMER)  ? GREEN : RED) );
                 DrawText( FormatText("J"), 220, 140, 18, (mRom[0xFFFF] & ( 1 << INTERUPT_JOYPAD) ? GREEN : RED) );
+
+                // Inputs
+                DrawText( FormatText("A"), 160, 200, 18, (mBtsPressed >> gbButton::A     ) & 1 ? GREEN : RED );
+                DrawText( FormatText("B"), 180, 200, 18, (mBtsPressed >> gbButton::B     ) & 1 ? GREEN : RED );
+                DrawText( FormatText("T"), 200, 200, 18, (mBtsPressed >> gbButton::START ) & 1 ? GREEN : RED );
+                DrawText( FormatText("S"), 220, 200, 18, (mBtsPressed >> gbButton::SELECT) & 1 ? GREEN : RED );
+
+                DrawText( FormatText("L"), 240, 200, 18, (mBtsPressed >> gbButton::LEFT  ) & 1 ? GREEN : RED );
+                DrawText( FormatText("R"), 260, 200, 18, (mBtsPressed >> gbButton::RIGHT ) & 1 ? GREEN : RED );
+                DrawText( FormatText("D"), 280, 200, 18, (mBtsPressed >> gbButton::DOWN  ) & 1 ? GREEN : RED );
+                DrawText( FormatText("U"), 300, 200, 18, (mBtsPressed >> gbButton::UP    ) & 1 ? GREEN : RED );
 
                 // Print Things
                 auto redbyte = [&](uint16_t offset) 
@@ -150,17 +186,17 @@ void gbGameBoy::Run()
 
 void gbGameBoy::PressButton(gbButton _key)
 {
-    bool was_unset = !((mBtsPressed >> _key) & 0b1); // 0 = held
-    mBtsPressed &= ~(1 << _key);
+    bool was_pressed = ((mBtsPressed >> _key) & 0b1);
+    mBtsPressed |= 1 << _key; // In gameboy's memory "0 = pressed", but this makes more sense for more normal people xd.
 
     // Request an interupt?
-    if (was_unset) {return;}     // Button was already held
-    uint8_t botps = mRom[0xFF00]; // Programmer wants direction or action buttons?
-    if ( (_key > 3) && !((botps >> 5) & 0b1) )       // Is action and wants action
+    if (!was_pressed) {return;}       // Button was already held
+    uint8_t btn_opts = mRom[0xFF00];  // Programmer wants direction or action buttons?
+    if ( (_key > 3) && !((btn_opts >> 5) & 0b1) )       // Is action and wants action
     {
         mCpu.RequestInterupt(INTERUPT_JOYPAD);
     }
-    else if ( (_key <= 3) && !((botps >> 4) & 0b1) ) // Is direction and wants direction
+    else if ( (_key <= 3) && !((btn_opts >> 4) & 0b1) ) // Is direction and wants direction
     {
         mCpu.RequestInterupt(INTERUPT_JOYPAD);
     }
@@ -168,7 +204,7 @@ void gbGameBoy::PressButton(gbButton _key)
 
 void gbGameBoy::ReleaseButton(gbButton _key)
 {
-    mBtsPressed |= 1 << _key;
+    mBtsPressed &= ~(1 << _key);
 }
 
 void gbGameBoy::Reset()
@@ -177,7 +213,7 @@ void gbGameBoy::Reset()
     mCart.Reset();
 
     // Rom
-    mRom[0xFF00] = 0x0F;
+    mBtsPressed = 0x00;
     mRom[0xFF05] = 0x00;
     mRom[0xFF06] = 0x00;
     mRom[0xFF07] = 0x00;
@@ -214,9 +250,6 @@ void gbGameBoy::Reset()
 
 uint8_t gbGameBoy::ReadByte(uint16_t _addr)
 {
-    static uint8_t ff = 0xFF;
-    ff = 0xFF;
-
     // are we reading from the rom memory bank?
     if ((_addr>=0x0000) && (_addr <= 0x7FFF))
     {
@@ -227,24 +260,24 @@ uint8_t gbGameBoy::ReadByte(uint16_t _addr)
     else if ((_addr >= 0xA000) && (_addr <= 0xBFFF))
     {
         uint16_t new_addr = _addr - 0xA000 ;
-        return ff;//mRam[new_addr + (mCurRamBank*0x2000)] ;
+        return 0xFF;//mRam[new_addr + (mCurRamBank*0x2000)] ; 
     }
-    else if (_addr == 0xFF00)
+    else if (_addr == 0xFF00) // Input
     {
-        uint8_t joy_state = mRom[0xFF00];
-        if (!((joy_state >> 4) & 1)) 
+        uint8_t buttons = mRom[0xFF00]; // All 0's expect bit 4,5 which (might) be set
+
+        if ( !((buttons >> 4) & 1)) // Wants Directions keys
         {
-            uint8_t topJoypad = mBtsPressed >> 4 ;
-            topJoypad |= 0xF0 ;
-            joy_state &= topJoypad ;
+            buttons |= (mBtsPressed & 0x0F);
         }
-        else if (!((joy_state >> 5) & 1))
+        if ( !((buttons >> 5) & 1)) // Wants Actions keys
         {
-            uint8_t bottomJoypad = mBtsPressed & 0xF ;
-            bottomJoypad |= 0xF0 ;
-            joy_state &= bottomJoypad ;
+            buttons |= (mBtsPressed >> 4);
         }
-        return joy_state;
+        buttons ^= 0xFF;
+        buttons ^= 0b00110000;
+
+        return buttons;
     }
     // else return memory
     return mRom[_addr];
@@ -261,28 +294,24 @@ uint16_t gbGameBoy::ReadWord()
 
 void gbGameBoy::WriteByte(uint16_t _addr, uint8_t _data)
 {
-    // Cartridge
-    if (_addr < 0x8000) 
+    if (_addr < 0x8000) // Cartridge is read only, writing here can be detect by on board hardware mostly for rom banking.
     {
         mCart.WriteByte(_addr, _data);
     } 
-
-    // Echo
-    else if ( ( _addr >= 0xE000 ) && (_addr < 0xFE00) )
+    else if ( ( _addr >= 0xE000 ) && (_addr < 0xFE00) ) // Echo ram
     {
         mRom[_addr] = _data;
         WriteByte(_addr-0x2000, _data);
     } 
-    else if ( _addr == 0xFF00) {}
-    else if ( ( _addr >= 0xFEA0 ) && (_addr < 0xFEFF) ) {}                     // this area is restricted
-    else if ( _addr == 0xFF04 ) { mRom[0xFF04] = 0x00; mCpu.mDividerCounter = 0; } // Writing to Scanline counter resets it
-    else if ( _addr == 0xFF44 ) { mRom[0xFF44] = 0x00; }                       // Writing to Scanline counter resets it
+    else if ( ( _addr >= 0xFEA0 ) && (_addr < 0xFEFF) ) {}                         // this area is restricted
+    else if ( _addr == 0xFF04 ) { mRom[0xFF04] = 0x00; mCpu.mDividerCounter = 0; } // Writing to Divier   counter resets it
+    else if ( _addr == 0xFF44 ) { mRom[0xFF44] = 0x00; }                           // Writing to Scanline counter resets it
     else if ( _addr == 0xFF07) // Set new counter frequency
     {
-        mRom[_addr] = _data; // Put in the data normally
+        mRom[_addr] = _data;   // Put in the data normally
 
         // Get a new frequency for the counter
-        uint16_t new_freq = 0;
+        unsigned int new_freq = 0;
         switch(_data & 0b11)
 		{
 			case 0b00: new_freq = 1024; break;
@@ -298,17 +327,12 @@ void gbGameBoy::WriteByte(uint16_t _addr, uint8_t _data)
     }
     else if ( _addr == 0xFF46 ) // DMA transfer
 	{
-	    uint8_t newAddress = (_data << 8);
-		for (uint8_t i = 0; i < 0xA0; i++)
+	    uint16_t newAddress = (_data << 8);
+		for (uint16_t i = 0; i < 0xA0; i++)
 		{
 			mRom[0xFE00 + i] = ReadByte(newAddress + i);
 		}
 	}
-    else if (_addr == 0xFF00) // Joypad Input
-    {
-        uint8_t opts = _data & 0b00110000; // Others are read only 
-        mRom[0xFF00] = opts;
-    }
     else 
     {
         mRom[_addr] = _data;

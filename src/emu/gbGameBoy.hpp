@@ -41,7 +41,8 @@ private:
     void WriteByte(uint16_t _addr, uint8_t _data);
 
 private:
-    uint8_t mBtsPressed = 0xFF; // 0 = pressed
+    uint8_t mBtsPressed = 0x00; // 0 = pressed
+
     uint8_t mRom[0x10000];
     gbZ80  mCpu;
     gbPPU  mPpu;
