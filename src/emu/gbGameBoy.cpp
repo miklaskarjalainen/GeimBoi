@@ -21,8 +21,10 @@ void gbGameBoy::Run()
         
         if ( IsKeyDown(KEY_SPACE) ) // run for a frame (hold)
         {
+            mCpu.FrameAdvance();
         }
-        mCpu.FrameAdvance();
+        
+            
         
         // Run
         if ( IsKeyReleased(KEY_W) ) // 100 ticks (once)
@@ -108,16 +110,16 @@ void gbGameBoy::Run()
             ClearBackground(BLUE);
 
             // Render Screen
-            Texture2D text_screen = LoadTextureFromImage(mPpu.mCanvasBuffer);
+            Texture2D text_screen = LoadTextureFromImage(*mPpu.front_buffer);
             DrawTextureEx(text_screen, {200, 200}, 0, 3.0f, WHITE);
             
             {
                 // Print Registers
-               DrawText( FormatText("AF: 0x%04X\n BC: 0x%04X\n HL: 0x%04X\n DE:0x%04X\n PC: 0x%04X\n SP: 0x%04X\n CONTROL: 0x%02X\n STATUS: 0x%02X\n", mCpu.mRegAF.val, mCpu.mRegBC.val, mCpu.mRegHL.val, mCpu.mRegDE.val, mCpu.mRegPC.val, mCpu.mRegSP.val, mRom[0xFF40], mRom[0xFF41]), 20, 20, 18, RED );
-                DrawText( FormatText("CartType: %u RomBanks: %u CurBank: %u", mCart.mMBC, mCart.ReadByte(0x148) * 4, mCart.mCurRomBank), 300, 20, 18, RED );
-                DrawText( FormatText("Next OP: 0x%02X", ReadByte(mCpu.mRegPC.val + 1) ), 300, 120, 18, RED );
+               DrawText( FormatText("AF: 0x%04x\n BC: 0x%04x\n HL: 0x%04x\n DE:0x%04x\n PC: 0x%04x\n SP: 0x%04x\n CONTROL: 0x%02x\n STATUS: 0x%02x\n", mCpu.mRegAF.val, mCpu.mRegBC.val, mCpu.mRegHL.val, mCpu.mRegDE.val, mCpu.mRegPC.val, mCpu.mRegSP.val, mRom[0xFF40], mRom[0xFF41]), 20, 20, 18, RED );
+                DrawText( FormatText("CartType: %u RomBanks: %u CurBank: %u", mCart.mMBC, mCart.GetRomBankCount(), mCart.mCurRomBank), 300, 20, 18, RED );
+                DrawText( FormatText("Next OP: 0x%02x, Last ExecutedOpcode: 0x%02x", ReadByte(mCpu.mRegPC.val), mCpu.mLastExecutedOpcode), 300, 120, 18, RED );
                 DrawText( FormatText("TimerEnabled: %u Timer: 0x%02X", (mRom[0xFF07] >> 2) & 1, ReadByte(0xFF05) ), 300, 140, 18, RED );
-                DrawText( FormatText("LY: %u", ReadByte(0xFF44) ), 300, 160, 18, RED );
+                DrawText( FormatText("SCX: %u SCY: %u", ReadByte(0xFF42), ReadByte(0xFF43) ), 300, 160, 18, RED );
 
                 // Print Registers  
                 DrawText( FormatText("Z"), 160, 80, 18, (mCpu.mRegAF.low & ( 1 << FLAG_Z) ? GREEN : RED) );
@@ -154,7 +156,7 @@ void gbGameBoy::Run()
                 DrawText( FormatText("U"), 300, 200, 18, (mBtsPressed >> gbButton::UP    ) & 1 ? GREEN : RED );
 
                 // Print Things
-                auto redbyte = [&](uint16_t offset) 
+                auto readbyte = [&](uint16_t offset) 
                 {
                     return ReadByte(addr + offset);
                 };
@@ -166,7 +168,7 @@ void gbGameBoy::Run()
                     addr -= 0x1000;
 
                 DrawText( FormatText("0x%04x: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x", 
-                    addr, redbyte(0x0), redbyte(0x1), redbyte(0x2), redbyte(0x3), redbyte(0x4), redbyte(0x5), redbyte(0x6), redbyte(0x7), redbyte(0x8), redbyte(0x9), redbyte(0xa), redbyte(0xb), redbyte(0xc), redbyte(0xd), redbyte(0xe), redbyte(0xf)), 500, 150, 18, RED );
+                    addr, readbyte(0x0), readbyte(0x1), readbyte(0x2), readbyte(0x3), readbyte(0x4), readbyte(0x5), readbyte(0x6), readbyte(0x7), readbyte(0x8), readbyte(0x9), readbyte(0xa), readbyte(0xb), readbyte(0xc), readbyte(0xd), readbyte(0xe), readbyte(0xf)), 500, 150, 18, RED );
 
                 DrawText( FormatText("mCyclesDone: %u mEnableInterrupts: %i mIsHalted: %i ScreenEnabled: %i",
                     mCpu.mCyclesDone, mCpu.mEnableInterrupts, mCpu.mIsHalted, (mRom[0xFF40] >> 7) & 1), 500, 110, 18, RED );
@@ -255,12 +257,10 @@ uint8_t gbGameBoy::ReadByte(uint16_t _addr)
     {
         return mCart.ReadByte(_addr);
     }
-
     // are we reading from ram memory bank?
     else if ((_addr >= 0xA000) && (_addr <= 0xBFFF))
     {
-        uint16_t new_addr = _addr - 0xA000 ;
-        return 0xFF;//mRam[new_addr + (mCurRamBank*0x2000)] ; 
+        return mCart.ReadByte(_addr);
     }
     else if (_addr == 0xFF00) // Input
     {
@@ -298,7 +298,11 @@ void gbGameBoy::WriteByte(uint16_t _addr, uint8_t _data)
     {
         mCart.WriteByte(_addr, _data);
     } 
-    else if ( ( _addr >= 0xE000 ) && (_addr < 0xFE00) ) // Echo ram
+    else if ( ( _addr >= 0xA000 ) && ( _addr < 0xC000 ) ) // Ram Bank
+    {
+        mCart.WriteByte(_addr, _data);
+    }
+    else if ( ( _addr >= 0xE000 ) && ( _addr < 0xFE00 ) ) // Echo ram
     {
         mRom[_addr] = _data;
         WriteByte(_addr-0x2000, _data);
@@ -332,7 +336,7 @@ void gbGameBoy::WriteByte(uint16_t _addr, uint8_t _data)
 		{
 			mRom[0xFE00 + i] = ReadByte(newAddress + i);
 		}
-	}
+	}   
     else 
     {
         mRom[_addr] = _data;
