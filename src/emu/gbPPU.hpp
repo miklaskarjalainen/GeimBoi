@@ -32,9 +32,10 @@ public:
 public:
     Image* front_buffer = nullptr;
 
+    void CheckCoinsidenceFlag(); // Aka LY=LYC
 private:
     Image* back_buffer  = nullptr;
-    void SwapBuffers() // Removing all unnecessary screen tearing, so i actually know what is caused by the emulation
+    void SwapBuffers() // Removing all unnecessary screen tearing, so i actually know what is caused by emulation
     {
         Image* hold = back_buffer;
         back_buffer = front_buffer;
@@ -42,14 +43,15 @@ private:
     }
 
     gbColor GetPixelColor(uint8_t col, uint16_t _addr);
-    void    UpdateGraphics(uint16_t _cycles);
-    void    SetLCDStatus    ();
-    void    RenderScanline  ();
-    void	RenderBackground();
-    void	RenderSprites	();
 
+    void UpdateGraphics(uint16_t _cycles);
+    void SetLCDStatus    ();
+    void RenderScanline  ();
+    void RenderBackground();
+    void RenderSprites	();
+    
 private:
-    int mScanlineCounter = 456; // 1 scanline is drawn every 456 cpu cycles, this keeps track of it.
+    int  mScanlineCounter = 456;// 1 scanline is drawn every 456 cpu cycles, this keeps track of it.
     gbGameBoy* mGameBoy = nullptr;
 
     friend gbZ80;

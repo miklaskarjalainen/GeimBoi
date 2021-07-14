@@ -49,12 +49,12 @@ void gbPPU::SetLCDStatus()
     uint8_t LCD_CONTROL = mGameBoy->mRom[0xFF40]; 
     uint8_t LCD_STATUS  = mGameBoy->mRom[0xFF41]; 
     uint8_t LY  = mGameBoy->mRom[0xFF44]; // Current scanline
-    uint8_t LYC = mGameBoy->mRom[0xFF45]; // This is set by a the game, if same as LY then a interrupt is requested
 
     if (!((LCD_CONTROL >> 7) & 1)) // If screen is disabled
     {
         mScanlineCounter = 456;
-        mGameBoy->mRom[0xFF41] = 0x00; // LCD Status to 0x00
+        mGameBoy->mRom[0xFF41] &= 0b11111100; // LCD Status to 0x00
+        mGameBoy->mRom[0xFF41] |= 0b1; // LCD Status to 0x00
         mGameBoy->mRom[0xFF44] = 0;    // Set cur scanline to 0
         return;
     }
@@ -97,19 +97,6 @@ void gbPPU::SetLCDStatus()
         mGameBoy->mCpu.RequestInterupt(INTERUPT_LCD);
     }
 
-    if (LY == LYC)
-    {    
-        LCD_STATUS |= 1 << 2;      // Set LY=LYC flag on the lcd
-        if ((LCD_STATUS >> 6) & 1) // Is LY=LYC interrupt enabled.
-        {
-            mGameBoy->mCpu.RequestInterupt(INTERUPT_LCD);
-        }
-    }
-    else
-    {
-        LCD_STATUS &= ~(1 << 2);   // Reset LY=LYC flag on the lcd
-    }
-    
     mGameBoy->mRom[0xFF41] = LCD_STATUS;
 }
 
@@ -122,16 +109,17 @@ void gbPPU::RenderScanline()
     uint8_t curScanline = mGameBoy->mRom[0xFF44]; // 0-153
     curScanline++;
     
-    if ( curScanline == 144U ) // VBLANK
+    if ( curScanline == 144U )     // VBLANK
     {
         mGameBoy->mCpu.RequestInterupt(INTERUPT_VBLANK);
         SwapBuffers();
     }
-    else if ( curScanline > 153U ) // GOTO NEXT LINE
+    else if ( curScanline > 153U ) // RESET SCANLINE
     {
         curScanline = 0;
     }
     mGameBoy->mRom[0xFF44] = curScanline;
+    CheckCoinsidenceFlag();
 
     if ( curScanline < 144U) // 0-144 is visible to the viewport
     {
@@ -310,6 +298,25 @@ void gbPPU::RenderSprites()
     }
 }
 
+// Aka LY=LYC
+void gbPPU::CheckCoinsidenceFlag()
+{
+    uint8_t& LCD_STATUS = mGameBoy->mRom[0xFF41]; 
+    uint8_t  LY  = mGameBoy->mRom[0xFF44]; // Current scanline
+    uint8_t  LYC = mGameBoy->mRom[0xFF45]; // This is set by a the game, if same as LY then a interrupt is requested
 
+    if (LY == LYC)
+    {    
+        LCD_STATUS |= 1 << 2;          // Set LY=LYC flag on the lcd
+        if ((LCD_STATUS >> 6) & 1) // Is LY=LYC interrupt enabled.
+        {
+            mGameBoy->mCpu.RequestInterupt(INTERUPT_LCD);
+        }
+    }
+    else
+    {
+        LCD_STATUS &= ~(1 << 2);   // Reset LY=LYC flag on the lcd
+    }
+}
 
 } // Namespace

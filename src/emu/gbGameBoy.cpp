@@ -253,12 +253,12 @@ void gbGameBoy::Reset()
 uint8_t gbGameBoy::ReadByte(uint16_t _addr)
 {
     // are we reading from the rom memory bank?
-    if ((_addr>=0x0000) && (_addr <= 0x7FFF))
+    if ((_addr>=0x0000) && (_addr < 0x8000))
     {
         return mCart.ReadByte(_addr);
     }
     // are we reading from ram memory bank?
-    else if ((_addr >= 0xA000) && (_addr <= 0xBFFF))
+    else if ((_addr >= 0xA000) && (_addr < 0xC000))
     {
         return mCart.ReadByte(_addr);
     }
@@ -328,6 +328,21 @@ void gbGameBoy::WriteByte(uint16_t _addr, uint8_t _data)
             mCpu.mTimerCounter = 0;
             mCpu.mCounterFreq = new_freq;
         }
+    }
+    else if ( _addr == 0xFF40 ) // Control
+    {
+        bool lcd_enabled  = (mRom[0xFF40] >> 7) & 1;
+        bool would_enable = (_data >> 7) & 1;
+        mRom[_addr] = _data;
+        if (!lcd_enabled && would_enable) // LCD got enabled.
+        {
+            mPpu.CheckCoinsidenceFlag();
+        }
+    } 
+    else if ( _addr == 0xFF41 ) // STAT
+    {
+        mRom[_addr] = _data;
+        mCpu.RequestInterupt(INTERUPT_LCD); // A bug that occurs only on the dmg model.
     }
     else if ( _addr == 0xFF46 ) // DMA transfer
 	{
