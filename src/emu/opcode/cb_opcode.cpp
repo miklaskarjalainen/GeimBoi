@@ -9,6 +9,7 @@ void gbZ80::ExecuteExtendedOpcode()
 {
     // All of these instructions take atleast 8 cycles
     uint8_t opcode = ReadByte( mRegPC.val );
+    mLastExecutedOpcode = 0xCB + opcode;
 
     mRegPC.val++;
 

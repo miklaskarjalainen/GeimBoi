@@ -56,6 +56,8 @@ public:
     unsigned int mTimerCounter   = 0; // Counts the timer cycles, till count up.
     unsigned int mCyclesDone = 0;
 
+    // Debugging
+    uint16_t mLastExecutedOpcode = 0x00;
 private:
     gbGameBoy* mGameBoy = nullptr;
 

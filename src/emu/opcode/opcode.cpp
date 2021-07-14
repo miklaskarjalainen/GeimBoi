@@ -8,6 +8,8 @@ namespace Giffi
 void gbZ80::ExecuteNextOpcode()
 {
     uint8_t opcode = ReadByte(mRegPC.val);
+    mLastExecutedOpcode = opcode;
+
     mCyclesDone += 4; 
 
     mRegPC.val++;
@@ -665,19 +667,19 @@ void gbZ80::ExecuteNextOpcode()
 
         // 16BIT INC        
         case 0x03: // INC BC
-            CPU_16BIT_INC(this, mRegBC.val);
+            mRegBC.val++;
             mCyclesDone += 4;
             break;
         case 0x13: // INC DE
-            CPU_16BIT_INC(this, mRegDE.val);
+            mRegDE.val++;
             mCyclesDone += 4;
             break;
         case 0x23: // INC HL
-            CPU_16BIT_INC(this, mRegHL.val);
+            mRegHL.val++;
             mCyclesDone += 4;
             break;
         case 0x33: // INC SP
-            CPU_16BIT_INC(this, mRegSP.val);
+            mRegSP.val++;
             mCyclesDone += 4;
             break;
 
@@ -810,15 +812,19 @@ void gbZ80::ExecuteNextOpcode()
         // Shifts
         case 0x07: // RLCA
             CPU_RLC(this, mRegAF.high);
+            mRegAF.low &= ~(1 << FLAG_Z);
             break;
         case 0x0F: // RRCA
             CPU_RRC(this, mRegAF.high);
+            mRegAF.low &= ~(1 << FLAG_Z);
             break;
         case 0x17: // RLA
             CPU_RL(this, mRegAF.high);
+            mRegAF.low &= ~(1 << FLAG_Z);
             break;
         case 0x1F: // RRA
             CPU_RR(this, mRegAF.high);
+            mRegAF.low &= ~(1 << FLAG_Z);
             break;
 
         // Jumps
