@@ -26,6 +26,13 @@
 *.a
 *.lib
 
+# Visual Studio Project
+.vs/
+bin_int/
+*.ilk
+*.pdb
+*.ini
+
 # Executables
 *.exe
 *.out
@@ -35,3 +42,4 @@
 *.gb
 *.gbc
 *.gba
+*.bin
