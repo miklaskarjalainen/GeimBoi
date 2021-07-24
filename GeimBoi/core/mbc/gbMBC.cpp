@@ -59,6 +59,7 @@ bool gbMBC::SaveRam(const std::string& _path, uint8_t* src, size_t size)
         return false;
     }
     wf.close();
+    printf("Savefile created to %s\n", new_path.c_str());
     return true;
 }
 

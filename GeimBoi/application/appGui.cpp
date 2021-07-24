@@ -10,10 +10,10 @@ bool appGui::mDrawDebug = false;
 bool appGui::mDrawFileDialog = false;
 bool appGui::mEmuPaused = false;
 
-void appGui::Init(SDL_Renderer* _renderer, std::shared_ptr<gbGameBoy>& _emu) {
+void appGui::Init(SDL_Renderer* _renderer, std::shared_ptr<gbGameBoy>& _emu, int _widht, int _height) {
     appGui::mGameBoy = _emu;
     ImGui::CreateContext();
-    ImGuiSDL::Initialize(_renderer, 1280, 720);
+    ImGuiSDL::Initialize(_renderer, _widht, _height);
 
     // Create Roms Folder
     if (!std::filesystem::exists("roms"))

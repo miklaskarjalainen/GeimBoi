@@ -10,13 +10,16 @@ std::shared_ptr<gbGameBoy> appWindow::mGameBoy = nullptr;
 
 bool appWindow::Init()
 {
+    const int width  = 1280;
+    const int height = 720;
+
     // Init SDL2
     if (SDL_Init(SDL_INIT_EVERYTHING))
     {
         printf("Unable to init sdl2: %s\n", SDL_GetError()); 
         return false;
     }
-    mWindow  = SDL_CreateWindow("GeimBoy", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_RESIZABLE);
+    mWindow  = SDL_CreateWindow("GeimBoy", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE);
     if (mWindow == NULL)
     {
         printf("Unable to create window: %s\n", SDL_GetError());
@@ -35,7 +38,7 @@ bool appWindow::Init()
     mGameBoy->Reset();
     mGameBoy->SetPalette(0x9bbc0f, 0x8bac0f, 0x306230, 0x0f380f);
     
-    appGui::Init(mRenderer, mGameBoy);
+    appGui::Init(mRenderer, mGameBoy, width, height);
     return true;
 }
 
