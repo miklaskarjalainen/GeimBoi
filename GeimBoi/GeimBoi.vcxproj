@@ -38,6 +38,7 @@
     <ClCompile Include="application\imgui\imgui_tables.cpp" />
     <ClCompile Include="application\imgui\imgui_widgets.cpp" />
     <ClCompile Include="core\mbc\gbMBC1.cpp" />
+    <ClCompile Include="core\mbc\gbMBC3.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -62,6 +63,7 @@
     <ClInclude Include="application\imgui\imstb_textedit.h" />
     <ClInclude Include="application\imgui\imstb_truetype.h" />
     <ClInclude Include="core\mbc\gbMBC1.hpp" />
+    <ClInclude Include="core\mbc\gbMBC3.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -1,5 +1,4 @@
 #pragma once
-#include <memory>
 #include "gbMBC.hpp"
 
 namespace Giffi
@@ -8,7 +7,7 @@ namespace Giffi
 	class gbMBC2 : public gbMBC
 	{
 	public:
-		~gbMBC2() override { printf("MBC2 Destroyed\n"); }
+		~gbMBC2() override;
 
 		uint16_t GetCurRomBank() const override;
 

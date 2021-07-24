@@ -1,42 +1,37 @@
 #include "../gbCart.hpp"
-#include "gbMBC1.hpp"
+#include "gbMBC3.hpp"
 
 using namespace Giffi;
 
-gbMBC1::gbMBC1(gbCart* _cart)
+gbMBC3::gbMBC3(gbCart* _cart)
     : gbMBC(_cart)
 {
     Reset();
-    printf("MBC1 Created\n");
+    printf("MBC3 Created\n");
     if (mCart->HasBattery())
     {
         LoadRam(mCart->GetGameName() + ".sav", (uint8_t*)&mRam, sizeof(mRam));
     }
 }
 
-gbMBC1::~gbMBC1() 
-{
-    printf("MBC1 Destroyed\n");
+gbMBC3::~gbMBC3()
+{ 
+    printf("MBC3 Destroyed\n"); 
     if (mCart->HasBattery())
     {
         SaveRam(mCart->GetGameName() + ".sav", (uint8_t*)&mRam, sizeof(mRam));
     }
 }
 
-uint8_t gbMBC1::ReadByte(uint16_t _addr) const      
+uint8_t gbMBC3::ReadByte(uint16_t _addr) const
 {
     if (_addr < 0x4000) // Cartridge
     {
-        
-        if (!mMode) { return mCart->mCart[_addr]; }
-        uint8_t bank = mCurBank & (0b11 << 5);
-        bank &= mCart->GetRomBankCount() - 1;
-        uint32_t new_addr = (0x4000 * bank) + _addr;
-        return mCart->mCart[new_addr];
+        return mCart->mCart[_addr];
     }
     else if (_addr < 0x8000)   // Rom bank
     {
-        uint8_t bank = mCurBank & 0b01111111;
+        uint8_t bank = mRomBank;
         bank &= mCart->GetRomBankCount() - 1;
         uint32_t new_addr = (_addr - 0x4000) + (bank * 0x4000);
         return mCart->mCart[new_addr];
@@ -44,9 +39,9 @@ uint8_t gbMBC1::ReadByte(uint16_t _addr) const
     else if ((_addr >= 0xA000) && (_addr < 0xC000) && mRamEnable) // Ram banks
     {
         uint16_t new_addr = _addr - 0xA000;
-        uint16_t bank = mMode ? ((mCurBank >> 5) & 0b11) : 0;
+        uint16_t bank = mRamBank;
         bank &= mCart->GetRamBankCount() - 1;
-        return mRam[(new_addr + (bank * 0x2000))];
+        return mRam[new_addr + (bank * 0x2000)];
     }
     else
     {
@@ -54,25 +49,21 @@ uint8_t gbMBC1::ReadByte(uint16_t _addr) const
     }
 }
 
-void gbMBC1::WriteByte(uint16_t _addr, uint8_t _data)
+void gbMBC3::WriteByte(uint16_t _addr, uint8_t _data)
 {
     if (_addr < 0x2000)     // Ram Enable
     {
-        if (mCart->GetRamSize() <= 0) { return; }
         mRamEnable = (_data & 0xF) == 0b1010;
     }
     else if (_addr < 0x4000) // ROM Change
     {
-        uint8_t bank1 = _data & 0x1F;
-        if (bank1 == 0) { bank1++; }
-        mCurBank &= (0b11 << 5);
-        mCurBank |= bank1;
+        mRomBank = _data & 0b01111111;
+        if (mRomBank == 0) { mRomBank++; }
     }
-    else if (_addr < 0x6000) // Set Bank2 (RAM/ROM)
+    else if (_addr < 0x6000) // RAM / RTS Reg change
     {
-        uint8_t bank2 = _data & 0b11;
-        mCurBank &= ~(0b11 << 5);
-        mCurBank |= (bank2 << 5);
+        _data &= 0b11;
+        mRamBank = _data;
     }
     else if (_addr < 0x8000) // Set RAM/ROM Mode
     {
@@ -82,26 +73,26 @@ void gbMBC1::WriteByte(uint16_t _addr, uint8_t _data)
     {
         if (!mRamEnable) { return; }
         uint16_t new_addr = _addr - 0xA000;
-        uint16_t bank = mMode ? ((mCurBank >> 5) & 0b11) : 0;
+        uint16_t bank = mRamBank;
         bank &= mCart->GetRamBankCount() - 1;
         mRam[new_addr + (bank * 0x2000)] = _data;
     }
 }
 
-void gbMBC1::Reset()
+void gbMBC3::Reset()
 {
-    mCurBank = 0x01;
+    mRomBank = 0x01;
     mRamEnable = false;
     mMode = false;
     memset(&mRam, 0xFF, sizeof(mRam));
 }
 
-uint16_t gbMBC1::GetCurRomBank() const
+uint16_t gbMBC3::GetCurRomBank() const
 {
-    return mCurBank & mCart->GetRomBankCount() - 1;
+    return mRomBank & mCart->GetRomBankCount() - 1;
 }
 
-uint16_t gbMBC1::GetCurRamBank() const
+uint16_t gbMBC3::GetCurRamBank() const
 {
     return 0;
 }

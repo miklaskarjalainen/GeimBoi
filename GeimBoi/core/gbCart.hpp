@@ -26,6 +26,7 @@ public:
     std::string GetCartTypeText() const;
     uint8_t     ReadByte(uint16_t _addr) const;
     bool        IsGameLoaded() const;
+    bool        HasBattery() const;
 private:
     void Reset();
     bool LoadRom(const std::string& _path);

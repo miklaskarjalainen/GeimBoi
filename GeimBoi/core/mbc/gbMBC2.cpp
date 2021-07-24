@@ -1,6 +1,5 @@
 #include "../gbCart.hpp"
 #include "gbMBC2.hpp"
-#include <random>
 
 using namespace Giffi;
 
@@ -9,6 +8,15 @@ gbMBC2::gbMBC2(gbCart* _cart)
 {
     Reset();
     printf("MBC2 Created\n");
+    if (mCart->HasBattery())
+    {
+        LoadRam(mCart->GetGameName() + ".sav", (uint8_t*)&mRam, sizeof(mRam));
+    }
+}
+
+gbMBC2::~gbMBC2()
+{
+    printf("MBC2 Destroyed\n");
 }
 
 uint8_t gbMBC2::ReadByte(uint16_t _addr) const      

@@ -103,6 +103,28 @@ std::string gbCart::GetCartTypeText() const
     }
 }
 
+bool gbCart::IsGameLoaded() const
+{
+    return mGameLoaded;
+}
+
+bool gbCart::HasBattery() const
+{
+    switch (mCart[0x147])
+    {
+        case 0x03:
+        case 0x06:
+        case 0x09:
+        case 0x0D:
+        case 0x0F:
+        case 0x10:
+        case 0x13:
+            return true;
+        default:
+            return false;
+    }
+}
+
 void gbCart::Reset()
 {
     if (mMBC != nullptr) { mMBC->Reset(); }
@@ -144,9 +166,4 @@ uint8_t gbCart::ReadByte(uint16_t _addr) const
 void gbCart::WriteByte(uint16_t _addr, uint8_t _data)
 {
     mMBC->WriteByte(_addr, _data);
-}
-
-bool gbCart::IsGameLoaded() const
-{
-    return mGameLoaded;
 }

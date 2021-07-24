@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <memory>
+#include <string>
 
 namespace Giffi
 {
@@ -35,6 +36,9 @@ namespace Giffi
 	protected:
 		gbCart* mCart = nullptr;
 		
+		bool SaveRam(const std::string& _path, uint8_t* src, size_t size);
+		bool LoadRam(const std::string& _path, uint8_t* dst, size_t size);
+
 		gbMBC(gbCart* _cart)
 			:mCart(_cart) {};
 	};
