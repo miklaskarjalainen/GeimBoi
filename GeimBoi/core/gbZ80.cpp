@@ -16,7 +16,7 @@ void gbZ80::Clock()
 
     UpdateTimers(delta_cycles);
     mGameBoy->mPpu.UpdateGraphics(delta_cycles);
-    DoInterupts();
+    DoInterrupts();
 }
 
 // Advance by a frame
@@ -83,7 +83,7 @@ void gbZ80::UpdateTimers( uint16_t cycles )
             if (timer == 0xFF) // Overflow
             {
                 timer = timer_set;
-                RequestInterupt(INTERUPT_TIMER);
+                RequestInterrupt(gbInterrupt::Timer);
             }
         }
     }
@@ -97,14 +97,14 @@ void gbZ80::UpdateTimers( uint16_t cycles )
 	}
 }
 
-void gbZ80::RequestInterupt(uint8_t _id)
+void gbZ80::RequestInterrupt(gbInterrupt _interrupt)
 {
     uint8_t IF = mGameBoy->mRom[0xFF0F];
-    IF |= 1 << _id;
+    IF |= 1 << static_cast<uint8_t>(_interrupt);
     mGameBoy->mRom[0xFF0F] = IF;
 } 
    
-void gbZ80::DoInterupts()
+void gbZ80::DoInterrupts()
 {
     uint8_t requested = mGameBoy->mRom[0xFF0F];
     uint8_t enabled   = mGameBoy->mRom[0xFFFF];
@@ -116,28 +116,28 @@ void gbZ80::DoInterupts()
             mIsHalted = false;
             if (mEnableInterrupts)
             {
-                ServiceInterupt(i);
+                ServiceInterrupt( static_cast<gbInterrupt>(i) );
             }
         }
     }  
 } 
 
-void gbZ80::ServiceInterupt(uint8_t _interrupt)
+void gbZ80::ServiceInterrupt(gbInterrupt _interrupt)
 {
     mEnableInterrupts = false;
 
-    mGameBoy->mRom[0xFF0F] &= ~(1 << _interrupt);
+    mGameBoy->mRom[0xFF0F] &= ~(1 << static_cast<uint8_t>(_interrupt) );
 
     /// we must save the current execution address by pushing it onto the stack
     PushWordOntoStack(mRegPC.val);
 
     switch (_interrupt)
     {
-        case INTERUPT_VBLANK: mRegPC.val = 0x40; break;
-        case INTERUPT_LCD   : mRegPC.val = 0x48; break;
-        case INTERUPT_TIMER : mRegPC.val = 0x50; break;
-        case INTERUPT_SERIAL: mRegPC.val = 0x58; break;
-        case INTERUPT_JOYPAD: mRegPC.val = 0x60; break;
+        case gbInterrupt::VBlank: mRegPC.val = 0x40; break;
+        case gbInterrupt::LCD   : mRegPC.val = 0x48; break;
+        case gbInterrupt::Timer : mRegPC.val = 0x50; break;
+        case gbInterrupt::Serial: mRegPC.val = 0x58; break;
+        case gbInterrupt::Joypad: mRegPC.val = 0x60; break;
     }   
 }
 

@@ -11,7 +11,7 @@
 namespace Giffi
 {
 
-    enum gbButton
+    enum gbButton : uint8_t
     {
         RIGHT = 0,
         LEFT  = 1,

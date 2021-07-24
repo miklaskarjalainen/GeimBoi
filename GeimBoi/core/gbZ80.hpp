@@ -5,29 +5,20 @@ namespace Giffi
 {
 
 #define CPU_CLOCKSPEED 1048576
-#define FLAG_Z 7 // Zero Flag, set if previous operation resulted in a zero
-#define FLAG_N 6 // Substract Flag, set if previous operation substracted otherwise 0
-#define FLAG_H 5 // Half Carry Flag, 
-#define FLAG_C 4 // Carry Flag
-
-#define INTERUPT_VBLANK 0U
-#define INTERUPT_LCD    1U
-#define INTERUPT_TIMER  2U
-#define INTERUPT_SERIAL 3U
-#define INTERUPT_JOYPAD 4U
 
 class gbGameBoy;
 class gbPPU;
 
-enum class gbFlag
+// Not enum class because used in bitshifts, a lot.
+enum gbFlag : uint8_t
 {
-    Zero      = 7,
-    Substract = 6,
-    HalfCarry = 5,
-    Carry     = 4,
+    Zero      = 7, // Set if previous operation resulted in a zero
+    Substract = 6, // Set if previous operation substracted otherwise 0
+    HalfCarry = 5, // If there was a carry from lower nibble to higher nibble
+    Carry     = 4, // If there was carry
 };
 
-enum class gbInterrupt
+enum class gbInterrupt : uint8_t
 {
     VBlank = 0,
     LCD    = 1,
@@ -54,8 +45,7 @@ public:
     void     PushWordOntoStack(uint16_t _word);
     uint16_t PopWordOffStack  ();
 
-
-    bool GetFlag(gbFlag flag)   const { return (mRegAF.low >> (int)flag) & 1; }
+    bool GetFlag(gbFlag flag)   const { return (mRegAF.low >> flag) & 1; }
     bool GetIE(gbInterrupt i)   const { return (ReadByte(0xFFFF) >> (int)i) & 1; } // Get 'Interrupt Enable'
     bool GetIF(gbInterrupt i)   const { return (ReadByte(0xFF0F) >> (int)i) & 1; } // Get 'Interrupt Flag'
     bool GetIME()               const { return mEnableInterrupts; }                // 'Interrupt Master Enable'
@@ -64,11 +54,10 @@ private:
     void ExecuteNextOpcode();
     void ExecuteExtendedOpcode();
 
-
-    void UpdateTimers( uint16_t cycles );
-    void RequestInterupt(uint8_t _id);
-    void DoInterupts();
-    void ServiceInterupt(uint8_t _interupt);
+    void UpdateTimers(uint16_t cycles);
+    void RequestInterrupt(gbInterrupt _interrupt);
+    void DoInterrupts();
+    void ServiceInterrupt(gbInterrupt _interupt);
 
 public:
     Reg16 mRegAF, mRegBC, mRegDE, mRegHL, mRegSP, mRegPC;

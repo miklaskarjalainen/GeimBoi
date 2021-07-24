@@ -388,11 +388,11 @@ void gbZ80::ExecuteNextOpcode()
                 mRegAF.low = 0x00; // Reset flags
                 if ( (reg & 0xF) + (value & 0xF) > 0xF)    // Half carry
                 {
-                    mRegAF.low |= 1 << FLAG_H;
+                    mRegAF.low |= 1 << gbFlag::HalfCarry;
                 }
                 if ( (reg & 0xFF) + (value & 0xFF) > 0xFF) // Carry
                 {
-                    mRegAF.low |= 1 << FLAG_C;
+                    mRegAF.low |= 1 << gbFlag::Carry;
                 }
                 mCyclesDone += 12;
                 break;
@@ -743,11 +743,11 @@ void gbZ80::ExecuteNextOpcode()
             mRegAF.low = 0x00; // Reset flags
             if ( (reg & 0xF) + (value & 0xF) > 0xF)    // Half carry
             {
-                mRegAF.low |= 1 << FLAG_H;
+                mRegAF.low |= 1 << gbFlag::HalfCarry;
             }
             if ( (reg & 0xFF) + (value & 0xFF) > 0xFF) // Carry
             {
-                mRegAF.low |= 1 << FLAG_C;
+                mRegAF.low |= 1 << gbFlag::Carry;
             }            
 		}break ;
         case 0x08: // LD (a16),SP
@@ -814,22 +814,22 @@ void gbZ80::ExecuteNextOpcode()
             mCyclesDone += 12;
             break;
 
-        // Shifts
+        // Shifts (Reset Zero flag)
         case 0x07: // RLCA
             CPU_RLC(this, mRegAF.high);
-            mRegAF.low &= ~(1 << FLAG_Z);
+            mRegAF.low &= ~(1 << gbFlag::Zero);
             break;
         case 0x0F: // RRCA
             CPU_RRC(this, mRegAF.high);
-            mRegAF.low &= ~(1 << FLAG_Z);
+            mRegAF.low &= ~(1 << gbFlag::Zero);
             break;
         case 0x17: // RLA
             CPU_RL(this, mRegAF.high);
-            mRegAF.low &= ~(1 << FLAG_Z);
+            mRegAF.low &= ~(1 << gbFlag::Zero);
             break;
         case 0x1F: // RRA
             CPU_RR(this, mRegAF.high);
-            mRegAF.low &= ~(1 << FLAG_Z);
+            mRegAF.low &= ~(1 << gbFlag::Zero);
             break;
 
         // Jumps
@@ -840,48 +840,48 @@ void gbZ80::ExecuteNextOpcode()
             CPU_JUMP(this, false, 0, false);
             break;
 		case 0xC2: // JP NZ, a16
-            CPU_JUMP(this, true, FLAG_Z, false);
+            CPU_JUMP(this, true, gbFlag::Zero, false);
             break;
 		case 0xCA: // JP Z, a16
-            CPU_JUMP(this, true, FLAG_Z, true);
+            CPU_JUMP(this, true, gbFlag::Zero, true);
             break;
 		case 0xD2: // JP NC, a16
-            CPU_JUMP(this, true, FLAG_C, false);
+            CPU_JUMP(this, true, gbFlag::Carry, false);
             break;
 		case 0xDA: // JP C, a16
-            CPU_JUMP(this, true, FLAG_C, true);
+            CPU_JUMP(this, true, gbFlag::Carry, true);
             break;
         
         case 0x18: // JR r8
             CPU_JUMP_IMMEDIATE(this);
             break;
 		case 0x20: // JR NZ, r8
-            CPU_JUMP_IMMEDIATE(this, true, FLAG_Z, false);
+            CPU_JUMP_IMMEDIATE(this, true, gbFlag::Zero, false);
             break;
 		case 0x28: // JR  Z, r8
-            CPU_JUMP_IMMEDIATE(this, true, FLAG_Z, true);
+            CPU_JUMP_IMMEDIATE(this, true, gbFlag::Zero, true);
             break;
 		case 0x30: // JR NC, r8
-            CPU_JUMP_IMMEDIATE(this, true, FLAG_C, false);
+            CPU_JUMP_IMMEDIATE(this, true, gbFlag::Carry, false);
             break;
 		case 0x38: // JR  C, r8
-            CPU_JUMP_IMMEDIATE(this, true, FLAG_C, true);
+            CPU_JUMP_IMMEDIATE(this, true, gbFlag::Carry, true);
             break;
 
         case 0xC9: // RET
             CPU_RET(this);
             break;
         case 0xC0: // RET NZ
-            CPU_RET(this, true, FLAG_Z, false);
+            CPU_RET(this, true, gbFlag::Zero, false);
             break;
         case 0xC8: // RET Z
-            CPU_RET(this, true, FLAG_Z, true);
+            CPU_RET(this, true, gbFlag::Zero, true);
             break;
         case 0xD0: // RET NC
-            CPU_RET(this, true, FLAG_C, false);
+            CPU_RET(this, true, gbFlag::Carry, false);
             break;
         case 0xD8: // RET C
-            CPU_RET(this, true, FLAG_C, true);
+            CPU_RET(this, true, gbFlag::Carry, true);
             break;
         case 0xD9: // RETI
             CPU_RET(this);
@@ -892,16 +892,16 @@ void gbZ80::ExecuteNextOpcode()
             CPU_CALL(this);
             break;
         case 0xC4: // CALL NZ, a16
-            CPU_CALL(this, true, FLAG_Z, false);
+            CPU_CALL(this, true, gbFlag::Zero, false);
             break;
 		case 0xCC: // CALL  Z, a16
-            CPU_CALL(this, true, FLAG_Z, true);
+            CPU_CALL(this, true, gbFlag::Zero, true);
             break;
 		case 0xD4: // CALL NC, a16
-            CPU_CALL(this, true, FLAG_C, false);
+            CPU_CALL(this, true, gbFlag::Carry, false);
             break;
 		case 0xDC: // CALL  C, a16
-            CPU_CALL(this, true, FLAG_C, true); 
+            CPU_CALL(this, true, gbFlag::Carry, true);
             break;
 
         case 0xC7: // RST 00H
@@ -935,8 +935,8 @@ void gbZ80::ExecuteNextOpcode()
         case 0x2F: // CPL (flip A register's bits)
         {
             // Set Substract & Half Carry -flag
-            mRegAF.low |= 1 << FLAG_N;
-            mRegAF.low |= 1 << FLAG_H;
+            mRegAF.low |= 1 << gbFlag::Substract;
+            mRegAF.low |= 1 << gbFlag::HalfCarry;
 
             // flip A register's bits
             mRegAF.high ^= 0b11111111;
@@ -945,19 +945,19 @@ void gbZ80::ExecuteNextOpcode()
         case 0x3F: // CCF (flip carry)
         {
             // Reset Substract and halfcarry flag
-            mRegAF.low &= ~( 1 << FLAG_N);
-            mRegAF.low &= ~( 1 << FLAG_H);
+            mRegAF.low &= ~( 1 << gbFlag::Substract);
+            mRegAF.low &= ~( 1 << gbFlag::HalfCarry);
             // Flip Carry
-            mRegAF.low ^= 1 << FLAG_C;
+            mRegAF.low ^= 1 << gbFlag::Carry;
             break;
         }
         case 0x37: // SCF (set carry)
         {
             // Reset Substract and halfcarry flag
-            mRegAF.low &= ~( 1 << FLAG_N);
-            mRegAF.low &= ~( 1 << FLAG_H);
+            mRegAF.low &= ~( 1 << gbFlag::Substract);
+            mRegAF.low &= ~( 1 << gbFlag::HalfCarry);
             // Set Carry
-            mRegAF.low |= 1 << FLAG_C;
+            mRegAF.low |= 1 << gbFlag::Carry;
             break;
         }
 
@@ -984,14 +984,18 @@ void CPU_8BIT_INC(gbZ80* _emu, uint8_t& _reg)
     uint8_t before = _reg;
     _reg++;
 
-    _emu->mRegAF.low &= ~(1 << FLAG_Z); // Reset zero flag
-    _emu->mRegAF.low &= ~(1 << FLAG_N); // Reset substract flag
-    _emu->mRegAF.low &= ~(1 << FLAG_H); // Reset halfcarry flag
+    _emu->mRegAF.low &= ~(1 << gbFlag::Zero);      // Reset zero flag
+    _emu->mRegAF.low &= ~(1 << gbFlag::Substract); // Reset substract flag
+    _emu->mRegAF.low &= ~(1 << gbFlag::HalfCarry); // Reset halfcarry flag
 
-    if  (_reg == 0)
-        _emu->mRegAF.low |= 1 << FLAG_Z;
+    if (_reg == 0)
+    {
+        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+    }
     if ((before & 0xF) == 0xF)
-        _emu->mRegAF.low |= 1 << FLAG_H;  
+    {
+        _emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
+    }
 }
 
 void CPU_8BIT_MEMORY_INC(gbZ80* _emu, uint16_t _addr)
@@ -999,14 +1003,18 @@ void CPU_8BIT_MEMORY_INC(gbZ80* _emu, uint16_t _addr)
     uint8_t before = _emu->ReadByte(_addr);
     _emu->WriteByte(_addr, before + 1);
 
-    _emu->mRegAF.low &= ~(1 << FLAG_Z); // Reset zero flag
-    _emu->mRegAF.low &= ~(1 << FLAG_N); // Reset substract flag
-    _emu->mRegAF.low &= ~(1 << FLAG_H); // Reset halfcarry flag
+    _emu->mRegAF.low &= ~(1 << gbFlag::Zero);      // Reset zero flag
+    _emu->mRegAF.low &= ~(1 << gbFlag::Substract); // Reset substract flag
+    _emu->mRegAF.low &= ~(1 << gbFlag::HalfCarry); // Reset halfcarry flag
 
-    if  ((uint8_t)(before + 1) == 0U)
-        _emu->mRegAF.low |= 1 << FLAG_Z;
+    if ((uint8_t)(before + 1) == 0U)
+    {
+        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+    }
     if ((before & 0xF) == 0xF)
-        _emu->mRegAF.low |= 1 << FLAG_H;  
+    {
+        _emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
+    }
 }
 
 void CPU_8BIT_DEC(gbZ80* _emu, uint8_t& _reg)
@@ -1014,14 +1022,18 @@ void CPU_8BIT_DEC(gbZ80* _emu, uint8_t& _reg)
     uint8_t before = _reg;
     _reg--;
 
-    _emu->mRegAF.low &= ~(1 << FLAG_Z); // Reset zero flag
-    _emu->mRegAF.low |=  (1 << FLAG_N); // Set substract flag
-    _emu->mRegAF.low &= ~(1 << FLAG_H); // Reset halfcarry flag
+    _emu->mRegAF.low &= ~(1 << gbFlag::Zero);      // Reset zero flag
+    _emu->mRegAF.low |=  (1 << gbFlag::Substract); // Set substract flag
+    _emu->mRegAF.low &= ~(1 << gbFlag::HalfCarry); // Reset halfcarry flag
 
-    if  (_reg == 0)
-        _emu->mRegAF.low |= 1 << FLAG_Z;
+    if (_reg == 0)
+    {
+        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+    }
     if ((before & 0xF) == 0)
-        _emu->mRegAF.low |= 1 << FLAG_H;        
+    {
+        _emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
+    }
 }
 
 void CPU_8BIT_MEMORY_DEC(gbZ80* _emu, uint16_t _addr)
@@ -1029,14 +1041,18 @@ void CPU_8BIT_MEMORY_DEC(gbZ80* _emu, uint16_t _addr)
     uint8_t before = _emu->ReadByte(_addr);
     _emu->WriteByte(_addr, before-1);
 
-    _emu->mRegAF.low &= ~(1 << FLAG_Z); // Reset zero flag
-    _emu->mRegAF.low |= 1 << FLAG_N; // Set substract flag
-    _emu->mRegAF.low &= ~(1 << FLAG_H); // Reset halfcarry flag
+    _emu->mRegAF.low &= ~(1 << gbFlag::Zero);      // Reset zero flag
+    _emu->mRegAF.low |=   1 << gbFlag::Substract;  // Set substract flag
+    _emu->mRegAF.low &= ~(1 << gbFlag::HalfCarry); // Reset halfcarry flag
 
-    if  ( (before - 1) == 0)
-        _emu->mRegAF.low |= 1 << FLAG_Z;
+    if ((before - 1) == 0)
+    {
+        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+    }
     if ((before & 0xF) == 0)
-        _emu->mRegAF.low |= 1 << FLAG_H;  
+    {
+        _emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
+    }
 }
 
 void CPU_8BIT_ADD(gbZ80* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
@@ -1046,7 +1062,7 @@ void CPU_8BIT_ADD(gbZ80* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
     // If add carry and carry flag is enabled
     if (_add_carry)
     {
-        if ((_emu->mRegAF.low >> FLAG_C) & 0b1)
+        if ((_emu->mRegAF.low >> gbFlag::Carry) & 0b1)
         {
             carry = 1;
         }
@@ -1059,15 +1075,15 @@ void CPU_8BIT_ADD(gbZ80* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
 
     if  (result == 0)
     {
-        _emu->mRegAF.low |= 1 << FLAG_Z;
+        _emu->mRegAF.low |= 1 << gbFlag::Zero;
     }
 	if (result_full > 0xFF)
     {
-		_emu->mRegAF.low |= 1 << FLAG_C;
+		_emu->mRegAF.low |= 1 << gbFlag::Carry;
     }
 	if (((_reg & 0xF) + (_amount & 0xF) + carry) > 0xF)
     {
-		_emu->mRegAF.low |= 1 << FLAG_H;
+		_emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
     }
 
     _reg = result;
@@ -1080,7 +1096,7 @@ void CPU_8BIT_SUB(gbZ80* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
     // If add carry and carry flag is enabled
     if (_add_carry)
     {
-        if ((_emu->mRegAF.low >> FLAG_C) & 0b1)
+        if ((_emu->mRegAF.low >> gbFlag::Carry) & 0b1)
         {
             carry = 1;
         }
@@ -1090,19 +1106,19 @@ void CPU_8BIT_SUB(gbZ80* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
 
     // Reset all flags
     _emu->mRegAF.low = 0x00;
-    _emu->mRegAF.low |= 1 << FLAG_N;
+    _emu->mRegAF.low |= 1 << gbFlag::Substract;
 
     if  (result == 0)
     {
-        _emu->mRegAF.low |= 1 << FLAG_Z;
+        _emu->mRegAF.low |= 1 << gbFlag::Zero;
     }
 	if (result_full < 0)
     {
-		_emu->mRegAF.low |= 1 << FLAG_C;
+		_emu->mRegAF.low |= 1 << gbFlag::Carry;
     }
 	if (((_reg & 0xF) - (_amount & 0xF) - carry) < 0)
     {
-		_emu->mRegAF.low |= 1 << FLAG_H;
+		_emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
     }
 
     _reg = result;
@@ -1134,18 +1150,18 @@ void CPU_16BIT_ADD(gbZ80* _emu, uint16_t& _reg, uint16_t _value)
 {
 	unsigned int result = _reg + _value;
 
-    // Reset substract flag
-	_emu->mRegAF.low &= ~(1 << FLAG_N);
-    _emu->mRegAF.low &= ~(1 << FLAG_C);
-    _emu->mRegAF.low &= ~(1 << FLAG_H);
+    // Reset Flags
+	_emu->mRegAF.low &= ~(1 << gbFlag::Substract);
+    _emu->mRegAF.low &= ~(1 << gbFlag::Carry);
+    _emu->mRegAF.low &= ~(1 << gbFlag::HalfCarry);
 
 	if ( (result & 0x10000) != 0)
     {
-		_emu->mRegAF.low |= 1 << FLAG_C;
+		_emu->mRegAF.low |= 1 << gbFlag::Carry;
     }
 	if ( (_reg & 0xFFF) + (_value & 0xFFF) > 0xFFF)
     {
-        _emu->mRegAF.low |= 1 << FLAG_H;
+        _emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
     }
     _reg = (uint16_t)result;	
 }
@@ -1157,15 +1173,21 @@ void CPU_8BIT_COMPARE(gbZ80* _emu, uint8_t _bits)
     uint8_t before = _emu->mRegAF.high;
     _emu->mRegAF.low = 0b01000000;
 
-    if ( _emu->mRegAF.high == _bits)
-        _emu->mRegAF.low |= 1 << FLAG_Z;
-    if ( _emu->mRegAF.high < _bits)
-        _emu->mRegAF.low |= 1 << FLAG_C;
+    if (_emu->mRegAF.high == _bits)
+    {
+        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+    }
+    if (_emu->mRegAF.high < _bits)
+    {
+        _emu->mRegAF.low |= 1 << gbFlag::Carry;
+    }
     
     int16_t htest = before & 0xF;
     htest -= (_bits & 0xF);
-	if ( htest < 0)
-		_emu->mRegAF.low |= 1 << FLAG_H;
+    if (htest < 0)
+    {
+	    _emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
+    }
 }
 
 void CPU_8BIT_AND(gbZ80* _emu, uint8_t _mask)
@@ -1176,7 +1198,9 @@ void CPU_8BIT_AND(gbZ80* _emu, uint8_t _mask)
     // Do the operation, set zeroflag if result was zero
     _emu->mRegAF.high &= _mask;
     if (_emu->mRegAF.high == 0x00)
-        _emu->mRegAF.low |= 1 << FLAG_Z;
+    {
+        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+    }
 }
 
 void CPU_8BIT_XOR(gbZ80* _emu, uint8_t _mask)
@@ -1187,7 +1211,7 @@ void CPU_8BIT_XOR(gbZ80* _emu, uint8_t _mask)
     // Do the operation, set zeroflag if result was zero
     _emu->mRegAF.high ^= _mask;
     if (_emu->mRegAF.high == 0x00)
-        _emu->mRegAF.low |= 1 << FLAG_Z;
+        _emu->mRegAF.low |= 1 << gbFlag::Zero;
 }
 
 void CPU_8BIT_OR(gbZ80* _emu, uint8_t _mask)
@@ -1198,7 +1222,7 @@ void CPU_8BIT_OR(gbZ80* _emu, uint8_t _mask)
     // Do the operation, set zeroflag if result was zero
     _emu->mRegAF.high |= _mask;
     if (_emu->mRegAF.high == 0x00)
-        _emu->mRegAF.low |= 1 << FLAG_Z;
+        _emu->mRegAF.low |= 1 << gbFlag::Zero;
 }
 
 // Jumps
@@ -1289,39 +1313,39 @@ void CPU_DAA(gbZ80* _emu)
     uint16_t RegA = (uint16_t)_emu->mRegAF.high;
     uint8_t&  RegF = _emu->mRegAF.low;
 
-    if ( !((RegF >> FLAG_N) & 1) ) 
+    if ( !((RegF >> gbFlag::Substract) & 1) )
     {
-        if ( ((RegF >> FLAG_H) & 1) || ((RegA & 0xF) > 9))
+        if ( ((RegF >> gbFlag::HalfCarry) & 1) || ((RegA & 0xF) > 9))
         {
             RegA += 0x6;
         }
 
-        if ( ((RegF >> FLAG_C) & 1) || (RegA > 0x9F))
+        if ( ((RegF >> gbFlag::Carry) & 1) || (RegA > 0x9F))
         {
             RegA += 0x60;
-            RegF |= 1 << FLAG_C;
+            RegF |= 1 << gbFlag::Carry;
         }
     }
     else
     {
-        if ( (RegF >> FLAG_H) & 1 )
+        if ( (RegF >> gbFlag::HalfCarry) & 1 )
         {
             RegA -= 0x6;
         }
 
-        if ( (RegF >> FLAG_C) & 1)
+        if ( (RegF >> gbFlag::Carry) & 1)
         {
             RegA -= 0x60;
         }
     }
 
     // Reset Flags
-    RegF &= ~(1 << FLAG_Z);
-    RegF &= ~(1 << FLAG_H);
+    RegF &= ~(1 << gbFlag::Zero);
+    RegF &= ~(1 << gbFlag::HalfCarry);
 
     if ( (RegA & 0xFF) == 0U)
     {
-       RegF |= 1 << FLAG_Z; 
+       RegF |= 1 << gbFlag::Zero;
     }
 
     _emu->mRegAF.high = (uint8_t)RegA;

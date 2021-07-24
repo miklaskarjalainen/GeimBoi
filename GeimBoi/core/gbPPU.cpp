@@ -104,7 +104,7 @@ void gbPPU::SetLCDStatus()
     uint8_t new_mode = LCD_STATUS & 0b11;
     if (mode_interupt && (old_mode != new_mode))
     {
-        mGameBoy->mCpu.RequestInterupt(INTERUPT_LCD);
+        mGameBoy->mCpu.RequestInterrupt(gbInterrupt::LCD);
     }
 
     mGameBoy->mRom[0xFF41] = LCD_STATUS;
@@ -120,7 +120,7 @@ void gbPPU::RenderScanline()
 
     if ( curScanline == 144U )     // VBLANK
     {
-        mGameBoy->mCpu.RequestInterupt(INTERUPT_VBLANK);
+        mGameBoy->mCpu.RequestInterrupt(gbInterrupt::VBlank);
     }
     else if ( curScanline > 153U ) // RESET SCANLINE
     {
@@ -308,7 +308,7 @@ void gbPPU::CheckCoinsidenceFlag()
         LCD_STATUS |= 1 << 2;      // Set LY=LYC flag on the lcd
         if ((LCD_STATUS >> 6) & 1) // Is LY=LYC interrupt enabled.
         {
-            mGameBoy->mCpu.RequestInterupt(INTERUPT_LCD);
+            mGameBoy->mCpu.RequestInterrupt(gbInterrupt::LCD);
         }
     }
     else

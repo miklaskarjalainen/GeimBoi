@@ -950,19 +950,22 @@ void REG_SWAP(gbZ80* _emu, uint8_t& _reg)
     // Flags
     _emu->mRegAF.low = 0x00; // Reset all
     if (_reg == 0x00)  // Set zero if result is zero
-        _emu->mRegAF.low |= 1 << FLAG_Z;
+    {
+        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+    }
 }
 
 // Set zeroflag if wanted bit is zero.
 void GET_BIT(gbZ80* _emu, uint8_t _reg, uint8_t _bit)
 {
-    _emu->mRegAF.low &= ~(1 << FLAG_N); // Reset Substract flag
-    _emu->mRegAF.low |=   1 << FLAG_H;  // Set Half Carry flag
+    _emu->mRegAF.low |=   1 << gbFlag::HalfCarry;  // Set Half Carry flag
+    _emu->mRegAF.low &= ~(1 << gbFlag::Substract); // Reset Substract flag
+    _emu->mRegAF.low &= ~(1 << gbFlag::Zero);      // Reset Zero Flag
 
-    if ((_reg >> _bit) & 1) // Reset Zero flag if wanted bit is not zero
-        _emu->mRegAF.low &= ~(1 << FLAG_Z);
-    else                    // otherwise set it.
-        _emu->mRegAF.low |= 1 << FLAG_Z;
+    if (!((_reg >> _bit) & 1)) // If wanted bit is zero
+    {
+        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+    }
 }
 
 // Set wanted bit
@@ -981,7 +984,7 @@ void RESET_BIT(gbZ80* _emu, uint8_t& _reg, uint8_t _bit)
 
 void CPU_RR(gbZ80* _emu, uint8_t& _reg)
 {
-	uint8_t carry = (_emu->mRegAF.low >> FLAG_C) & 0b1;
+	uint8_t carry = (_emu->mRegAF.low >> gbFlag::Carry) & 0b1;
 	bool will_carry = _reg & 0b1;
 
 	_emu->mRegAF.low = 0x00;
@@ -990,18 +993,18 @@ void CPU_RR(gbZ80* _emu, uint8_t& _reg)
 
 	if (will_carry)
     {
-		_emu->mRegAF.low |= 1 << FLAG_C;
+		_emu->mRegAF.low |= 1 << gbFlag::Carry;
     }
 
 	if (_reg == 0U)
     {
-        _emu->mRegAF.low |= 1 << FLAG_Z;
+        _emu->mRegAF.low |= 1 << gbFlag::Zero;
     }
 }
 
 void CPU_RL(gbZ80* _emu, uint8_t& _reg)
 {
-	uint8_t carry = (_emu->mRegAF.low >> FLAG_C) & 0b1;
+	uint8_t carry = (_emu->mRegAF.low >> gbFlag::Carry) & 0b1;
 	bool will_carry = (_reg >> 7) & 0b1;
 
 	_reg <<= 1;
@@ -1010,12 +1013,12 @@ void CPU_RL(gbZ80* _emu, uint8_t& _reg)
 	_emu->mRegAF.low = 0x00;
 	if (will_carry)
     {
-		_emu->mRegAF.low |= 1 << FLAG_C;
+		_emu->mRegAF.low |= 1 << gbFlag::Carry;
     }
 
 	if (_reg == 0)
     {
-        _emu->mRegAF.low |= 1 << FLAG_Z;
+        _emu->mRegAF.low |= 1 << gbFlag::Zero;
     }
 }
 
@@ -1025,11 +1028,15 @@ void CPU_SLA(gbZ80* _emu, uint8_t& _reg)
 	_reg <<= 1;
     _emu->mRegAF.low = 0x00;
 
-	if (isMSBSet)
-		_emu->mRegAF.low |= 1 << FLAG_C;
+    if (isMSBSet)
+    {
+		_emu->mRegAF.low |= 1 << gbFlag::Carry;
+    }
 
-	if (_reg == 0)
-		_emu->mRegAF.low |= 1 << FLAG_Z;
+    if (_reg == 0)
+    {
+		_emu->mRegAF.low |= 1 << gbFlag::Zero;
+    }
 }
 
 void CPU_SRA(gbZ80* _emu, uint8_t& _reg)
@@ -1046,12 +1053,12 @@ void CPU_SRA(gbZ80* _emu, uint8_t& _reg)
     }
 	if (isLSBSet)
     {
-		_emu->mRegAF.low |= 1 << FLAG_C;
+		_emu->mRegAF.low |= 1 << gbFlag::Carry;
     }
 
 	if (_reg == 0)
     {
-		_emu->mRegAF.low |= 1 << FLAG_Z;
+		_emu->mRegAF.low |= 1 << gbFlag::Zero;
     }
 }
 
@@ -1065,11 +1072,11 @@ void CPU_SRL(gbZ80* _emu, uint8_t& _reg)
 
 	if (isLSBSet)
     {
-		_emu->mRegAF.low |= 1 << FLAG_C;
+		_emu->mRegAF.low |= 1 << gbFlag::Carry;
     }
 	if (_reg == 0)
     {
-		_emu->mRegAF.low |= 1 << FLAG_Z;
+		_emu->mRegAF.low |= 1 << gbFlag::Zero;
     }
 }
 
@@ -1081,12 +1088,12 @@ void CPU_RLC(gbZ80* _emu, uint8_t& _reg)
 	_emu->mRegAF.low = 0x00;
 	if (will_carry)
 	{
-		_emu->mRegAF.low |= 1 << FLAG_C;
+		_emu->mRegAF.low |= 1 << gbFlag::Carry;
 		_reg |= 1;
 	}
 	if (_reg == 0)
     {
-		_emu->mRegAF.low |= 1 << FLAG_Z;
+		_emu->mRegAF.low |= 1 << gbFlag::Zero;
     }
 }
 
@@ -1098,13 +1105,13 @@ void CPU_RRC(gbZ80* _emu, uint8_t& _reg)
 	_emu->mRegAF.low = 0x00;
 	if (will_carry)
 	{
-		_emu->mRegAF.low |= 1 << FLAG_C;
+		_emu->mRegAF.low |= 1 << gbFlag::Carry;
 		_reg |= 1 << 7;
 	}
 
 	if (_reg == 0)
     {
-		_emu->mRegAF.low |= 1 << FLAG_Z;
+		_emu->mRegAF.low |= 1 << gbFlag::Zero;
     }
 }
 

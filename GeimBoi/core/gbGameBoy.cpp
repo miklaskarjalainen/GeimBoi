@@ -39,11 +39,11 @@ void gbGameBoy::PressButton(gbButton _key)
     uint8_t btn_opts = mRom[0xFF00];  // Programmer wants direction or action buttons?
     if ( (_key > 3) && !((btn_opts >> 5) & 0b1) )       // Is action and wants action
     {
-        mCpu.RequestInterupt(INTERUPT_JOYPAD);
+        mCpu.RequestInterrupt(gbInterrupt::Joypad);
     }
     else if ( (_key <= 3) && !((btn_opts >> 4) & 0b1) ) // Is direction and wants direction
     {
-        mCpu.RequestInterupt(INTERUPT_JOYPAD);
+        mCpu.RequestInterrupt(gbInterrupt::Joypad);
     }
 }
 
@@ -203,7 +203,7 @@ void gbGameBoy::WriteByte(uint16_t _addr, uint8_t _data)
     else if ( _addr == 0xFF41 ) // STAT
     {
         mRom[_addr] = _data;
-        mCpu.RequestInterupt(INTERUPT_LCD); // A bug that occurs only on the dmg model.
+        mCpu.RequestInterrupt(gbInterrupt::LCD); // A bug that occurs only on the dmg model.
     }
     else if ( _addr == 0xFF46 ) // DMA transfer
 	{
