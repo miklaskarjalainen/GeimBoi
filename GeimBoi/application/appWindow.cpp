@@ -54,7 +54,7 @@ void appWindow::Run()
         int start_ticks = SDL_GetTicks();
         // Update
         {
-            // Emulator
+            // Emulator gets updated in the gui, because of "pause"
             appGui::Update();
         }
 

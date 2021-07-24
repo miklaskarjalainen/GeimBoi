@@ -9,9 +9,6 @@ namespace Giffi
 class appWindow
 {
 public:
-	appWindow()  = delete;
-	~appWindow() = delete;
-
 	// Retruns true on success
 	static bool Init();
 	static void Run();
@@ -24,6 +21,9 @@ public:
 private:
 	static SDL_Renderer* mRenderer;
 	static SDL_Window* mWindow;
+
+	appWindow() = delete;
+	~appWindow() = delete;
 };
 
 } // Namespace
