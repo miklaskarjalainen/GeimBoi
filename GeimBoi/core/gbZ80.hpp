@@ -27,6 +27,15 @@ enum class gbFlag
     Carry     = 4,
 };
 
+enum class gbInterrupt
+{
+    VBlank = 0,
+    LCD    = 1,
+    Timer  = 2,
+    Serial = 3,
+    Joypad = 4,
+};
+
 class gbZ80
 {
 public:
@@ -40,14 +49,16 @@ public:
 
     // Only public because of opcodes
     uint8_t  ReadByte(uint16_t _addr) const;
-    void  WriteByte(uint16_t _addr, uint8_t _data);
+    void     WriteByte(uint16_t _addr, uint8_t _data);
     uint16_t ReadWord() const;
     void     PushWordOntoStack(uint16_t _word);
     uint16_t PopWordOffStack  ();
 
 
     bool GetFlag(gbFlag flag)   const { return (mRegAF.low >> (int)flag) & 1; }
-    bool AreInterruptsEnabled() const { return mEnableInterrupts; }
+    bool GetIE(gbInterrupt i)   const { return (ReadByte(0xFFFF) >> (int)i) & 1; } // Get 'Interrupt Enable'
+    bool GetIF(gbInterrupt i)   const { return (ReadByte(0xFF0F) >> (int)i) & 1; } // Get 'Interrupt Flag'
+    bool GetIME()               const { return mEnableInterrupts; }                // 'Interrupt Master Enable'
     bool IsHalted()             const { return mIsHalted; }
 private:
     void ExecuteNextOpcode();

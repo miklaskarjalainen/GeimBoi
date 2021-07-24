@@ -36,7 +36,7 @@ public:
     void Reset();
     void CheckCoinsidenceFlag(); // Aka LY=LYC
 private:
-    enum gbColorId // Color id used by the gameboy.
+    enum gbColorId // Color ids used by the gameboy.
     {
         WHITE = 0b00,
         LIGHTGRAY = 0b01,
