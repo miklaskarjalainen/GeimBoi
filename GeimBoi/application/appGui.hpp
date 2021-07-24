@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL.h>
 #include <memory>
+#include <string>
 #include "../core/gbGameBoy.hpp"
 
 namespace Giffi
@@ -16,12 +17,13 @@ public:
 private:
 	static void UpdateTopbar();
 	static void UpdateDebug();
+	static void UpdateFileDialog();
 
 private:
 	static std::shared_ptr<gbGameBoy> mGameBoy;
 	static bool mDrawDebug;
+	static bool mDrawFileDialog;
 	static bool mEmuPaused;
-
 
 	appGui() = delete;
 	~appGui() = delete;
