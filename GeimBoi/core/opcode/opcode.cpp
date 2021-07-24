@@ -2,6 +2,8 @@
 #include "cb_opcode.hpp"
 #include "../gbZ80.hpp"
 
+#include <iostream>
+
 namespace Giffi
 {
     
@@ -9,6 +11,7 @@ void gbZ80::ExecuteNextOpcode()
 {
     uint8_t opcode = ReadByte(mRegPC.val);
     mLastExecutedOpcode = opcode;
+
     mRegPC.val++;
 
     // Every instrucitons take atleast 4 cycles, some take longer than that.
@@ -18,15 +21,20 @@ void gbZ80::ExecuteNextOpcode()
         case 0x00: // NOP
             break;
         
-        case 0x10: // STOP
+        case 0x10: // STOP, halts after hence fallthrough
             WriteByte(0xFF04, 0); // Reset Divider Counter
             mDividerCounter = 0;
-            mIsHalted = true;
             mRegPC.val++;
-            break;
+            [[fallthrough]];
         case 0x76: // HALT
-            mIsHalted = true;
+        {
+            uint8_t IE = ReadByte(0xFFFF);
+            if (IE || mEnableInterrupts)
+            {
+                mIsHalted = true;
+            }
             break;
+        }
 
         // 8BIT INC & DEC      
         case 0x04: // INC B
