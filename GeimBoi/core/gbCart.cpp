@@ -1,7 +1,7 @@
-#include "gbCart.hpp"
-#include <cstdio>   // fopen
 #include <string.h>
 #include <filesystem>
+#include <fstream>
+#include "gbCart.hpp"
 
 using namespace Giffi;
 
@@ -74,6 +74,8 @@ gbCartType gbCart::GetCartType() const
         case 0x06: // MBC2+RAM+BATTERY
             return gbCartType::MBC2;
         
+        case 0x09: // MBC3+TIMER+BATTERY
+        case 0x10: // MBC3+TIMER+RAM+BATTERY
         case 0x11: // MBC3
         case 0x12: // MBC3+RAM
         case 0x13: // MBC3+RAM+BATTERY
@@ -106,27 +108,32 @@ void gbCart::Reset()
     if (mMBC != nullptr) { mMBC->Reset(); }
 }
 
-void gbCart::LoadRom(const std::string& _path)
+bool gbCart::LoadRom(const std::string& _path)
 {
     if (!std::filesystem::exists(_path))
     {
         printf("Can't find a file at %s\n", _path.c_str());
         mGameLoaded = false;
-        return;
+        return false;
     }
 
-    // Init Cart
-    memset(mCart,0,sizeof(mCart));
-    FILE *in;
-    in = fopen( _path.c_str(), "rb" );
-    fread(mCart, 1, 0x200000, in);
-    fclose(in); 
-    
-    mMBC = std::unique_ptr<gbMBC>(gbMBC::CreateMBC(this));
-    mGameLoaded = true;
+    // Load Rom
+    std::ifstream rf(_path, std::ios::binary);
+    rf.read((char*)mCart, sizeof(mCart));
+    if (rf.bad())
+    {    
+        printf("An error occurred when trying to read a romfile at %s!\n", _path.c_str());
+        rf.close();
+        return false;
+    }
+    rf.close();
+    printf("Rom %s loaded\n", _path.c_str());
 
-    // Reset cart variables to defaults
-    Reset();
+    // Get MBC
+    mMBC = std::unique_ptr<gbMBC>(gbMBC::CreateMBC(this));
+
+    mGameLoaded = true;
+    return true;
 }
 
 uint8_t gbCart::ReadByte(uint16_t _addr) const

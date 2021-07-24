@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <fstream>
 #include "gbBootRom.hpp"
 
 using namespace Giffi;
@@ -7,20 +8,25 @@ bool gbBootRom::LoadBios(const std::string& _path)
 {
 	if (!std::filesystem::exists(_path))
 	{
-		printf("Couldn't find %s!\n", _path.c_str());
+		printf("Couldn't find a bios at %s!\n", _path.c_str());
 		mHasBios = false;
 		return false;
 	}
 
 	// Load Bios, maybe add bios hashes for more safety?
-	memset(mBootRom, 0, sizeof(mBootRom));
-	FILE* in;
-	in = fopen(_path.c_str(), "rb");
-	fread(mBootRom, 1, 0x100, in);
-	fclose(in);
-	printf("%s Loaded successfully!\n", _path.c_str());
-	mHasBios = true;
+	std::ifstream rf(_path, std::ios::binary);
+	rf.read((char*)mBootRom, sizeof(mBootRom));
+	if (rf.bad())
+	{
+		printf("An error occurred when trying to read a bios at %s!\n", _path.c_str());
+		rf.close();
+		mHasBios = false;
+		return false;
+	}
+	rf.close();
 
+	printf("Bios %s loaded\n", _path.c_str());
+	mHasBios = true;
 	return true;
 }
 

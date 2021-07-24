@@ -28,7 +28,7 @@ public:
     bool        IsGameLoaded() const;
 private:
     void Reset();
-    void LoadRom(const std::string& _path);
+    bool LoadRom(const std::string& _path);
     void WriteByte(uint16_t _addr, uint8_t _data);
 private:
     std::unique_ptr<gbMBC> mMBC = nullptr;
