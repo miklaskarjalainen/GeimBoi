@@ -34,7 +34,7 @@ private:
 private:
     std::unique_ptr<gbMBC> mMBC = nullptr;
 public:
-    uint8_t mCart[0x200000]; 
+    uint8_t mCart[0x200000] = {};
     bool mGameLoaded = false;
 
     friend gbGameBoy;

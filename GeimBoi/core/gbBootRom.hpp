@@ -18,7 +18,7 @@ namespace Giffi
 
 		bool IsLoaded() const;
 	private:
-		uint8_t mBootRom[0x100];
+		uint8_t mBootRom[0x100] = {};
 		mutable bool mLoaded = false; // Mapped into the gameboy's bus?
 		bool mHasBios = false;        // If the boot rom was loaded successfully? 
 	};

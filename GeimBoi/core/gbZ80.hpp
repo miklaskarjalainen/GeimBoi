@@ -4,8 +4,6 @@
 namespace Giffi
 {
 
-#define CPU_CLOCKSPEED 1048576
-
 class gbGameBoy;
 class gbPPU;
 
