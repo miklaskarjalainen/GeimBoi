@@ -93,7 +93,10 @@ void gbMBC1::Reset()
     mCurBank = 0x01;
     mRamEnable = false;
     mMode = false;
-    memset(&mRam, 0xFF, sizeof(mRam));
+    if (!mCart->HasBattery())
+    {
+        memset(&mRam, 0xFF, sizeof(mRam));
+    }
 }
 
 uint16_t gbMBC1::GetCurRomBank() const

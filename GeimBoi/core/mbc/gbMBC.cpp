@@ -1,4 +1,3 @@
-#pragma once
 #include <filesystem>
 #include <fstream>
 #include "gbMBC.hpp"
@@ -40,13 +39,13 @@ gbMBC* gbMBC::CreateMBC(gbCart* _cart)
 bool gbMBC::SaveRam(const std::string& _path, uint8_t* src, size_t size)
 {
     // Create Roms Folder
-    if (!std::filesystem::exists("saves"))
+    if (!std::filesystem::exists("saves") || !std::filesystem::is_directory("saves"))
     {
-        if (!std::filesystem::is_directory("saves"))
+        if (!std::filesystem::create_directory("saves"))
         {
-            std::filesystem::remove("saves");
+            printf("Unabled to create ./saves folder\n");
+            return false;
         }
-        std::filesystem::create_directory("saves");
     }
 
     std::string new_path = "saves/" + _path;

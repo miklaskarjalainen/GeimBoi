@@ -17,6 +17,10 @@ gbMBC2::gbMBC2(gbCart* _cart)
 gbMBC2::~gbMBC2()
 {
     printf("MBC2 Destroyed\n");
+    if (mCart->HasBattery())
+    {
+        SaveRam(mCart->GetGameName() + ".sav", (uint8_t*)&mRam, sizeof(mRam));
+    }
 }
 
 uint8_t gbMBC2::ReadByte(uint16_t _addr) const      
@@ -66,7 +70,10 @@ void gbMBC2::Reset()
 {
     mCurBank = 0x01;
     mRamEnable = false;
-    memset(&mRam, 0xFF, sizeof(mRam));
+    if (!mCart->HasBattery())
+    {
+        memset(&mRam, 0xFF, sizeof(mRam));
+    }
 }
 
 uint16_t gbMBC2::GetCurRomBank() const

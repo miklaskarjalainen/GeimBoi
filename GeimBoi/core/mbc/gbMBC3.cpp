@@ -82,9 +82,13 @@ void gbMBC3::WriteByte(uint16_t _addr, uint8_t _data)
 void gbMBC3::Reset()
 {
     mRomBank = 0x01;
+    mRamBank = 0x00;
     mRamEnable = false;
     mMode = false;
-    memset(&mRam, 0xFF, sizeof(mRam));
+    if (!mCart->HasBattery())
+    {
+        memset(&mRam, 0xFF, sizeof(mRam));
+    }
 }
 
 uint16_t gbMBC3::GetCurRomBank() const

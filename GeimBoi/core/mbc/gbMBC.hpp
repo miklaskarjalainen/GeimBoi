@@ -1,6 +1,5 @@
 #pragma once
 #include <cstdint>
-#include <memory>
 #include <string>
 
 namespace Giffi
@@ -18,7 +17,7 @@ namespace Giffi
 	/*
 		MBC (Memory Bank Controller) is essentually a mapper on the cartridge,
 		but there can also be a Battery, RAM or other hardware.
-		Basicly accounts for any extra hardware in the cartridge.
+		Basicly inherited classes accounts for any extra hardware in the cartridge.
 	*/
 	class gbMBC
 	{
@@ -32,7 +31,11 @@ namespace Giffi
 		virtual void WriteByte(uint16_t _addr, uint8_t _data);
 		virtual void Reset() {}
 
-		static gbMBC* CreateMBC(gbCart* _cart);
+		/*
+			Gets the correct "mapper" for the cartridge.
+			This gets put in to a unique_ptr in gbCart::LoadRom(...)
+		*/
+		static gbMBC* CreateMBC(gbCart* _cart); 
 	protected:
 		gbCart* mCart = nullptr;
 		
