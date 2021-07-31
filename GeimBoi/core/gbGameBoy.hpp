@@ -33,7 +33,7 @@ namespace Giffi
         void Clock();
         void FrameAdvance();
         void Reset();
-        void LoadRom(const std::string& _path);
+        bool LoadRom(const std::string& _path);
 
         void SetPalette   (gbColor _white, gbColor _lgray, gbColor _dgray, gbColor _black);
         void PressButton  (gbButton _key);

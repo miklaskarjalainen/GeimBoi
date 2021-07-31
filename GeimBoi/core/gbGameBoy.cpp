@@ -13,12 +13,18 @@ gbGameBoy::gbGameBoy()
 
 void gbGameBoy::Clock()
 {
-    mCpu.Clock();
+    if (mCart.IsGameLoaded())
+    {
+        mCpu.Clock();
+    }
 }
 
 void gbGameBoy::FrameAdvance()
 {
-    mCpu.FrameAdvance();
+    if (mCart.IsGameLoaded())
+    {
+        mCpu.FrameAdvance();
+    }
 }
 
 void gbGameBoy::SetPalette(gbColor _white, gbColor _lgray, gbColor _dgray, gbColor _black)
@@ -96,20 +102,20 @@ void gbGameBoy::Reset()
     mRom[0xFFFF] = 0x00; 
 }
 
-void gbGameBoy::LoadRom(const std::string& _path)
+bool gbGameBoy::LoadRom(const std::string& _path)
 {
     if (!mBootRom.LoadBios("gb_bios.bin"))
     {
         // If couldn't load the bios, skip the part where the bios would be.
         mCpu.mRegPC.val = 0x0100;
     }
-    mCart.LoadRom(_path); 
+    return mCart.LoadRom(_path); 
 }
 
 uint8_t gbGameBoy::ReadByte(uint16_t _addr) const
 {
     // Bios
-    if (_addr < 0x100 && mBootRom.IsLoaded())
+    if (_addr < 0x100 && mBootRom.IsBiosLoaded())
     {
         return mBootRom.ReadByte(_addr);
     }

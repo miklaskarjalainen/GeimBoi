@@ -45,7 +45,7 @@ void gbBootRom::Reset()
 	mLoaded = true;
 }
 
-bool gbBootRom::IsLoaded() const
+bool gbBootRom::IsBiosLoaded() const
 {
 	return mLoaded && mHasBios;
 }

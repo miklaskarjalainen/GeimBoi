@@ -38,8 +38,7 @@ bool appWindow::Init()
     mGameBoy->Reset();
     mGameBoy->SetPalette(0x9bbc0f, 0x8bac0f, 0x306230, 0x0f380f);
     
-    appGui::Init(mRenderer, mGameBoy, width, height);
-    return true;
+    return appGui::Init(mRenderer, mGameBoy, width, height);
 }
 
 void appWindow::Run()
@@ -113,41 +112,33 @@ bool appWindow::ShouldWindowClose()
                 should_close = true;
                 break;
             }
+
+            // Controls currently hardcoded but will be added into a array or something
             case SDL_KEYDOWN:
             {
-                switch (events.key.keysym.scancode)
-                {
-                    case SDL_SCANCODE_ESCAPE:    should_close = true; break;
-                    case SDL_SCANCODE_BACKSPACE: mGameBoy->PressButton(gbButton::SELECT); break;
-                    case SDL_SCANCODE_RETURN:    mGameBoy->PressButton(gbButton::START);  break;
-                    case SDL_SCANCODE_A:         mGameBoy->PressButton(gbButton::A);      break;
-                    case SDL_SCANCODE_B:         mGameBoy->PressButton(gbButton::B);      break;
-                                                 
-                    case SDL_SCANCODE_UP:        mGameBoy->PressButton(gbButton::UP);    break;
-                    case SDL_SCANCODE_DOWN:      mGameBoy->PressButton(gbButton::DOWN);  break;
-                    case SDL_SCANCODE_LEFT:      mGameBoy->PressButton(gbButton::LEFT);  break;
-                    case SDL_SCANCODE_RIGHT:     mGameBoy->PressButton(gbButton::RIGHT); break;
-
-                    default: break;
-                }
+                uint16_t pressed = events.key.keysym.scancode;
+                if (pressed == SDL_SCANCODE_ESCAPE)    { should_close = true; break; }
+                if (pressed == SDL_SCANCODE_D)         { mGameBoy->PressButton(gbButton::RIGHT);  break; }
+                if (pressed == SDL_SCANCODE_A)         { mGameBoy->PressButton(gbButton::LEFT);   break; }
+                if (pressed == SDL_SCANCODE_W)         { mGameBoy->PressButton(gbButton::UP);     break; }
+                if (pressed == SDL_SCANCODE_S)         { mGameBoy->PressButton(gbButton::DOWN);   break; }
+                if (pressed == SDL_SCANCODE_K)         { mGameBoy->PressButton(gbButton::A);      break; }
+                if (pressed == SDL_SCANCODE_J)         { mGameBoy->PressButton(gbButton::B);      break; }
+                if (pressed == SDL_SCANCODE_RETURN)    { mGameBoy->PressButton(gbButton::SELECT); break; }
+                if (pressed == SDL_SCANCODE_BACKSLASH) { mGameBoy->PressButton(gbButton::START);  break; }
                 break;
             }
             case SDL_KEYUP:
             {
-                switch (events.key.keysym.scancode)
-                {
-                    case SDL_SCANCODE_BACKSPACE: mGameBoy->ReleaseButton(gbButton::SELECT); break;
-                    case SDL_SCANCODE_RETURN:    mGameBoy->ReleaseButton(gbButton::START);  break;
-                    case SDL_SCANCODE_A:         mGameBoy->ReleaseButton(gbButton::A);      break;
-                    case SDL_SCANCODE_B:         mGameBoy->ReleaseButton(gbButton::B);      break;
-                                                 
-                    case SDL_SCANCODE_UP:        mGameBoy->ReleaseButton(gbButton::UP);    break;
-                    case SDL_SCANCODE_DOWN:      mGameBoy->ReleaseButton(gbButton::DOWN);  break;
-                    case SDL_SCANCODE_LEFT:      mGameBoy->ReleaseButton(gbButton::LEFT);  break;
-                    case SDL_SCANCODE_RIGHT:     mGameBoy->ReleaseButton(gbButton::RIGHT); break;
-
-                    default: break;
-                }
+                uint16_t released = events.key.keysym.scancode;
+                if (released == SDL_SCANCODE_D)         { mGameBoy->ReleaseButton(gbButton::RIGHT);  break; }
+                if (released == SDL_SCANCODE_A)         { mGameBoy->ReleaseButton(gbButton::LEFT);   break; }
+                if (released == SDL_SCANCODE_W)         { mGameBoy->ReleaseButton(gbButton::UP);     break; }
+                if (released == SDL_SCANCODE_S)         { mGameBoy->ReleaseButton(gbButton::DOWN);   break; }
+                if (released == SDL_SCANCODE_K)         { mGameBoy->ReleaseButton(gbButton::A);      break; }
+                if (released == SDL_SCANCODE_J)         { mGameBoy->ReleaseButton(gbButton::B);      break; }
+                if (released == SDL_SCANCODE_RETURN)    { mGameBoy->ReleaseButton(gbButton::SELECT); break; }
+                if (released == SDL_SCANCODE_BACKSLASH) { mGameBoy->ReleaseButton(gbButton::START);  break; }
                 break;
             }
             case SDL_DROPFILE: // File gets dropped into the program

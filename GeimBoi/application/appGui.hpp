@@ -10,7 +10,7 @@ namespace Giffi
 class appGui
 {
 public:
-	static void Init(SDL_Renderer* _renderer, std::shared_ptr<gbGameBoy>& _emu, int _width, int _height);
+	static bool Init(SDL_Renderer* _renderer, std::shared_ptr<gbGameBoy>& _emu, int _width, int _height);
 	static void Update();
 
 	static void Draw();

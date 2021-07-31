@@ -10,25 +10,33 @@ bool appGui::mDrawDebug = false;
 bool appGui::mDrawFileDialog = false;
 bool appGui::mEmuPaused = false;
 
-void appGui::Init(SDL_Renderer* _renderer, std::shared_ptr<gbGameBoy>& _emu, int _widht, int _height) {
-    appGui::mGameBoy = _emu;
+bool appGui::Init(SDL_Renderer* _renderer, std::shared_ptr<gbGameBoy>& _emu, int _widht, int _height) {
+    appGui::mGameBoy = _emu; // Pointer to emulator core
     ImGui::CreateContext();
     ImGuiSDL::Initialize(_renderer, _widht, _height);
 
     // Create Roms Folder
     if (!std::filesystem::exists("roms"))
     {
-        if (!std::filesystem::is_directory("roms"))
+        if (!std::filesystem::create_directory("roms"))
         {
-            std::filesystem::remove("roms");
-        }
-        std::filesystem::create_directory("roms");
+            printf("Unable to create ./roms folder\n");
+            return false;
+        } 
     }
+    if (!std::filesystem::exists("roms") || !std::filesystem::is_directory("roms"))
+    {
+        printf("No roms directory!\n");
+        return false;
+    }
+
+
+    return true;
 }
 
 void appGui::Update()
 {
-    if (!mEmuPaused && mGameBoy->mCart.mGameLoaded) { mGameBoy->FrameAdvance(); }
+    if (!mEmuPaused) { mGameBoy->FrameAdvance(); }
 
     ImGui::NewFrame();
     UpdateTopbar();

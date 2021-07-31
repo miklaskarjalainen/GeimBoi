@@ -146,6 +146,7 @@ bool gbCart::LoadRom(const std::string& _path)
     {    
         printf("An error occurred when trying to read a romfile at %s!\n", _path.c_str());
         rf.close();
+        mGameLoaded = false;
         return false;
     }
     rf.close();

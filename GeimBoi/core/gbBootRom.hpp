@@ -16,7 +16,7 @@ namespace Giffi
 		uint8_t ReadByte(uint16_t _addr) const;
 		void Reset();
 
-		bool IsLoaded() const;
+		bool IsBiosLoaded() const;
 	private:
 		uint8_t mBootRom[0x100] = {};
 		mutable bool mLoaded = false; // Mapped into the gameboy's bus?

@@ -33,9 +33,9 @@ private:
     void WriteByte(uint16_t _addr, uint8_t _data);
 private:
     std::unique_ptr<gbMBC> mMBC = nullptr;
+    bool mGameLoaded = false;
 public:
     uint8_t mCart[0x200000] = {};
-    bool mGameLoaded = false;
 
     friend gbGameBoy;
     friend gbMBC;
