@@ -65,4 +65,19 @@ DLL_EXPORT bool Cart_HasBattery(gbCart* _ptr)
 	return _ptr->HasBattery();
 }
 
+DLL_EXPORT bool Cart_SupportsGBC(gbCart* _ptr)
+{
+	return _ptr->SupportsGBC();
+}
+
+DLL_EXPORT bool Cart_SaveBattery(gbCart* _ptr, const char* _path)
+{
+	return _ptr->SaveBattery(_path);
+}
+
+DLL_EXPORT bool Cart_LoadBattery(gbCart* _ptr, const char* _path)
+{
+	return _ptr->LoadBattery(_path);
+}
+
 #endif
