@@ -172,7 +172,7 @@ void appGui::UpdateDebug()
         ImGui::Text("NextOp: 0x%02X", sCpu->ReadByte(sCpu->mRegPC.val));
 
         if (ImGui::Button("FrameAdvance")) { mGameBoy->FrameAdvance(); mEmuPaused = true; }
-        if (ImGui::Button("ExecuteOpcode")) { mGameBoy->FrameAdvance(); mEmuPaused = true; }
+        if (ImGui::Button("ExecuteOpcode")) { mGameBoy->Clock(); mEmuPaused = true; }
         ImGui::ProgressBar((float)sCpu->mCyclesDone / 70221.0f);
         
         ImGui::End();
@@ -211,8 +211,22 @@ void appGui::UpdateFileDialog()
             }
             else
             {
+                // Save
+                if (mGameBoy->mCart.IsGameLoaded())
+                {
+                    std::string file_name = mGameBoy->mCart.GetGameName() + ".sav";
+                    mGameBoy->mCart.SaveBattery(file_name);
+                }
+
+                // Load
                 mGameBoy->Reset();
                 mGameBoy->LoadRom(p.path().string());
+                if (mGameBoy->mCart.IsGameLoaded())
+                {
+                    std::string file_name = mGameBoy->mCart.GetGameName() + ".sav";
+                    mGameBoy->mCart.LoadBattery(file_name);
+                }
+
                 mDrawFileDialog = false;
             }
             

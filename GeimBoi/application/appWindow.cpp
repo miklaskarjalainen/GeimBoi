@@ -37,6 +37,7 @@ bool appWindow::Init()
     mGameBoy = std::make_shared<gbGameBoy>();
     mGameBoy->Reset();
     mGameBoy->SetPalette(0x9bbc0f, 0x8bac0f, 0x306230, 0x0f380f);
+    mGameBoy->mBootRom.LoadBios("gb_bios.bin");
     
     return appGui::Init(mRenderer, mGameBoy, width, height);
 }
@@ -92,6 +93,13 @@ void appWindow::Run()
 
 void appWindow::CleanUp()
 {
+    // Save Game on exit
+    if (mGameBoy->mCart.IsGameLoaded())
+    {
+        std::string file_name = mGameBoy->mCart.GetGameName() + ".sav";
+        mGameBoy->mCart.SaveBattery(file_name);
+    }
+
     SDL_Quit();
 }
 
@@ -124,8 +132,8 @@ bool appWindow::ShouldWindowClose()
                 if (pressed == SDL_SCANCODE_S)         { mGameBoy->PressButton(gbButton::DOWN);   break; }
                 if (pressed == SDL_SCANCODE_K)         { mGameBoy->PressButton(gbButton::A);      break; }
                 if (pressed == SDL_SCANCODE_J)         { mGameBoy->PressButton(gbButton::B);      break; }
-                if (pressed == SDL_SCANCODE_RETURN)    { mGameBoy->PressButton(gbButton::SELECT); break; }
-                if (pressed == SDL_SCANCODE_BACKSLASH) { mGameBoy->PressButton(gbButton::START);  break; }
+                if (pressed == SDL_SCANCODE_RETURN)    { mGameBoy->PressButton(gbButton::START); break; }
+                if (pressed == SDL_SCANCODE_BACKSLASH) { mGameBoy->PressButton(gbButton::SELECT);  break; }
                 break;
             }
             case SDL_KEYUP:
@@ -137,8 +145,8 @@ bool appWindow::ShouldWindowClose()
                 if (released == SDL_SCANCODE_S)         { mGameBoy->ReleaseButton(gbButton::DOWN);   break; }
                 if (released == SDL_SCANCODE_K)         { mGameBoy->ReleaseButton(gbButton::A);      break; }
                 if (released == SDL_SCANCODE_J)         { mGameBoy->ReleaseButton(gbButton::B);      break; }
-                if (released == SDL_SCANCODE_RETURN)    { mGameBoy->ReleaseButton(gbButton::SELECT); break; }
-                if (released == SDL_SCANCODE_BACKSLASH) { mGameBoy->ReleaseButton(gbButton::START);  break; }
+                if (released == SDL_SCANCODE_RETURN)    { mGameBoy->ReleaseButton(gbButton::START); break; }
+                if (released == SDL_SCANCODE_BACKSLASH) { mGameBoy->ReleaseButton(gbButton::SELECT);  break; }
                 break;
             }
             case SDL_DROPFILE: // File gets dropped into the program

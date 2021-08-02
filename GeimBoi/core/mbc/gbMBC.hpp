@@ -27,6 +27,9 @@ namespace Giffi
 		virtual uint16_t GetCurRomBank() const { return 0; }
 		virtual uint16_t GetCurRamBank() const { return 0; }
 
+		virtual bool SaveBattery(const std::string& _path) { printf("No MBC\n"); return false; }
+		virtual bool LoadBattery(const std::string& _path) { printf("No MBC\n"); return false; }
+
 		virtual uint8_t ReadByte(uint16_t _addr) const;
 		virtual void WriteByte(uint16_t _addr, uint8_t _data);
 		virtual void Reset() {}
@@ -39,8 +42,8 @@ namespace Giffi
 	protected:
 		gbCart* mCart = nullptr;
 		
-		bool SaveRam(const std::string& _path, uint8_t* src, size_t size);
-		bool LoadRam(const std::string& _path, uint8_t* dst, size_t size);
+		bool SaveBatteryImpl(const std::string& _path, uint8_t* src, size_t size);
+		bool LoadBatteryImpl(const std::string& _path, uint8_t* dst, size_t size);
 
 		gbMBC(gbCart* _cart)
 			:mCart(_cart) {};

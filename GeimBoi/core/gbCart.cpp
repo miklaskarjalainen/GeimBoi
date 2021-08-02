@@ -125,6 +125,23 @@ bool gbCart::HasBattery() const
     }
 }
 
+bool gbCart::SupportsGBC() const {
+    // 0x80 works on dmg and cgb
+    // 0xC0 is cgb only
+    // else is dmg only
+    return mCart[0x147] == 0x80 || mCart[0x147] == 0xC0;
+}
+
+bool gbCart::SaveBattery(const std::string& _path)
+{
+    return mMBC->SaveBattery(_path);
+}
+
+bool gbCart::LoadBattery(const std::string& _path)
+{
+    return mMBC->LoadBattery(_path);
+}
+
 void gbCart::Reset()
 {
     if (mMBC != nullptr) { mMBC->Reset(); }

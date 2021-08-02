@@ -104,11 +104,6 @@ void gbGameBoy::Reset()
 
 bool gbGameBoy::LoadRom(const std::string& _path)
 {
-    if (!mBootRom.LoadBios("gb_bios.bin"))
-    {
-        // If couldn't load the bios, skip the part where the bios would be.
-        mCpu.mRegPC.val = 0x0100;
-    }
     return mCart.LoadRom(_path); 
 }
 

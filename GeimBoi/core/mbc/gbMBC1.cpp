@@ -8,19 +8,29 @@ gbMBC1::gbMBC1(gbCart* _cart)
 {
     Reset();
     printf("MBC1 Created\n");
-    if (mCart->HasBattery())
-    {
-        LoadRam(mCart->GetGameName() + ".sav", (uint8_t*)&mRam, sizeof(mRam));
-    }
 }
 
-gbMBC1::~gbMBC1() 
+gbMBC1::~gbMBC1()
 {
     printf("MBC1 Destroyed\n");
+}
+
+bool gbMBC1::SaveBattery(const std::string& _path)
+{
     if (mCart->HasBattery())
     {
-        SaveRam(mCart->GetGameName() + ".sav", (uint8_t*)&mRam, sizeof(mRam));
+        return SaveBatteryImpl(mCart->GetGameName() + ".sav", (uint8_t*)&mRam, sizeof(mRam));
     }
+    return false;
+}
+
+bool gbMBC1::LoadBattery(const std::string& _path)
+{
+    if (mCart->HasBattery())
+    {
+        return LoadBatteryImpl(mCart->GetGameName() + ".sav", (uint8_t*)&mRam, sizeof(mRam));
+    }
+    return false;
 }
 
 uint8_t gbMBC1::ReadByte(uint16_t _addr) const      

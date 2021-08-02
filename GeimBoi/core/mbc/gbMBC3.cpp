@@ -1,3 +1,4 @@
+#include <time.h>
 #include "../gbCart.hpp"
 #include "gbMBC3.hpp"
 
@@ -8,19 +9,29 @@ gbMBC3::gbMBC3(gbCart* _cart)
 {
     Reset();
     printf("MBC3 Created\n");
-    if (mCart->HasBattery())
-    {
-        LoadRam(mCart->GetGameName() + ".sav", (uint8_t*)&mRam, sizeof(mRam));
-    }
 }
 
 gbMBC3::~gbMBC3()
 { 
     printf("MBC3 Destroyed\n"); 
+}
+
+bool gbMBC3::SaveBattery(const std::string& _path)
+{
     if (mCart->HasBattery())
     {
-        SaveRam(mCart->GetGameName() + ".sav", (uint8_t*)&mRam, sizeof(mRam));
+        return SaveBatteryImpl(mCart->GetGameName() + ".sav", (uint8_t*)&mRam, sizeof(mRam));
     }
+    return false;
+}
+
+bool gbMBC3::LoadBattery(const std::string& _path)
+{
+    if (mCart->HasBattery())
+    {
+        return LoadBatteryImpl(mCart->GetGameName() + ".sav", (uint8_t*)&mRam, sizeof(mRam));
+    }
+    return false;
 }
 
 uint8_t gbMBC3::ReadByte(uint16_t _addr) const
@@ -81,10 +92,10 @@ void gbMBC3::WriteByte(uint16_t _addr, uint8_t _data)
 
 void gbMBC3::Reset()
 {
-    mRomBank = 0x01;
-    mRamBank = 0x00;
     mRamEnable = false;
     mMode = false;
+    mRomBank = 0x01;
+    mRamBank = 0x00;
     if (!mCart->HasBattery())
     {
         memset(&mRam, 0xFF, sizeof(mRam));

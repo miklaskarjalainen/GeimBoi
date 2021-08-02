@@ -155,6 +155,6 @@ void gbZ80::Reset()
     mRegBC.val = 0x0013;
     mRegDE.val = 0x00D8;
     mRegHL.val = 0x014D;
-    mRegPC.val = 0x0000;
+    mRegPC.val = mGameBoy->mBootRom.IsBiosLoaded() ? 0x0000 : 0x0100;
     mRegSP.val = 0xFFFE;
 }

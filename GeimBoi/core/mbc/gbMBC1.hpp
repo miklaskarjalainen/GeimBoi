@@ -11,6 +11,9 @@ namespace Giffi
 		uint16_t GetCurRomBank() const override;
 		uint16_t GetCurRamBank() const override;
 
+		bool SaveBattery(const std::string& _path) override;
+		bool LoadBattery(const std::string& _path) override;
+
 		uint8_t ReadByte(uint16_t _addr) const        override;
 		void    WriteByte(uint16_t _addr, uint8_t _data) override;
 		void    Reset() override;

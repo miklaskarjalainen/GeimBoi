@@ -36,52 +36,39 @@ gbMBC* gbMBC::CreateMBC(gbCart* _cart)
 	}
 }
 
-bool gbMBC::SaveRam(const std::string& _path, uint8_t* src, size_t size)
+bool gbMBC::SaveBatteryImpl(const std::string& _path, uint8_t* src, size_t size)
 {
-    // Create Roms Folder
-    if (!std::filesystem::exists("saves") || !std::filesystem::is_directory("saves"))
-    {
-        if (!std::filesystem::create_directory("saves"))
-        {
-            printf("Unabled to create ./saves folder\n");
-            return false;
-        }
-    }
-
-    std::string new_path = "saves/" + _path;
-    std::ofstream wf(new_path, std::ios::binary);
+    std::ofstream wf(_path, std::ios::binary);
     wf.write((char*)src, size);
     if (wf.bad())
     {
-        printf("An error occurred when trying to create a savefile at %s!\n", new_path.c_str());
+        printf("An error occurred when trying to create a savefile at %s!\n", _path.c_str());
         wf.close();
         return false;
     }
     wf.close();
-    printf("Savefile created to %s\n", new_path.c_str());
+    printf("Savefile created to %s\n", _path.c_str());
     return true;
 }
 
-bool gbMBC::LoadRam(const std::string& _path, uint8_t* dst, size_t size)
+bool gbMBC::LoadBatteryImpl(const std::string& _path, uint8_t* dst, size_t size)
 {
-    std::string new_path = "saves/" + _path;
-
-    if (!std::filesystem::exists(new_path))
+    if (!std::filesystem::exists(_path))
     {
-        printf("No savefile at %s\n", new_path.c_str());
+        printf("No savefile at %s\n", _path.c_str());
         return false;
     }
 
-    std::ifstream rf(new_path, std::ios::binary);
+    std::ifstream rf(_path, std::ios::binary);
     rf.read((char*)dst, size);
     if (rf.bad())
     {
-        printf("An error occurred when trying to read a savefile at %s!\n", new_path.c_str());
+        printf("An error occurred when trying to read a savefile at %s!\n", _path.c_str());
         rf.close();
         return false;
     }
     rf.close();
 
-    printf("Savefile %s loaded\n", new_path.c_str());
+    printf("Savefile %s loaded\n", _path.c_str());
     return true;
 }

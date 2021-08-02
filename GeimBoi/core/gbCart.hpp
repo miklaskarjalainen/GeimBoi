@@ -27,6 +27,16 @@ public:
     uint8_t     ReadByte(uint16_t _addr) const;
     bool        IsGameLoaded() const;
     bool        HasBattery() const;
+    bool        SupportsGBC() const;
+
+    /*
+        The emulator will not save / load -savefiles autoamtically,
+        it's the frontends responsibility. Also savefile is not created if
+        the gamecartridge doesn't have a battery in it.
+    */
+    bool SaveBattery(const std::string& _path);
+    bool LoadBattery(const std::string& _path);
+
 private:
     void Reset();
     bool LoadRom(const std::string& _path);
