@@ -32,6 +32,7 @@ bin_int/
 *.ilk
 *.pdb
 *.ini
+*.json
 
 # Executables
 *.exe
