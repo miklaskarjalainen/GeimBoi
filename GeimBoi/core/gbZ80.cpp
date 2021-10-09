@@ -1,3 +1,4 @@
+#include <utils/Benchmark.hpp>
 #include "gbZ80.hpp"
 #include "gbPPU.hpp"
 #include "gbGameBoy.hpp"
@@ -22,6 +23,7 @@ void gbZ80::Clock()
 // Advance by a frame
 void gbZ80::FrameAdvance()
 {
+    PROFILE_FUNCTION();
     while (mCyclesDone < 70221)
     {
         Clock();
@@ -143,6 +145,8 @@ void gbZ80::ServiceInterrupt(gbInterrupt _interrupt)
 
 void gbZ80::Reset()
 {
+    PROFILE_FUNCTION();
+
     mCounterFreq = 0;
     mDividerCounter = 0; 
     mTimerCounter = 0; 

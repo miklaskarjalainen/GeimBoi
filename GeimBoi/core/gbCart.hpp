@@ -11,7 +11,8 @@ class gbGameBoy;
 class gbCart
 {
 public:
-    gbCart()  = default;
+    gbCart(gbGameBoy* pGameBoy)
+        : mGameBoy(pGameBoy) {}
     ~gbCart() = default;
 
     std::string GetGameName() const;
@@ -43,6 +44,8 @@ private:
     void WriteByte(uint16_t _addr, uint8_t _data);
 private:
     std::unique_ptr<gbMBC> mMBC = nullptr;
+    gbGameBoy* mGameBoy = nullptr;
+
     bool mGameLoaded = false;
 public:
     uint8_t mCart[0x200000] = {};

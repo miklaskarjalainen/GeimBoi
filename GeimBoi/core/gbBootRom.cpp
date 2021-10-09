@@ -1,4 +1,5 @@
-#include <filesystem>
+#include <utils/Benchmark.hpp>
+#include <utils/Dir.hpp>
 #include <fstream>
 #include "gbBootRom.hpp"
 
@@ -6,7 +7,8 @@ using namespace Giffi;
 
 bool gbBootRom::LoadBios(const std::string& _path)
 {
-	if (!std::filesystem::exists(_path))
+	PROFILE_FUNCTION();
+	if (!Dir::FileExists(_path))
 	{
 		printf("Couldn't find a bios at %s!\n", _path.c_str());
 		mHasBios = false;

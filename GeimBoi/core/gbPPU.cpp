@@ -1,3 +1,4 @@
+#include <utils/Benchmark.hpp>
 #include "gbPPU.hpp"
 #include "gbZ80.hpp"
 #include "gbGameBoy.hpp"
@@ -130,6 +131,7 @@ void gbPPU::RenderScanline()
 
     if ( curScanline < 144U) // 0-144 is visible to the viewport
     {
+        PROFILE_SCOPE("Rendering scanline");
         RenderBackground();
         RenderSprites();
     }    
@@ -138,6 +140,7 @@ void gbPPU::RenderScanline()
 
 void gbPPU::RenderBackground()
 {   
+
     uint8_t LCDControl = mGameBoy->mRom[0xFF40];
 
     if (!((LCDControl >> 0) & 1)) // LCD Enabled?

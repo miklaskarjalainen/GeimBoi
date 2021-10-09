@@ -1,4 +1,5 @@
-#include <string.h>
+#include <utils/Benchmark.hpp>
+#include <cstring>
 #include <string>
 #include <filesystem>
 #include "gbGameBoy.hpp"
@@ -6,7 +7,7 @@
 using namespace Giffi;
 
 gbGameBoy::gbGameBoy()
-    : mCpu(this), mPpu(this)
+    : mCpu(this), mPpu(this), mCart(this)
 {
     Reset();
 }
@@ -21,6 +22,7 @@ void gbGameBoy::Clock()
 
 void gbGameBoy::FrameAdvance()
 {
+    //PROFILE_FUNCTION();
     if (mCart.IsGameLoaded())
     {
         mCpu.FrameAdvance();
@@ -60,6 +62,8 @@ void gbGameBoy::ReleaseButton(gbButton _key)
 
 void gbGameBoy::Reset()
 {
+    PROFILE_FUNCTION();
+
     mCpu .Reset();
     mCart.Reset();
     mPpu .Reset();
@@ -104,6 +108,7 @@ void gbGameBoy::Reset()
 
 bool gbGameBoy::LoadRom(const std::string& _path)
 {
+    PROFILE_FUNCTION();
     return mCart.LoadRom(_path); 
 }
 

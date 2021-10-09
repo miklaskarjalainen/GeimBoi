@@ -1,4 +1,5 @@
-#include <filesystem>
+#include <utils/Benchmark.hpp>
+#include <utils/Dir.hpp>
 #include <fstream>
 #include "gbMBC.hpp"
 #include "gbMBC1.hpp"
@@ -38,6 +39,8 @@ gbMBC* gbMBC::CreateMBC(gbCart* _cart)
 
 bool gbMBC::SaveBatteryImpl(const std::string& _path, uint8_t* src, size_t size)
 {
+    PROFILE_FUNCTION();
+
     std::ofstream wf(_path, std::ios::binary);
     wf.write((char*)src, size);
     if (wf.bad())
@@ -53,7 +56,9 @@ bool gbMBC::SaveBatteryImpl(const std::string& _path, uint8_t* src, size_t size)
 
 bool gbMBC::LoadBatteryImpl(const std::string& _path, uint8_t* dst, size_t size)
 {
-    if (!std::filesystem::exists(_path))
+    PROFILE_FUNCTION();
+
+    if (!Dir::FileExists(_path))
     {
         printf("No savefile at %s\n", _path.c_str());
         return false;

@@ -1,6 +1,9 @@
-#include <string.h>
+#include <utils/Benchmark.hpp>
+#include <utils/Dir.hpp>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
+#include "gbGameBoy.hpp"
 #include "gbCart.hpp"
 
 using namespace Giffi;
@@ -149,12 +152,18 @@ void gbCart::Reset()
 
 bool gbCart::LoadRom(const std::string& _path)
 {
-    if (!std::filesystem::exists(_path))
+    PROFILE_FUNCTION();
+
+    // Load
+    if (!Dir::FileExists(_path))
     {
         printf("Can't find a file at %s\n", _path.c_str());
         mGameLoaded = false;
         return false;
     }
+
+    // Reset
+    mGameBoy->Reset();
 
     // Load Rom
     std::ifstream rf(_path, std::ios::binary);

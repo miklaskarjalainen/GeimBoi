@@ -1,3 +1,5 @@
+#include <utils/Benchmark.hpp>
+#include <thread>
 #include "imgui/imgui.h"
 #include "appWindow.hpp"
 #include "appGui.hpp"
@@ -7,9 +9,12 @@ using namespace Giffi;
 SDL_Renderer* appWindow::mRenderer = nullptr;
 SDL_Window*   appWindow::mWindow = nullptr;
 std::shared_ptr<gbGameBoy> appWindow::mGameBoy = nullptr;
+bool appWindow::mClosing = false;
 
-bool appWindow::Init()
+void appWindow::Init()
 {
+    PROFILE_FUNCTION();
+
     const int width  = 1280;
     const int height = 720;
 
@@ -17,20 +22,20 @@ bool appWindow::Init()
     if (SDL_Init(SDL_INIT_EVERYTHING))
     {
         printf("Unable to init sdl2: %s\n", SDL_GetError()); 
-        return false;
+        exit(1);
     }
     mWindow  = SDL_CreateWindow("GeimBoy", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE);
     if (mWindow == NULL)
     {
         printf("Unable to create window: %s\n", SDL_GetError());
-        return false;
+        exit(1);
     }
     
-    mRenderer= SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED);
+    mRenderer= SDL_CreateRenderer(mWindow, 0, SDL_RENDERER_ACCELERATED);
     if (mRenderer == NULL)
     {
         printf("Unable to create renderer: %s\n", SDL_GetError());
-        return false;
+        exit(1);
     }
 
     // Init GameBoy
@@ -39,42 +44,55 @@ bool appWindow::Init()
     mGameBoy->SetPalette(0x9bbc0f, 0x8bac0f, 0x306230, 0x0f380f);
     mGameBoy->mBootRom.LoadBios("gb_bios.bin");
     
-    return appGui::Init(mRenderer, mGameBoy, width, height);
+    // Gui
+    appGui::Init(mRenderer, mGameBoy, width, height);
 }
+
+#include <thread>
 
 void appWindow::Run()
 {
-    // Create Surface out of raw pixel data.
-    int depth = 24;
-    int pitch = 3 * 160;
-    Uint32 rmask = 0x000000FF;
-    Uint32 gmask = 0x0000FF00;
-    Uint32 bmask = 0x00FF0000;
-    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(&mGameBoy->mPpu.front_buffer, 160, 144, depth, pitch, rmask, gmask, bmask, NULL);
+    PROFILE_FUNCTION();
 
+    // Create Surface out of raw pixel data. PROFILE_SCOPE("Rendering GB framebuffer");
+    constexpr int pitch = 3 * 160;
+    constexpr int depth = 24;
+    constexpr Uint32 rmask = 0x000000FF;
+    constexpr Uint32 gmask = 0x0000FF00;
+    constexpr Uint32 bmask = 0x00FF0000;
+    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(&mGameBoy->mPpu.front_buffer, 160, 144, depth, pitch, rmask, gmask, bmask, NULL);
+    
+    //const std::function<void()> gg = std::bind(&gbGameBoy::FrameAdvance, mGameBoy);
     while (!ShouldWindowClose())
     {
         int start_ticks = SDL_GetTicks();
+        //std::thread thread(gg);
+        
         // Update
         {
+            PROFILE_SCOPE("Update");
             // Emulator gets updated in the gui, because of "pause"
             appGui::Update();
+            if (!appGui::IsPaused())
+                mGameBoy->FrameAdvance();
         }
 
-        // Drawing
+
+        // Rendering
         {
+            PROFILE_SCOPE("Rendering");
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(mRenderer, surface);
+
             // Clear Background
             SDL_SetRenderDrawColor(mRenderer, 114, 144, 154, 255);
             SDL_RenderClear(mRenderer);
 
             // Render Emulator
-            SDL_Texture* texture = SDL_CreateTextureFromSurface(mRenderer, surface);
             SDL_Rect dst = { 0, 19, 0, 0 }; // Take in count window size, and top bar which takes 19px.
             SDL_GetWindowSize(mWindow, &dst.w, &dst.h);
             dst.h -= dst.y;
+        
             SDL_RenderCopy(mRenderer, texture, NULL, &dst);
-
-            // Draw Gui
             appGui::Draw();
 
             // Render
@@ -82,35 +100,47 @@ void appWindow::Run()
             SDL_DestroyTexture(texture);
         }
 
-        // Using delay to target 60fps
-        int end_ticks = SDL_GetTicks();
-        if (16 - (end_ticks - start_ticks) > 0)
-            SDL_Delay(16 - (end_ticks - start_ticks));
+        {
+            PROFILE_SCOPE("SDL_Delay");
+            // Using delay to target 60fps
+            int end_ticks = SDL_GetTicks();
+            if (16 - (end_ticks - start_ticks) > 0)
+                SDL_Delay(16 - (end_ticks - start_ticks));
+        }
+        //thread.join();
+        
     }
 
     SDL_FreeSurface(surface);
 }
 
+static bool should_close = false;
 void appWindow::CleanUp()
 {
+    PROFILE_FUNCTION();
+
     // Save Game on exit
     if (mGameBoy->mCart.IsGameLoaded())
     {
         std::string file_name = mGameBoy->mCart.GetGameName() + ".sav";
         mGameBoy->mCart.SaveBattery(file_name);
     }
-
     SDL_Quit();
 }
-
 // Does Window events aswell
 bool appWindow::ShouldWindowClose()
 {
-    static bool should_close = false;
+    DoEvents();
+    return should_close;
+}
+
+void appWindow::DoEvents()
+{
+    SDL_Event events;
     ImGuiIO& io = ImGui::GetIO();
     int mouseX, mouseY, mouseWheel = 0;
     const int buttons = SDL_GetMouseState(&mouseX, &mouseY);
-    SDL_Event events;
+    
     while (SDL_PollEvent(&events))
     {
         switch (events.type)
@@ -173,6 +203,8 @@ bool appWindow::ShouldWindowClose()
                 }
                 break;
             }
+            default:
+                break;
 
         }
     }
@@ -183,6 +215,4 @@ bool appWindow::ShouldWindowClose()
     io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT);
     io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
     io.MouseWheel = (float)(mouseWheel);
-
-    return should_close;
 }
