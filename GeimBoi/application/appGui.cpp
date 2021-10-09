@@ -1,71 +1,62 @@
-#include <filesystem>
+#include <SDL2/SDL.h>
+#include <utils/Benchmark.hpp>
 #include "appGui.hpp"
+#include "appSettings.hpp"
 #include "imgui/imgui.h"
 #include "imgui/imgui_sdl.h"
+#include "utils/FileDialogs.hpp"
 
 using namespace Giffi;
 
 std::shared_ptr<gbGameBoy> appGui::mGameBoy = nullptr;
 bool appGui::mDrawDebug = false;
-bool appGui::mDrawFileDialog = false;
 bool appGui::mEmuPaused = false;
 
-bool appGui::Init(SDL_Renderer* _renderer, std::shared_ptr<gbGameBoy>& _emu, int _widht, int _height) {
+void appGui::Init(SDL_Renderer* _renderer, std::shared_ptr<gbGameBoy>& _emu, int _widht, int _height) {
+    PROFILE_FUNCTION();
+
     appGui::mGameBoy = _emu; // Pointer to emulator core
     ImGui::CreateContext();
     ImGuiSDL::Initialize(_renderer, _widht, _height);
-
-    // Create Roms Folder
-    if (!std::filesystem::exists("roms"))
-    {
-        if (!std::filesystem::create_directory("roms"))
-        {
-            printf("Unable to create ./roms folder\n");
-            return false;
-        } 
-    }
-    if (!std::filesystem::exists("roms") || !std::filesystem::is_directory("roms"))
-    {
-        printf("No roms directory!\n");
-        return false;
-    }
-
-
-    return true;
 }
 
 void appGui::Update()
 {
-    if (!mEmuPaused) { mGameBoy->FrameAdvance(); }
-
+    PROFILE_FUNCTION();
     ImGui::NewFrame();
     UpdateTopbar();
     UpdateDebug();
-    UpdateFileDialog();
 }
 
 void appGui::Draw()
 {
+    PROFILE_FUNCTION();
+
     ImGui::Render();
     ImGuiSDL::Render(ImGui::GetDrawData());
 }
 
+bool appGui::IsPaused()
+{
+    return mEmuPaused;
+}
+
 void appGui::UpdateTopbar()
 {
+    PROFILE_FUNCTION();
     ImGuiIO& io = ImGui::GetIO();
     
-    ImGui::Begin("My Thingy", 0, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
+    ImGui::Begin("NavBar", 0, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
     ImGui::SetWindowPos(ImVec2(-2, 0));
     ImGui::SetWindowSize(ImVec2(io.DisplaySize.x + 4, 0));
     
     if (ImGui::BeginMenuBar())
     {
-
         if (ImGui::BeginMenu("GeimBoy"))
         {
             if (ImGui::MenuItem("Open Rom"))
             { 
-                mDrawFileDialog = true;
+                OpenRomDialog();
             }
             if (ImGui::MenuItem("Reset")) { mGameBoy->Reset(); }
             ImGui::EndMenu();
@@ -88,8 +79,31 @@ void appGui::UpdateTopbar()
     ImGui::End();
 }
 
+void appGui::OpenRomDialog()
+{
+    // File open
+    std::string path = appSettings::GetLastRomPath();
+    auto f = pfd::open_file("Opem rom", path,
+                            { "GB(C) Roms", "*.gb *.gbc",
+                            "All Files", "*" },
+                            pfd::opt::none);
+    
+    if (f.result().size() == 1)
+    {
+        // Load
+        mGameBoy->LoadRom(f.result()[0]);
+        if (mGameBoy->mCart.IsGameLoaded())
+        {
+            const std::string file_name = mGameBoy->mCart.GetGameName() + ".sav";
+            mGameBoy->mCart.LoadBattery(file_name);
+            appSettings::SetLastRomPath(f.result()[0]);
+        }
+    }
+}
+
 void appGui::UpdateDebug()
 {
+    PROFILE_FUNCTION();
     if (!mDrawDebug) { return; }
 
     static const gbZ80* sCpu   = &mGameBoy->mCpu;
@@ -177,61 +191,4 @@ void appGui::UpdateDebug()
         
         ImGui::End();
     }
-}
-
-void appGui::UpdateFileDialog()
-{
-    if (!mDrawFileDialog)
-    {
-        return;
-    }
-
-    static const char* start_dir = "roms";
-    static std::filesystem::path current_directory = start_dir;
-
-    ImGui::Begin("Open File [./Roms/]", &mDrawFileDialog);
-    
-    if (current_directory != start_dir)
-    {
-        if (ImGui::Button("<-"))
-        {
-            current_directory = current_directory.parent_path();
-        }
-    }
-
-    for (auto& p : std::filesystem::directory_iterator(current_directory))
-    {
-        std::string file_name = p.path().filename().string();
-
-        if (ImGui::Button(file_name.c_str()))
-        {
-            if (p.is_directory())
-            {
-                current_directory /= p.path().filename();
-            }
-            else
-            {
-                // Save
-                if (mGameBoy->mCart.IsGameLoaded())
-                {
-                    std::string file_name = mGameBoy->mCart.GetGameName() + ".sav";
-                    mGameBoy->mCart.SaveBattery(file_name);
-                }
-
-                // Load
-                mGameBoy->Reset();
-                mGameBoy->LoadRom(p.path().string());
-                if (mGameBoy->mCart.IsGameLoaded())
-                {
-                    std::string file_name = mGameBoy->mCart.GetGameName() + ".sav";
-                    mGameBoy->mCart.LoadBattery(file_name);
-                }
-
-                mDrawFileDialog = false;
-            }
-            
-        }
-    }
-
-    ImGui::End();
 }
