@@ -8,25 +8,16 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		DLL|x64 = DLL|x64
-		DLL|x86 = DLL|x86
 		Release|x64 = Release|x64
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{67CCC219-65B2-42CB-B0B3-99DD1841C496}.Debug|x64.ActiveCfg = Debug|x64
 		{67CCC219-65B2-42CB-B0B3-99DD1841C496}.Debug|x64.Build.0 = Debug|x64
-		{67CCC219-65B2-42CB-B0B3-99DD1841C496}.Debug|x86.ActiveCfg = Debug|Win32
-		{67CCC219-65B2-42CB-B0B3-99DD1841C496}.Debug|x86.Build.0 = Debug|Win32
 		{67CCC219-65B2-42CB-B0B3-99DD1841C496}.DLL|x64.ActiveCfg = DLL|x64
 		{67CCC219-65B2-42CB-B0B3-99DD1841C496}.DLL|x64.Build.0 = DLL|x64
-		{67CCC219-65B2-42CB-B0B3-99DD1841C496}.DLL|x86.ActiveCfg = DLL|Win32
-		{67CCC219-65B2-42CB-B0B3-99DD1841C496}.DLL|x86.Build.0 = DLL|Win32
 		{67CCC219-65B2-42CB-B0B3-99DD1841C496}.Release|x64.ActiveCfg = Release|x64
 		{67CCC219-65B2-42CB-B0B3-99DD1841C496}.Release|x64.Build.0 = Release|x64
-		{67CCC219-65B2-42CB-B0B3-99DD1841C496}.Release|x86.ActiveCfg = Release|Win32
-		{67CCC219-65B2-42CB-B0B3-99DD1841C496}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
