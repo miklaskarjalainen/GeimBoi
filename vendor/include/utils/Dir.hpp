@@ -29,7 +29,7 @@ inline bool CreateDirectory(const std::string& folder)
 {
     struct stat st = {0};
     if (!FileExists(folder)) {
-        mkdir(folder.c_str(), 0700);
+        _makedir(folder.c_str());
         return true;
     }
     return false;
