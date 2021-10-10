@@ -1,4 +1,4 @@
-#ifdef GIFFI_DLL_EXPORT
+#ifdef GB_DLL_EXPORT
 
 #include "wrapper.hpp"
 #include "../gbGameBoy.hpp"

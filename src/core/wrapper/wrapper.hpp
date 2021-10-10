@@ -7,8 +7,12 @@
 
 	Is useful if you're for example loading the dll in a C# script.
 
-	e.g GeimBoy_LoadRom( gbGameBoy* _ptr, const char* _path);
+	e.g GameBoy_LoadRom( gbGameBoy* _ptr, const char* _path);
 */
 
 #pragma once
+#ifdef _WIN64
 #define DLL_EXPORT extern "C" __declspec(dllexport)
+#elif __GNUG__
+#define DLL_EXPORT extern "C"
+#endif
