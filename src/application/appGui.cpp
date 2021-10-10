@@ -83,7 +83,7 @@ void appGui::OpenRomDialog()
 {
     // File open
     std::string path = appSettings::GetLastRomPath();
-    auto f = pfd::open_file("Opem rom", path,
+    auto f = pfd::open_file("Open rom", path,
                             { "GB(C) Roms", "*.gb *.gbc",
                             "All Files", "*" },
                             pfd::opt::none);
