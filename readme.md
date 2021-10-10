@@ -3,10 +3,14 @@ GeimBoi is a GameBoy DMG emulator written in C++ using [SDL2](https://www.libsdl
 
 ![gameboy_ss](pictures/geimboy.png)
 
+## Building:
+- **Windows:**  `(Visual Studio): should be just the matter of opening the GeimBoy.sln file an pressing compile. (assuming you have working c++ building environment.)`
+- **Linux Arch:** `pamac install gcc make lib32-sdl2 && make -build=release -j4`
+
 ## Features:
 - **MBC1:** support (passes Mooneye's mbc1 tests)
 - **MBC2:** support (passes Mooneye's mbc2 tests)
-- **MBC3:** only rom/ram banking.
+- **MBC3:** only rom/ram banking. (no working realtime clock)
 - **Saving:** roms with a battery gets it's ram dumbed into a *.sav file on exit and loaded on game power on.
 
 ## Todo:
