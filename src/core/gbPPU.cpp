@@ -147,11 +147,11 @@ void gbPPU::RenderBackground()
     // Using Window
     uint8_t windowY = mGameBoy->ReadByte(0xFF4A);
     uint8_t windowX = mGameBoy->ReadByte(0xFF4B) - 7;
-    bool WindowEnable = ((LCDControl >> 5) & 1) &&  windowY <= LY;
+    bool windowEnable = ((LCDControl >> 5) & 1) &&  windowY <= LY;
     
     // Background Memory
     uint16_t backgroundMemory;
-    if (WindowEnable)
+    if (windowEnable)
         { backgroundMemory = (LCDControl >> 6) & 1 ? 0x9C00 : 0x9800; }
     else
         { backgroundMemory = (LCDControl >> 3) & 1 ? 0x9C00 : 0x9800; }
@@ -160,7 +160,7 @@ void gbPPU::RenderBackground()
     uint8_t scrollX = mGameBoy->ReadByte(0xFF43);
         
     uint8_t yPos = 0; 
-    if (!WindowEnable)
+    if (!windowEnable)
 		yPos = scrollY + LY;
 	else
 		yPos = LY - windowY;
@@ -171,7 +171,7 @@ void gbPPU::RenderBackground()
     {
         uint8_t xPos = pixel + scrollX;
 
-        if (WindowEnable)
+        if (windowEnable)
         {
             if (pixel >= windowX)
             {
