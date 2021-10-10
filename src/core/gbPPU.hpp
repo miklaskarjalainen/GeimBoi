@@ -31,7 +31,7 @@ public:
     ~gbPPU() = default;
 public:
     gbColor dmgPalette[4];
-    gbColor front_buffer[144][160];
+    gbColor frontBuffer[144][160];
 
     void Reset();
     void CheckCoinsidenceFlag(); // Aka LY=LYC

@@ -5,11 +5,6 @@
 
 using namespace Giffi;
 
-/*
-    This ppu implumentation is pretty much copy & pasted from,
-    codeslinger.co.uk's gameboy emulator. With some improvements added.
-*/
-
 gbPPU::gbColorId gbPPU::GetPixelColor(uint8_t col, uint16_t _addr)
 {
     uint8_t palette = mGameBoy->ReadByte(_addr);
@@ -34,13 +29,12 @@ gbPPU::gbColorId gbPPU::GetPixelColor(uint8_t col, uint16_t _addr)
 void gbPPU::Reset()
 {
     mScanlineCounter = 456;
-    memset(&front_buffer, 0, sizeof(front_buffer));
+    memset(&frontBuffer, 0, sizeof(frontBuffer));
 }
 
 void gbPPU::UpdateGraphics(uint16_t _cycles)
 {
     SetLCDStatus();
-
     uint8_t LCD_CONTROL = mGameBoy->mRom[0xFF40]; // Settings for the lcd
 
     if (LCD_CONTROL >> 7) // LCD_ENABLE
@@ -50,10 +44,9 @@ void gbPPU::UpdateGraphics(uint16_t _cycles)
 
     if (mScanlineCounter <= 0)
     {
-        mScanlineCounter = 456;
+        mScanlineCounter = 456;   
         RenderScanline();
     }
-    
 }
 
 void gbPPU::SetLCDStatus()
@@ -71,25 +64,25 @@ void gbPPU::SetLCDStatus()
     }
 
     // SET MODE
-    bool    mode_interupt = false;
-    uint8_t old_mode = LCD_STATUS & 0b11;      // Last 2 bits contains the current mode
+    bool    modeInterrupt = false;
+    uint8_t oldMode = LCD_STATUS & 0b11;      // Last 2 bits contains the current mode
     if (LY >= 144)                             // VBlank (0b01)
     {
         // mode 1
         LCD_STATUS &= ~(0b11);
         LCD_STATUS |= 0b01;
-        mode_interupt = (LCD_STATUS >> 4) & 1; // Vblank interrupt enable
+        modeInterrupt = (LCD_STATUS >> 4) & 1; // Vblank interrupt enable
     }
     else
     {
-        int mode2Bounds = (456 - 80);
-        int mode3Bounds = (mode2Bounds - 172);
+        const int mode2Bounds = (456 - 80);
+        const int mode3Bounds = (mode2Bounds - 172);
 
         if (mScanlineCounter >= mode2Bounds)            // Searching Oam (0b10)
         {
             LCD_STATUS &= ~(0b11);
             LCD_STATUS |= 0b10;
-            mode_interupt = (LCD_STATUS >> 5) & 1;      // Oam interrupt enable
+            modeInterrupt = (LCD_STATUS >> 5) & 1;      // Oam interrupt enable
         }
         else if (mScanlineCounter >= mode3Bounds)       // Transferring Data (0b11)
         {   
@@ -98,12 +91,12 @@ void gbPPU::SetLCDStatus()
         else                                            //Hblank (0b00)
         {
             LCD_STATUS &= ~(0b11);
-            mode_interupt = (LCD_STATUS >> 3) & 1;      // Hblank interrupt enable
+            modeInterrupt = (LCD_STATUS >> 3) & 1;      // Hblank interrupt enable
         }
     }       
     // just entered a new mode. Request interupt
-    uint8_t new_mode = LCD_STATUS & 0b11;
-    if (mode_interupt && (old_mode != new_mode))
+    uint8_t newMode = LCD_STATUS & 0b11;
+    if (modeInterrupt && (oldMode != newMode))
     {
         mGameBoy->mCpu.RequestInterrupt(gbInterrupt::LCD);
     }
@@ -118,7 +111,7 @@ void gbPPU::RenderScanline()
     
     uint8_t& curScanline = mGameBoy->mRom[0xFF44]; // 0-153
     curScanline++;
-
+    
     if ( curScanline == 144U )     // VBLANK
     {
         mGameBoy->mCpu.RequestInterrupt(gbInterrupt::VBlank);
@@ -135,7 +128,6 @@ void gbPPU::RenderScanline()
         RenderBackground();
         RenderSprites();
     }    
-    
 }
 
 void gbPPU::RenderBackground()
@@ -150,13 +142,13 @@ void gbPPU::RenderBackground()
     uint8_t  LY   = mGameBoy->mRom[0xFF44]; // Scanline
     
     uint16_t tileData = (LCDControl >> 4) & 1 ? 0x8000 : 0x8800;
-    bool     unsig    = (LCDControl >> 4) & 1;                   // Use signed with 0x8800
-
+    bool     unsig    = (LCDControl >> 4) & 1;  // Use signed with 0x8800
+    
     // Using Window
     uint8_t windowY = mGameBoy->ReadByte(0xFF4A);
     uint8_t windowX = mGameBoy->ReadByte(0xFF4B) - 7;
     bool WindowEnable = ((LCDControl >> 5) & 1) &&  windowY <= LY;
-        
+    
     // Background Memory
     uint16_t backgroundMemory;
     if (WindowEnable)
@@ -222,78 +214,84 @@ void gbPPU::RenderBackground()
             continue;
         }
     
-        front_buffer[LY][pixel] = color;
+        frontBuffer[LY][pixel] = color;
     }
 }
 
 void gbPPU::RenderSprites()
 {
     uint8_t lcdControl = mGameBoy->mRom[0xFF40];
-    if ( (lcdControl >> 1) & 1)
+    if ( (lcdControl >> 1) & 0) { return; } // OBJ enabled?
+
+    uint8_t spritesPerScanline = 10;
+    int ySize = (lcdControl >> 2) & 1 ? 16 : 8;
+
+    // Loop through all the available sprites
+    for (int sprite = 0; sprite < 40; sprite++)
     {
-        int y_size = (lcdControl >> 2) & 1 ? 16 : 8;
+        // 10 sprites per scanline
+        if (!spritesPerScanline) { break; }
 
-        for (int sprite = 0; sprite < 40; sprite++)
+        uint8_t index = sprite*4;
+        uint8_t yPos = mGameBoy->ReadByte(0xFE00+index)   - 16;
+        uint8_t xPos = mGameBoy->ReadByte(0xFE00+index+1) - 8;
+        uint8_t tileLocation = mGameBoy->ReadByte(0xFE00+index+2); if (ySize == 16) { tileLocation &= ~(0b1); } // bit 0 is ignored on y=16 mode.
+        uint8_t attributes   = mGameBoy->ReadByte(0xFE00+index+3);
+
+        bool yFlip = (attributes >> 6) & 1;
+        bool xFlip = (attributes >> 5) & 1;
+
+        int scanline = mGameBoy->ReadByte(0xFF44);
+        // Is in the current scanline?.
+        if ((scanline >= yPos) && (scanline < ( yPos + ySize)))
         {
-            uint8_t index = sprite*4;
-            uint8_t yPos = mGameBoy->ReadByte(0xFE00+index)   - 16;
-            uint8_t xPos = mGameBoy->ReadByte(0xFE00+index+1) - 8;
-            uint8_t tileLocation = mGameBoy->ReadByte(0xFE00+index+2);
-            uint8_t attributes   = mGameBoy->ReadByte(0xFE00+index+3);
+            spritesPerScanline--;
 
-            bool yFlip = (attributes >> 6) & 1;
-            bool xFlip = (attributes >> 5) & 1;
-
-            int scanline = mGameBoy->ReadByte(0xFF44);
-
-            if ((scanline >= yPos) && (scanline < (yPos+y_size)))
+            int line = scanline - yPos ;
+            if (yFlip)
             {
-                int line = scanline - yPos ;
+                line -= ySize ;
+                line *= -1 ;
+            }
 
-                if (yFlip)
+            line *= 2;
+            uint16_t dataAddress = (0x8000 + (tileLocation * 16)) + line;
+            uint8_t data1 = mGameBoy->ReadByte( dataAddress );
+            uint8_t data2 = mGameBoy->ReadByte( dataAddress+1 );
+
+            // Loop through a row of pixels in the sprite (for 1 scanline)
+            for (int tilePixel = 7; tilePixel >= 0; tilePixel--)
+            {
+                int colourbit = tilePixel ;
+                if (xFlip)
                 {
-                    line -= y_size ;
-                    line *= -1 ;
+                    colourbit -= 7 ;
+                    colourbit *= -1 ;
                 }
 
-                line *= 2;
-                uint16_t dataAddress = (0x8000 + (tileLocation * 16)) + line;
-                uint8_t data1 = mGameBoy->ReadByte( dataAddress ) ;
-                uint8_t data2 = mGameBoy->ReadByte( dataAddress+1 ) ;
+                // Color Index with in a palette
+                int ColorIdx = ((data2 >> colourbit) & 0b1);
+                ColorIdx <<= 1;
+                ColorIdx |= ((data1 >> colourbit) & 0b1);
+                // Index 0 is transparent 
+                if (ColorIdx == 0b00) { continue; }
+                // Color palette address
+                uint16_t ColorAddress = (attributes >> 4 ) & 1 ? 0xFF49 : 0xFF48;
 
-                for (int tilePixel = 7; tilePixel >= 0; tilePixel--)
+                gbColorId col = GetPixelColor(ColorIdx, ColorAddress);
+                gbColor color = dmgPalette[col];
+
+                int xPix = 0 - tilePixel ;
+                xPix += 7 ;
+
+                int pixel = xPos+xPix ;
+
+                if ((scanline < 0) || (scanline > 143) || (pixel < 0) || (pixel > 159))
                 {
-                    int colourbit = tilePixel ;
-                    if (xFlip)
-                    {
-                        colourbit -= 7 ;
-                        colourbit *= -1 ;
-                    }
-
-                    // Color Index with in a palette
-                    int ColorIdx = ((data2 >> colourbit) & 0b1);
-                    ColorIdx <<= 1;
-                    ColorIdx |= ((data1 >> colourbit) & 0b1);
-                    // Index 0 is transparent 
-                    if (ColorIdx == 0b00) { continue; }
-                    // Color palette address
-                    uint16_t ColorAddress = (attributes >> 4 ) & 1 ? 0xFF49 : 0xFF48;
-
-                    gbColorId col = GetPixelColor(ColorIdx, ColorAddress);
-                    gbColor color = dmgPalette[col];
-
-                    int xPix = 0 - tilePixel ;
-                    xPix += 7 ;
-
-                    int pixel = xPos+xPix ;
-
-                    if ((scanline < 0) || (scanline > 143) || (pixel < 0) || (pixel > 159))
-                    {
-                        continue ;
-                    }
-
-                    front_buffer[scanline][pixel] = color;
+                    continue ;
                 }
+
+                frontBuffer[scanline][pixel] = color;
             }
         }
     }

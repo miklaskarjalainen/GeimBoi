@@ -60,7 +60,7 @@ void appWindow::Run()
     constexpr Uint32 rmask = 0x000000FF;
     constexpr Uint32 gmask = 0x0000FF00;
     constexpr Uint32 bmask = 0x00FF0000;
-    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(&mGameBoy->mPpu.front_buffer, 160, 144, depth, pitch, rmask, gmask, bmask, NULL);
+    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(&mGameBoy->mPpu.frontBuffer, 160, 144, depth, pitch, rmask, gmask, bmask, NULL);
     
     //const std::function<void()> gg = std::bind(&gbGameBoy::FrameAdvance, mGameBoy);
     while (!ShouldWindowClose())
