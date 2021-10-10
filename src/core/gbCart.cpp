@@ -148,6 +148,10 @@ bool gbCart::LoadBattery(const std::string& _path)
 void gbCart::Reset()
 {
     if (mMBC != nullptr) { mMBC->Reset(); }
+    else
+    {
+        mMBC = gbMBC::CreateMBC(this);
+    }
 }
 
 bool gbCart::LoadRom(const std::string& _path)
@@ -179,7 +183,7 @@ bool gbCart::LoadRom(const std::string& _path)
     printf("Rom %s loaded\n", _path.c_str());
 
     // Get MBC
-    mMBC = std::unique_ptr<gbMBC>(gbMBC::CreateMBC(this));
+    mMBC = gbMBC::CreateMBC(this);
 
     mGameLoaded = true;
     return true;

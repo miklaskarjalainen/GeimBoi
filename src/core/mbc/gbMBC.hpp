@@ -37,9 +37,8 @@ namespace Giffi
 
 		/*
 			Gets the correct "mapper" for the cartridge.
-			This gets put in to a unique_ptr in gbCart::LoadRom(...)
 		*/
-		static gbMBC* CreateMBC(gbCart* _cart); 
+		static std::unique_ptr<gbMBC> CreateMBC(gbCart* _cart);
 	protected:
 		gbCart* mCart = nullptr;
 		

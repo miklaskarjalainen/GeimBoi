@@ -19,23 +19,31 @@ void gbMBC::WriteByte(uint16_t _addr, uint8_t _data)
 	// Don't write to ROM lmfao
 }
 
-gbMBC* gbMBC::CreateMBC(gbCart* _cart)
+std::unique_ptr<gbMBC> gbMBC::CreateMBC(gbCart* _cart)
 {
+    gbMBC* ptr = nullptr;
 	switch (_cart->GetCartType())
 	{
         case gbCartType::None:
-            return new gbMBC(_cart);
+            ptr = new gbMBC(_cart);
+            break;
 		case gbCartType::MBC1:
-			return new gbMBC1(_cart);
+			ptr = new gbMBC1(_cart);
+            break;
 		case gbCartType::MBC2:
-			return new gbMBC2(_cart);
+			ptr = new gbMBC2(_cart);
+            break;
 		case gbCartType::MBC3:
-			return new gbMBC3(_cart);
+			ptr = new gbMBC3(_cart);
+            break;
 		default:
             printf("Unsopprted mbc type!\n");
-            return new gbMBC(_cart);
+            ptr = new gbMBC(_cart);
+            break;
 	}
+    return std::move( std::unique_ptr<gbMBC>(ptr) );
 }
+
 
 bool gbMBC::SaveBatteryImpl(const std::string& _path, uint8_t* src, size_t size)
 {
