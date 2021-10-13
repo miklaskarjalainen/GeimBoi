@@ -3,7 +3,7 @@
 CPP     := g++
 ARGS    := -std=c++17 # c++17 needed for variant (FileIni.hpp), would like to get this to c++14 tho.
 
-LIBS    := -lSDL2 -lSDL2main -pthread 
+LIBS    := -lSDL2 -lSDL2main
 INCLUDE := -Ivendor/include
 
 SRCS    := src/*.cpp src/application/*.cpp src/application/imgui/*.cpp src/core/*.cpp src/core/opcode/*.cpp src/core/mbc/*.cpp 
