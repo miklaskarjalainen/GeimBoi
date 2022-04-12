@@ -9,7 +9,6 @@
 
 using namespace Giffi;
 
-
 void appSettings::SetLastRomPath(const std::string& path)
 {
     Get().m_IniFile.SetValue("General", "LastRomPath", path);
@@ -37,12 +36,3 @@ appSettings::~appSettings()
 {
     m_IniFile.SaveFile(iniFilePath);
 }
-
-// SHIB AT 0.000023 BUY AFTER GET'S BACK THERE
-
-// Bhought 960,076.05000000 SHIB = 20.2e = 23.15usd
-// 1 SHIB = 0.00002104 EUR
-// 1 SHIB = 0.00002104 EUR 
-// 1 EUR = 47528.5 SHIB
-
-
