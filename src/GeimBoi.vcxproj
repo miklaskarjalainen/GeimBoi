@@ -32,6 +32,7 @@
     <ClCompile Include="core\mbc\gbMBC2.cpp" />
     <ClCompile Include="core\opcode\cb_opcode.cpp" />
     <ClCompile Include="core\gbBootRom.cpp" />
+    <ClCompile Include="core\opcode\decompiler.cpp" />
     <ClCompile Include="core\opcode\opcode.cpp" />
     <ClCompile Include="core\mbc\gbMBC1.cpp" />
     <ClCompile Include="core\mbc\gbMBC3.cpp" />
@@ -56,6 +57,7 @@
     <ClInclude Include="core\mbc\gbMBC2.hpp" />
     <ClInclude Include="core\gbBootRom.hpp" />
     <ClInclude Include="core\opcode\cb_opcode.hpp" />
+    <ClInclude Include="core\opcode\decompiler.hpp" />
     <ClInclude Include="core\opcode\opcode.hpp" />
     <ClInclude Include="core\reg.hpp" />
     <ClInclude Include="core\mbc\gbMBC1.hpp" />
@@ -72,20 +74,20 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
