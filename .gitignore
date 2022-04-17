@@ -39,9 +39,13 @@ bin_int/
 *.out
 *.app
 
+# Assembly
+*.s
+
 # Roms
 *.gb
 *.gbc
 *.gba
 *.bin
+*.inc
 *.sav
