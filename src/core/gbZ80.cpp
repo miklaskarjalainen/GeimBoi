@@ -9,10 +9,7 @@ using namespace Giffi;
 void gbZ80::Clock()
 {
     int cur_cycle = mCyclesDone;
-
-    if (!mIsHalted) { ExecuteNextOpcode(); }
-    else            { mCyclesDone += 4; }
-    
+    ExecuteNextOpcode();
     int delta_cycles = mCyclesDone - cur_cycle;
 
     UpdateTimers(delta_cycles);
@@ -71,7 +68,7 @@ uint16_t gbZ80::PopWordOffStack()
 void gbZ80::UpdateTimers( uint16_t cycles )
 {
     uint8_t& timer      = mGameBoy->mRom[0xFF05];
-    uint8_t  timer_set  = mGameBoy->mRom[0xFF06];
+    uint8_t  timerSet  = mGameBoy->mRom[0xFF06];
 
     if ((mGameBoy->mRom[0xFF07] >> 2) & 1) // Timer Enabled
     {
@@ -84,7 +81,7 @@ void gbZ80::UpdateTimers( uint16_t cycles )
 
             if (timer == 0xFF) // Overflow
             {
-                timer = timer_set;
+                timer = timerSet;
                 RequestInterrupt(gbInterrupt::Timer);
             }
         }
@@ -101,9 +98,8 @@ void gbZ80::UpdateTimers( uint16_t cycles )
 
 void gbZ80::RequestInterrupt(gbInterrupt _interrupt)
 {
-    uint8_t IF = mGameBoy->mRom[0xFF0F];
+    uint8_t& IF = mGameBoy->mRom[0xFF0F];
     IF |= 1 << static_cast<uint8_t>(_interrupt);
-    mGameBoy->mRom[0xFF0F] = IF;
 } 
    
 void gbZ80::DoInterrupts()
@@ -129,8 +125,6 @@ void gbZ80::ServiceInterrupt(gbInterrupt _interrupt)
     mEnableInterrupts = false;
 
     mGameBoy->mRom[0xFF0F] &= ~(1 << static_cast<uint8_t>(_interrupt) );
-
-    /// we must save the current execution address by pushing it onto the stack
     PushWordOntoStack(mRegPC.val);
 
     switch (_interrupt)

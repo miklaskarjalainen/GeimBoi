@@ -9,13 +9,16 @@ namespace Giffi
     
 void gbZ80::ExecuteNextOpcode()
 {
-    uint8_t opcode = ReadByte(mRegPC.val);
-    mLastExecutedOpcode = opcode;
-
-    mRegPC.val++;
-
     // Every instrucitons take atleast 4 cycles, some take longer than that.
     mCyclesDone += 4;
+    if (mIsHalted) {
+        return;
+    }
+
+    uint8_t opcode = ReadByte(mRegPC.val);
+    mLastExecutedOpcode = opcode;
+    mRegPC.val++;
+
     switch ( opcode )
     {
         case 0x00: // NOP

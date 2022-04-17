@@ -1,3 +1,4 @@
+#include <sstream>
 #include <SDL2/SDL.h>
 #include <utils/Benchmark.hpp>
 #include "appGui.hpp"
@@ -18,6 +19,30 @@ void appGui::Init(SDL_Renderer* _renderer, std::shared_ptr<gbGameBoy>& _emu, int
     appGui::mGameBoy = _emu; // Pointer to emulator core
     ImGui::CreateContext();
     ImGuiSDL::Initialize(_renderer, _widht, _height);
+
+    // MAP KEYS
+    ImGuiIO& io = ImGui::GetIO();
+    io.KeyMap[ImGuiKey_Tab] = SDL_SCANCODE_TAB;
+    io.KeyMap[ImGuiKey_LeftArrow] = SDL_SCANCODE_LEFT;
+    io.KeyMap[ImGuiKey_RightArrow] = SDL_SCANCODE_RIGHT;
+    io.KeyMap[ImGuiKey_UpArrow] = SDL_SCANCODE_UP;
+    io.KeyMap[ImGuiKey_DownArrow] = SDL_SCANCODE_DOWN;
+    io.KeyMap[ImGuiKey_PageUp] = SDL_SCANCODE_PAGEUP;
+    io.KeyMap[ImGuiKey_PageDown] = SDL_SCANCODE_PAGEDOWN;
+    io.KeyMap[ImGuiKey_Home] = SDL_SCANCODE_HOME;
+    io.KeyMap[ImGuiKey_End] = SDL_SCANCODE_END;
+    io.KeyMap[ImGuiKey_Insert] = SDL_SCANCODE_INSERT;
+    io.KeyMap[ImGuiKey_Delete] = SDL_SCANCODE_DELETE;
+    io.KeyMap[ImGuiKey_Backspace] = SDL_SCANCODE_BACKSPACE;
+    io.KeyMap[ImGuiKey_Space] = SDL_SCANCODE_SPACE;
+    io.KeyMap[ImGuiKey_Enter] = SDL_SCANCODE_RETURN;
+    io.KeyMap[ImGuiKey_Escape] = SDL_SCANCODE_ESCAPE;
+    io.KeyMap[ImGuiKey_A] = SDL_SCANCODE_A;
+    io.KeyMap[ImGuiKey_C] = SDL_SCANCODE_C;
+    io.KeyMap[ImGuiKey_V] = SDL_SCANCODE_V;
+    io.KeyMap[ImGuiKey_X] = SDL_SCANCODE_X;
+    io.KeyMap[ImGuiKey_Y] = SDL_SCANCODE_Y;
+    io.KeyMap[ImGuiKey_Z] = SDL_SCANCODE_Z;
 }
 
 void appGui::Update()
@@ -182,13 +207,44 @@ void appGui::UpdateDebug()
         ImGui::Begin("Control", nullptr, ImGuiWindowFlags_NoResize);
         ImGui::SetWindowSize(ImVec2(140, 136));
 
-        ImGui::Text("LastOp: 0x%02X", sCpu->mLastExecutedOpcode);
-        ImGui::Text("NextOp: 0x%02X", sCpu->ReadByte(sCpu->mRegPC.val));
+        ImGui::Text("LastOp: %s", GetAssembly(sCpu->mLastExecutedOpcode).c_str());
+        ImGui::Text("NextOp: %s", GetAssembly(sCpu->ReadByte(sCpu->mRegPC.val)).c_str());
 
         if (ImGui::Button("FrameAdvance")) { mGameBoy->FrameAdvance(); mEmuPaused = true; }
         if (ImGui::Button("ExecuteOpcode")) { mGameBoy->Clock(); mEmuPaused = true; }
+        if (ImGui::Button("Scanline")) { mGameBoy->Clock(); mEmuPaused = true; }
         ImGui::ProgressBar((float)sCpu->mCyclesDone / 70221.0f);
         
+        ImGui::End();
+    }
+
+    // Debugger
+    // TODO: add breakpoints
+    {
+        // Window
+        ImGui::Begin("Debugger", nullptr, ImGuiWindowFlags_None);
+
+        
+        for (int16_t offset = 0; offset < 256; offset++) {
+            const uint16_t addr = sCpu->mRegPC.val + offset;
+            if (addr < 0)
+                continue;
+            uint8_t opcode = sCpu->ReadByte(addr + offset);
+
+            std::stringstream assembly;
+            assembly << GetAssembly(opcode) << std::hex;
+            for (uint8_t i = 0; i < GetLength(opcode) - 1; i++) {
+                assembly << " [0x" << (unsigned int)sCpu->ReadByte(addr + i) << "]";
+            }
+
+            if (offset == 0)
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(96, 96, 255, 255));
+            ImGui::Text("0x%04X: %s", addr, assembly.str().c_str());
+            if (offset == 0)
+                ImGui::PopStyleColor();
+
+            offset += GetLength(opcode);
+        }
         ImGui::End();
     }
 }

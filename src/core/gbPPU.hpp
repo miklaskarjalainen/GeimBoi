@@ -21,7 +21,7 @@ class gbPPU
 {
 public:
     gbPPU(gbGameBoy* _gameboy)
-        : mGameBoy(_gameboy)
+        : mGameBoy(_gameboy) 
     {
         dmgPalette[0] = { 217,217,217 };
         dmgPalette[1] = { 128,128,128 };
@@ -36,7 +36,8 @@ public:
     void Reset();
     void CheckCoinsidenceFlag(); // Aka LY=LYC
 private:
-    enum gbColorId // Color ids used by the gameboy.
+    // Color ids used by the gameboy.
+    enum gbColorId 
     {
         WHITE = 0b00,
         LIGHTGRAY = 0b01,

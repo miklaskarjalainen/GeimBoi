@@ -35,7 +35,7 @@ void gbPPU::Reset()
 void gbPPU::UpdateGraphics(uint16_t _cycles)
 {
     SetLCDStatus();
-    uint8_t LCD_CONTROL = mGameBoy->mRom[0xFF40]; // Settings for the lcd
+    const uint8_t LCD_CONTROL = mGameBoy->mRom[0xFF40]; // Settings for the lcd
 
     if (LCD_CONTROL >> 7) // LCD_ENABLE
     {
@@ -52,20 +52,20 @@ void gbPPU::UpdateGraphics(uint16_t _cycles)
 void gbPPU::SetLCDStatus()
 {
     uint8_t LCD_CONTROL = mGameBoy->mRom[0xFF40]; 
-    uint8_t LCD_STATUS  = mGameBoy->mRom[0xFF41]; 
+    uint8_t LCD_STATUS  = mGameBoy->mRom[0xFF41];
     uint8_t LY  = mGameBoy->mRom[0xFF44]; // Current scanline
 
     if (!((LCD_CONTROL >> 7) & 1)) // If screen is disabled
     {
         mScanlineCounter = 456;
         mGameBoy->mRom[0xFF41] &= 0b11111100; // LCD Status to 0x00
-        mGameBoy->mRom[0xFF44] = 0;           // Set cur scanline to 0
+        mGameBoy->mRom[0xFF44] = 0x0;         // Set cur scanline to 0
         return;
     }
 
     // SET MODE
     bool    modeInterrupt = false;
-    uint8_t oldMode = LCD_STATUS & 0b11;      // Last 2 bits contains the current mode
+    uint8_t oldMode = LCD_STATUS & 0b11;       // Last 2 bits contains the current mode
     if (LY >= 144)                             // VBlank (0b01)
     {
         // mode 1
@@ -96,12 +96,12 @@ void gbPPU::SetLCDStatus()
     }       
     // just entered a new mode. Request interupt
     uint8_t newMode = LCD_STATUS & 0b11;
+    mGameBoy->mRom[0xFF41] = LCD_STATUS;
+
     if (modeInterrupt && (oldMode != newMode))
     {
         mGameBoy->mCpu.RequestInterrupt(gbInterrupt::LCD);
     }
-
-    mGameBoy->mRom[0xFF41] = LCD_STATUS;
 }
 
 void gbPPU::RenderScanline()
@@ -131,15 +131,13 @@ void gbPPU::RenderScanline()
 }
 
 void gbPPU::RenderBackground()
-{   
-
+{  
     uint8_t LCDControl = mGameBoy->mRom[0xFF40];
 
     if (!((LCDControl >> 0) & 1)) // LCD Enabled?
-    {
         return;
-    }
-    uint8_t  LY   = mGameBoy->mRom[0xFF44]; // Scanline
+    
+    const uint8_t  LY   = mGameBoy->mRom[0xFF44]; // Scanline
     
     uint16_t tileData = (LCDControl >> 4) & 1 ? 0x8000 : 0x8800;
     bool     unsig    = (LCDControl >> 4) & 1;  // Use signed with 0x8800
@@ -152,9 +150,9 @@ void gbPPU::RenderBackground()
     // Background Memory
     uint16_t backgroundMemory;
     if (windowEnable)
-        { backgroundMemory = (LCDControl >> 6) & 1 ? 0x9C00 : 0x9800; }
+        backgroundMemory = (LCDControl >> 6) & 1 ? 0x9C00 : 0x9800;
     else
-        { backgroundMemory = (LCDControl >> 3) & 1 ? 0x9C00 : 0x9800; }
+        backgroundMemory = (LCDControl >> 3) & 1 ? 0x9C00 : 0x9800;
 
     uint8_t scrollY = mGameBoy->ReadByte(0xFF42);
     uint8_t scrollX = mGameBoy->ReadByte(0xFF43);
@@ -235,7 +233,9 @@ void gbPPU::RenderSprites()
         uint8_t index = sprite*4;
         uint8_t yPos = mGameBoy->ReadByte(0xFE00+index)   - 16;
         uint8_t xPos = mGameBoy->ReadByte(0xFE00+index+1) - 8;
-        uint8_t tileLocation = mGameBoy->ReadByte(0xFE00+index+2); if (ySize == 16) { tileLocation &= ~(0b1); } // bit 0 is ignored on y=16 mode.
+        uint8_t tileLocation = mGameBoy->ReadByte(0xFE00 + index + 2);
+        if (ySize == 16)
+            tileLocation &= ~(0b1);
         uint8_t attributes   = mGameBoy->ReadByte(0xFE00+index+3);
 
         bool yFlip = (attributes >> 6) & 1;
@@ -281,10 +281,10 @@ void gbPPU::RenderSprites()
                 gbColorId col = GetPixelColor(ColorIdx, ColorAddress);
                 gbColor color = dmgPalette[col];
 
-                int xPix = 0 - tilePixel ;
-                xPix += 7 ;
+                int xPix = 0 - tilePixel;
+                xPix += 7;
 
-                int pixel = xPos+xPix ;
+                int pixel = xPos+xPix;
 
                 if ((scanline < 0) || (scanline > 143) || (pixel < 0) || (pixel > 159))
                 {
@@ -300,20 +300,20 @@ void gbPPU::RenderSprites()
 // Aka LY=LYC
 void gbPPU::CheckCoinsidenceFlag()
 {
-    uint8_t& LCD_STATUS = mGameBoy->mRom[0xFF41]; 
-    uint8_t  LY  = mGameBoy->mRom[0xFF44]; // Current scanline
-    uint8_t  LYC = mGameBoy->mRom[0xFF45]; // This is set by a the game, if same as LY then a interrupt is requested
-
+    const uint8_t  LY  = mGameBoy->mRom[0xFF44]; // Current scanline
+    const uint8_t  LYC = mGameBoy->mRom[0xFF45]; // This is set by a the game, if same as LY then a interrupt is requested
+    uint8_t& lcdStatus = mGameBoy->mRom[0xFF41]; 
+    
     if (LY == LYC)
     {    
-        LCD_STATUS |= 1 << 2;      // Set LY=LYC flag on the lcd
-        if ((LCD_STATUS >> 6) & 1) // Is LY=LYC interrupt enabled.
+        lcdStatus |= 1 << 2;      // Set LY=LYC flag on the lcd
+        if ((lcdStatus >> 6) & 1) // Is LY=LYC interrupt enabled.
         {
             mGameBoy->mCpu.RequestInterrupt(gbInterrupt::LCD);
         }
     }
     else
     {
-        LCD_STATUS &= ~(1 << 2);   // Reset LY=LYC flag on the lcd
+        lcdStatus &= ~(1 << 2);   // Reset LY=LYC flag on the lcd
     }
 }

@@ -14,7 +14,7 @@ gbGameBoy::gbGameBoy()
 
 void gbGameBoy::Clock()
 {
-    if (mCart.IsGameLoaded())
+    if (mCart.IsGameLoaded()) // get rid of this if statement...
     {
         mCpu.Clock();
     }

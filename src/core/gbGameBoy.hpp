@@ -4,6 +4,9 @@
 #include "gbPPU.hpp"
 #include "gbCart.hpp"
 #include "gbBootRom.hpp"
+
+#include "opcode/decompiler.hpp"
+
 #include "reg.hpp"
 
 // Include the emulator //
