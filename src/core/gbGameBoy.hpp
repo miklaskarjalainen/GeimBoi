@@ -5,11 +5,9 @@
 #include "gbCart.hpp"
 #include "gbBootRom.hpp"
 
-#include "opcode/decompiler.hpp"
+#include "opcode/debugger.hpp"
 
 #include "reg.hpp"
-
-// Include the emulator //
 
 namespace Giffi
 {
@@ -38,12 +36,13 @@ namespace Giffi
         void Reset();
         bool LoadRom(const std::string& _path);
 
-        void SetPalette   (gbColor _white, gbColor _lgray, gbColor _dgray, gbColor _black);
-        void PressButton  (gbButton _key);
-        void ReleaseButton(gbButton _key);
+        void SetPalette   (gbColor white, gbColor lgray, gbColor dgray, gbColor black);
+        void PressButton  (gbButton key);
+        void ReleaseButton(gbButton key);
 
-        uint8_t  ReadByte(uint16_t _addr) const;
+        uint8_t  ReadByte(uint16_t addr) const;
         uint16_t ReadWord() const;
+        uint16_t ReadWord(uint16_t addr) const;
     public:
         gbPPU  mPpu;
         gbZ80  mCpu;
@@ -64,4 +63,4 @@ namespace Giffi
 
 
 
-} // Namespace
+}

@@ -159,6 +159,14 @@ uint16_t gbGameBoy::ReadWord() const
 	return res;
 }
 
+uint16_t gbGameBoy::ReadWord(uint16_t addr) const
+{
+    uint16_t res = ReadByte(addr + 1);
+    res = res << 8;
+    res |= ReadByte(addr);
+    return res;
+}
+
 void gbGameBoy::WriteByte(uint16_t _addr, uint8_t _data)
 {
     if (_addr < 0x8000) // Cartridge is read only, writing here can be detect by on board hardware mostly for rom banking.
