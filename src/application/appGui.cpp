@@ -207,12 +207,12 @@ void appGui::UpdateDebug()
         ImGui::Begin("Control", nullptr, ImGuiWindowFlags_NoResize);
         ImGui::SetWindowSize(ImVec2(140, 136));
 
-        ImGui::Text("LastOp: %s", GetAssembly(sCpu->mLastExecutedOpcode).c_str());
-        ImGui::Text("NextOp: %s", GetAssembly(sCpu->ReadByte(sCpu->mRegPC.val)).c_str());
+
+        ImGui::Text("LastOp: %s", GetAssembly(sCpu->mLastExecutedOpcode).data());
+        ImGui::Text("NextOp: %s", GetAssembly(sCpu->ReadByte(sCpu->mRegPC.val)).data());
 
         if (ImGui::Button("FrameAdvance")) { mGameBoy->FrameAdvance(); mEmuPaused = true; }
         if (ImGui::Button("ExecuteOpcode")) { mGameBoy->Clock(); mEmuPaused = true; }
-        if (ImGui::Button("Scanline")) { mGameBoy->Clock(); mEmuPaused = true; }
         ImGui::ProgressBar((float)sCpu->mCyclesDone / 70221.0f);
         
         ImGui::End();
@@ -224,15 +224,16 @@ void appGui::UpdateDebug()
         // Window
         ImGui::Begin("Debugger", nullptr, ImGuiWindowFlags_None);
 
-        
-        for (int16_t offset = 0; offset < 256; offset++) {
+        for (int16_t offset = 0; offset < 256;) {
             const uint16_t addr = sCpu->mRegPC.val + offset;
             if (addr < 0)
                 continue;
-            uint8_t opcode = sCpu->ReadByte(addr + offset);
 
             std::stringstream assembly;
+            uint16_t opcode = sCpu->ReadWord(addr);
             assembly << GetAssembly(opcode) << std::hex;
+
+            // prints arguments for the assembly
             for (uint8_t i = 0; i < GetLength(opcode) - 1; i++) {
                 assembly << " [0x" << (unsigned int)sCpu->ReadByte(addr + i) << "]";
             }

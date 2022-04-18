@@ -182,7 +182,7 @@ void appWindow::DoEvents()
                 if (key == SDL_SCANCODE_S)         { mGameBoy->ReleaseButton(gbButton::DOWN);   break; }
                 if (key == SDL_SCANCODE_K)         { mGameBoy->ReleaseButton(gbButton::A);      break; }
                 if (key == SDL_SCANCODE_J)         { mGameBoy->ReleaseButton(gbButton::B);      break; }
-                if (key == SDL_SCANCODE_RETURN)    { mGameBoy->ReleaseButton(gbButton::START); break; }
+                if (key == SDL_SCANCODE_RETURN)    { mGameBoy->ReleaseButton(gbButton::START);  break; }
                 if (key == SDL_SCANCODE_BACKSLASH) { mGameBoy->ReleaseButton(gbButton::SELECT);  break; }
                 break;
             }

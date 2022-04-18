@@ -56,9 +56,7 @@
     <ClInclude Include="core\mbc\gbMBC.hpp" />
     <ClInclude Include="core\mbc\gbMBC2.hpp" />
     <ClInclude Include="core\gbBootRom.hpp" />
-    <ClInclude Include="core\opcode\cb_opcode.hpp" />
     <ClInclude Include="core\opcode\decompiler.hpp" />
-    <ClInclude Include="core\opcode\opcode.hpp" />
     <ClInclude Include="core\reg.hpp" />
     <ClInclude Include="core\mbc\gbMBC1.hpp" />
     <ClInclude Include="core\mbc\gbMBC3.hpp" />

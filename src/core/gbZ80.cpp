@@ -47,6 +47,11 @@ uint16_t gbZ80::ReadWord() const
     return mGameBoy->ReadWord();
 }
 
+uint16_t gbZ80::ReadWord(uint16_t addr) const
+{
+    return mGameBoy->ReadWord(addr);
+}
+
 void gbZ80::PushWordOntoStack(uint16_t _word)
 {
 	uint8_t high = _word >> 8 ;

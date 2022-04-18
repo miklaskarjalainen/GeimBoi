@@ -1,8 +1,6 @@
-#include "opcode.hpp"
-#include "cb_opcode.hpp"
-#include "../gbZ80.hpp"
-
 #include <iostream>
+#include <stdint.h>
+#include "../gbZ80.hpp"
 
 namespace Giffi
 {
@@ -41,214 +39,214 @@ void gbZ80::ExecuteNextOpcode()
 
         // 8BIT INC & DEC      
         case 0x04: // INC B
-            CPU_8BIT_INC(this, mRegBC.high);
+            CPU8BitInc(mRegBC.high);
             break;
         case 0x14: // INC D
-            CPU_8BIT_INC(this, mRegDE.high);
+            CPU8BitInc(mRegDE.high);
             break;
         case 0x24: // INC H
-            CPU_8BIT_INC(this, mRegHL.high);
+            CPU8BitInc(mRegHL.high);
             break;
         case 0x0C: // INC C
-            CPU_8BIT_INC(this, mRegBC.low);
+            CPU8BitInc(mRegBC.low);
             break;
         case 0x1C: // INC E
-            CPU_8BIT_INC(this, mRegDE.low);
+            CPU8BitInc(mRegDE.low);
             break;
         case 0x2C: // INC L
-            CPU_8BIT_INC(this, mRegHL.low);
+            CPU8BitInc(mRegHL.low);
             break;
         case 0x3C: // INC A 
-            CPU_8BIT_INC(this, mRegAF.high);
+            CPU8BitInc(mRegAF.high);
             break;
         case 0x34: // INC (HL)
         {
-            CPU_8BIT_MEMORY_INC(this, mRegHL.val);
+            CPU8BitMemInc(mRegHL.val);
             mCyclesDone+=8;
             break;
         }
         
         case 0x05: // DEC B
-            CPU_8BIT_DEC(this, mRegBC.high);
+            CPU8BitDec(mRegBC.high);
             break;
         case 0x15: // DEC D
-            CPU_8BIT_DEC(this, mRegDE.high);
+            CPU8BitDec(mRegDE.high);
             break;
         case 0x25: // DEC H
-            CPU_8BIT_DEC(this, mRegHL.high);
+            CPU8BitDec(mRegHL.high);
             break;
         case 0x0D: // DEC C
-            CPU_8BIT_DEC(this, mRegBC.low);
+            CPU8BitDec(mRegBC.low);
             break;
         case 0x1D: // DEC E
-            CPU_8BIT_DEC(this, mRegDE.low);
+            CPU8BitDec(mRegDE.low);
             break;
         case 0x2D: // DEC L
-            CPU_8BIT_DEC(this, mRegHL.low);
+            CPU8BitDec(mRegHL.low);
             break;
         case 0x3D: // DEC A
-            CPU_8BIT_DEC(this, mRegAF.high);
+            CPU8BitDec(mRegAF.high);
             break;
         case 0x35: // DEC (HL)
-            CPU_8BIT_MEMORY_DEC(this, mRegHL.val);
+            CPU8BitMemDec(mRegHL.val);
             mCyclesDone+=8;
             break;
 
         // 8BIT LOAD
         case 0x40: // LD B,B
-            CPU_REG_LOAD(this, mRegBC.high, mRegBC.high);
+            mRegBC.high = mRegBC.high;
             break;
         case 0x41: // LD B,C
-            CPU_REG_LOAD(this, mRegBC.high, mRegBC.low);
+            mRegBC.high = mRegBC.low;
             break;
         case 0x42: // LD B,D
-            CPU_REG_LOAD(this, mRegBC.high, mRegDE.high);
+            mRegBC.high = mRegDE.high;
             break;
         case 0x43: // LD B,E
-            CPU_REG_LOAD(this, mRegBC.high, mRegDE.low);
+            mRegBC.high = mRegDE.low;
             break;
         case 0x44: // LD B,H
-            CPU_REG_LOAD(this, mRegBC.high, mRegHL.high);
+            mRegBC.high = mRegHL.high;
             break;
         case 0x45: // LD B,L
-            CPU_REG_LOAD(this, mRegBC.high, mRegHL.low);
+            mRegBC.high = mRegHL.low;
             break;
         case 0x46: // LD B,(HL)
-            CPU_REG_LOAD(this, mRegBC.high, ReadByte(mRegHL.val) );
+            mRegBC.high = ReadByte(mRegHL.val);
             mCyclesDone += 4;
             break;
         case 0x47: // LD B,A
-            CPU_REG_LOAD(this, mRegBC.high, mRegAF.high);
+            mRegBC.high = mRegAF.high;
             break;
         
         case 0x48: // LD C,B
-            CPU_REG_LOAD(this, mRegBC.low, mRegBC.high);
+            mRegBC.low = mRegBC.high;
             break;
         case 0x49: // LD C,C
-            CPU_REG_LOAD(this, mRegBC.low, mRegBC.low);
+            mRegBC.low = mRegBC.low;
             break;
         case 0x4A: // LD C,D
-            CPU_REG_LOAD(this, mRegBC.low, mRegDE.high);
+            mRegBC.low = mRegDE.high;
             break;
         case 0x4B: // LD C,E
-            CPU_REG_LOAD(this, mRegBC.low, mRegDE.low);
+            mRegBC.low = mRegDE.low;
             break;
         case 0x4C: // LD C,H
-            CPU_REG_LOAD(this, mRegBC.low, mRegHL.high);
+            mRegBC.low = mRegHL.high;
             break;
         case 0x4D: // LD C,L
-            CPU_REG_LOAD(this, mRegBC.low, mRegHL.low);
+            mRegBC.low = mRegHL.low;
             break;
         case 0x4E: // LD C,(HL)
-            CPU_REG_LOAD(this, mRegBC.low, ReadByte(mRegHL.val) );
+            mRegBC.low = ReadByte(mRegHL.val);
             mCyclesDone += 4;
             break;
         case 0x4F: // LD C,A
-            CPU_REG_LOAD(this, mRegBC.low, mRegAF.high);
+            mRegBC.low = mRegAF.high;
             break;
 
         case 0x50: // LD D,B
-            CPU_REG_LOAD(this, mRegDE.high, mRegBC.high);
+            mRegDE.high = mRegBC.high;
             break;
         case 0x51: // LD D,C
-            CPU_REG_LOAD(this, mRegDE.high, mRegBC.low);
+            mRegDE.high = mRegBC.low;
             break;
         case 0x52: // LD D,D
-            CPU_REG_LOAD(this, mRegDE.high, mRegDE.high);
+            mRegDE.high = mRegDE.high;
             break;
         case 0x53: // LD D,E
-            CPU_REG_LOAD(this, mRegDE.high, mRegDE.low);
+            mRegDE.high = mRegDE.low;
             break;
         case 0x54: // LD D,H
-            CPU_REG_LOAD(this, mRegDE.high, mRegHL.high);
+            mRegDE.high = mRegHL.high;
             break;
         case 0x55: // LD D,L
-            CPU_REG_LOAD(this, mRegDE.high, mRegHL.low);
+            mRegDE.high = mRegHL.low;
             break;
         case 0x56: // LD D,(HL)
-            CPU_REG_LOAD(this, mRegDE.high, ReadByte(mRegHL.val) );
+            mRegDE.high = ReadByte(mRegHL.val);
             mCyclesDone += 4;
             break;
         case 0x57: // LD D,A
-            CPU_REG_LOAD(this, mRegDE.high, mRegAF.high);
+            mRegDE.high = mRegAF.high;
             break;
         
         case 0x58: // LD E,B
-            CPU_REG_LOAD(this, mRegDE.low, mRegBC.high);
+            mRegDE.low = mRegBC.high;
             break;
         case 0x59: // LD E,C
-            CPU_REG_LOAD(this, mRegDE.low, mRegBC.low);
+            mRegDE.low = mRegBC.low;
             break;
         case 0x5A: // LD E,D
-            CPU_REG_LOAD(this, mRegDE.low, mRegDE.high);
+            mRegDE.low = mRegDE.high;
             break;
         case 0x5B: // LD E,E
-            CPU_REG_LOAD(this, mRegDE.low, mRegDE.low);
+            mRegDE.low = mRegDE.low;
             break;
         case 0x5C: // LD E,H
-            CPU_REG_LOAD(this, mRegDE.low, mRegHL.high);
+            mRegDE.low = mRegHL.high;
             break;
         case 0x5D: // LD E,L
-            CPU_REG_LOAD(this, mRegDE.low, mRegHL.low);
+            mRegDE.low = mRegHL.low;
             break;
         case 0x5E: // LD E,(HL)
-            CPU_REG_LOAD(this, mRegDE.low, ReadByte(mRegHL.val) );
+            mRegDE.low = ReadByte(mRegHL.val);
             mCyclesDone += 4;
             break;
         case 0x5F: // LD E,A
-            CPU_REG_LOAD(this, mRegDE.low, mRegAF.high);
+            mRegDE.low = mRegAF.high;
             break;
         
         case 0x60: // LD H,B
-            CPU_REG_LOAD(this, mRegHL.high, mRegBC.high);
+            mRegHL.high = mRegBC.high;
             break;
         case 0x61: // LD H,C
-            CPU_REG_LOAD(this, mRegHL.high, mRegBC.low);
+            mRegHL.high = mRegBC.low;
             break;
         case 0x62: // LD H,D
-            CPU_REG_LOAD(this, mRegHL.high, mRegDE.high);
+            mRegHL.high = mRegDE.high;
             break;
         case 0x63: // LD H,E
-            CPU_REG_LOAD(this, mRegHL.high, mRegDE.low);
+            mRegHL.high = mRegDE.low;
             break;
         case 0x64: // LD H,H
-            CPU_REG_LOAD(this, mRegHL.high, mRegHL.high);
+            mRegHL.high = mRegHL.high;
             break;
         case 0x65: // LD H,L
-            CPU_REG_LOAD(this, mRegHL.high, mRegHL.low);
+            mRegHL.high = mRegHL.low;
             break;
         case 0x66: // LD H,(HL)
-            CPU_REG_LOAD(this, mRegHL.high, ReadByte(mRegHL.val) );
+            mRegHL.high = ReadByte(mRegHL.val);
             mCyclesDone += 4;
             break;
         case 0x67: // LD H,A
-            CPU_REG_LOAD(this, mRegHL.high, mRegAF.high);
+            mRegHL.high = mRegAF.high;
             break;
 
         case 0x68: // LD L,B
-            CPU_REG_LOAD(this, mRegHL.low, mRegBC.high);
+            mRegHL.low = mRegBC.high;
             break;
         case 0x69: // LD L,C
-            CPU_REG_LOAD(this, mRegHL.low, mRegBC.low);
+            mRegHL.low = mRegBC.low;
             break;
         case 0x6A: // LD L,D
-            CPU_REG_LOAD(this, mRegHL.low, mRegDE.high);
+            mRegHL.low = mRegDE.high;
             break;
         case 0x6B: // LD L,E
-            CPU_REG_LOAD(this, mRegHL.low, mRegDE.low);
+            mRegHL.low = mRegDE.low;
             break;
         case 0x6C: // LD L,H
-            CPU_REG_LOAD(this, mRegHL.low, mRegHL.high);
+            mRegHL.low = mRegHL.high;
             break;
         case 0x6D: // LD L,L
-            CPU_REG_LOAD(this, mRegHL.low, mRegHL.low);
+            mRegHL.low = mRegHL.low;
             break;
         case 0x6E: // LD L,(HL)
-            CPU_REG_LOAD(this, mRegHL.low, ReadByte(mRegHL.val) );
+            mRegHL.low = ReadByte(mRegHL.val);
             mCyclesDone += 4;
             break;
         case 0x6F: // LD L,A
-            CPU_REG_LOAD(this, mRegHL.low, mRegAF.high);
+            mRegHL.low = mRegAF.high;
             break;
 
         case 0x70: // LD (HL),B
@@ -281,55 +279,55 @@ void gbZ80::ExecuteNextOpcode()
             break;
 
         case 0x78: // LD A, B
-            CPU_REG_LOAD(this, mRegAF.high, mRegBC.high);
+            mRegAF.high = mRegBC.high;
             break;
         case 0x79: // LD A, C
-            CPU_REG_LOAD(this, mRegAF.high, mRegBC.low);
+            mRegAF.high = mRegBC.low;
             break;
         case 0x7A: // LD A, D
-            CPU_REG_LOAD(this, mRegAF.high, mRegDE.high);
+            mRegAF.high = mRegDE.high;
             break;
         case 0x7B: // LD A, E
-            CPU_REG_LOAD(this, mRegAF.high, mRegDE.low);
+            mRegAF.high = mRegDE.low;
             break;
         case 0x7C: // LD A, H
-            CPU_REG_LOAD(this, mRegAF.high, mRegHL.high);
+            mRegAF.high = mRegHL.high;
             break;
         case 0x7D: // LD A, L
-            CPU_REG_LOAD(this, mRegAF.high, mRegHL.low);
+            mRegAF.high = mRegHL.low;
             break;
         case 0x7E: // LD A,(HL)
-            CPU_REG_LOAD(this, mRegAF.high, ReadByte(mRegHL.val) );
+            mRegAF.high = ReadByte(mRegHL.val);
             mCyclesDone += 4;
             break;
         case 0x7F: // LD A, A
-            CPU_REG_LOAD(this, mRegAF.high, mRegAF.high);
+            mRegAF.high = mRegAF.high;
             break;
         case 0xEA: // LD (a16), A
-            WriteByte( ReadWord(), mRegAF.high);
+            WriteByte(ReadWord(), mRegAF.high);
             mRegPC.val  += 2;
             mCyclesDone += 12;
             break;
         case 0xFA: // LD A, (a16)
-            CPU_REG_LOAD(this, mRegAF.high, ReadByte( ReadWord() ));
+            mRegAF.high = ReadByte( ReadWord() );
             mRegPC.val  += 2;
             mCyclesDone += 12;
             break;
 
         case 0x02: // LD (BC), A
-            WriteByte( mRegBC.val, mRegAF.high);
+            WriteByte(mRegBC.val, mRegAF.high);
             mCyclesDone += 8;
             break;
         case 0x12: // LD (DE), A
-            WriteByte( mRegDE.val, mRegAF.high);
+            WriteByte(mRegDE.val, mRegAF.high);
             mCyclesDone += 8;
             break;
         case 0x22: // LD (HL+), A
-            WriteByte( mRegHL.val++, mRegAF.high);
+            WriteByte(mRegHL.val++, mRegAF.high);
             mCyclesDone += 8;
             break;
         case 0x32: // LD (HL-), A
-            WriteByte( mRegHL.val--, mRegAF.high);
+            WriteByte(mRegHL.val--, mRegAF.high);
             mCyclesDone += 8;
             break;
         
@@ -349,19 +347,19 @@ void gbZ80::ExecuteNextOpcode()
             }
 
         case 0x06: // LD B, d8
-            CPU_REG_LOAD(this, mRegBC.high, ReadByte(mRegPC.val++));
+            mRegBC.high = ReadByte(mRegPC.val++);
             mCyclesDone += 4;
             break;
         case 0x16: // LD D, d8
-            CPU_REG_LOAD(this, mRegDE.high, ReadByte(mRegPC.val++));
+            mRegDE.high = ReadByte(mRegPC.val++);
             mCyclesDone += 4;
             break;
         case 0x26: // LD H, d8
-            CPU_REG_LOAD(this, mRegHL.high, ReadByte(mRegPC.val++));
+            mRegHL.high = ReadByte(mRegPC.val++);
             mCyclesDone += 4;
             break;
         case 0x36: // LD (HL), d8
-            WriteByte( mRegHL.val, ReadByte(mRegPC.val++));
+            WriteByte(mRegHL.val, ReadByte(mRegPC.val++));
             mCyclesDone += 8;
             break;
         
@@ -374,7 +372,7 @@ void gbZ80::ExecuteNextOpcode()
             }
         case 0xF2: // LD A, (0xFF00 + C)
             {
-                uint8_t  data = ReadByte( 0xFF00 + mRegBC.low );
+                uint8_t data = ReadByte( 0xFF00 + mRegBC.low );
                 mRegAF.high = data;
                 mCyclesDone += 4;
                 break;
@@ -402,274 +400,274 @@ void gbZ80::ExecuteNextOpcode()
             }
 
         case 0x0A: // LD A, (BC)
-            CPU_REG_LOAD(this, mRegAF.high, ReadByte(mRegBC.val));
+            mRegAF.high = ReadByte(mRegBC.val);
             mCyclesDone += 4;
             break;
         case 0x1A: // LD A, (DE)
-            CPU_REG_LOAD(this, mRegAF.high, ReadByte(mRegDE.val));
+            mRegAF.high = ReadByte(mRegDE.val);
             mCyclesDone += 4;
             break;
         case 0x2A: // LD A, (HL+) (post increment HL)
-            CPU_REG_LOAD(this, mRegAF.high, ReadByte(mRegHL.val++));
+            mRegAF.high = ReadByte(mRegHL.val++);
             mCyclesDone += 4;
             break;
         case 0x3A: // LD A, (HL-) (post decrement HL)
-            CPU_REG_LOAD(this, mRegAF.high, ReadByte(mRegHL.val--));
+            mRegAF.high = ReadByte(mRegHL.val--);
             mCyclesDone += 4;
             break;
 
         case 0x0E: // LD C, d8
-            CPU_REG_LOAD(this, mRegBC.low, ReadByte(mRegPC.val++));
+            mRegBC.low = ReadByte(mRegPC.val++);
             mCyclesDone += 4;
             break;
         case 0x1E: // LD E, d8
-            CPU_REG_LOAD(this, mRegDE.low, ReadByte(mRegPC.val++));
+            mRegDE.low = ReadByte(mRegPC.val++);
             mCyclesDone += 4;
             break;
         case 0x2E: // LD L, d8
-            CPU_REG_LOAD(this, mRegHL.low, ReadByte(mRegPC.val++));
+            mRegHL.low = ReadByte(mRegPC.val++);
             mCyclesDone += 4;
             break;
         case 0x3E: // LD A, d8
-            CPU_REG_LOAD(this, mRegAF.high, ReadByte(mRegPC.val++));
+            mRegAF.high = ReadByte(mRegPC.val++);
             mCyclesDone += 4;
             break;
 
         // 8BIT SUB
         case 0x90: // SUB A, B
-            CPU_8BIT_SUB(this, mRegAF.high, mRegBC.high);
+            CPU8BitSub(mRegAF.high, mRegBC.high);
             break;
         case 0x91: // SUB A, C
-            CPU_8BIT_SUB(this, mRegAF.high, mRegBC.low);
+            CPU8BitSub(mRegAF.high, mRegBC.low);
             break;
         case 0x92: // SUB A, D
-            CPU_8BIT_SUB(this, mRegAF.high, mRegDE.high);
+            CPU8BitSub(mRegAF.high, mRegDE.high);
             break;
         case 0x93: // SUB A, E
-            CPU_8BIT_SUB(this, mRegAF.high, mRegDE.low);
+            CPU8BitSub(mRegAF.high, mRegDE.low);
             break;
         case 0x94: // SUB A, H
-            CPU_8BIT_SUB(this, mRegAF.high, mRegHL.high);
+            CPU8BitSub(mRegAF.high, mRegHL.high);
             break;
         case 0x95: // SUB A, L
-            CPU_8BIT_SUB(this, mRegAF.high, mRegHL.low);
+            CPU8BitSub(mRegAF.high, mRegHL.low);
             break;
         case 0x96: // SUB A, (HL)
-            CPU_8BIT_SUB(this, mRegAF.high, ReadByte(mRegHL.val) );
+            CPU8BitSub(mRegAF.high, ReadByte(mRegHL.val) );
             mCyclesDone += 4;
             break;
         case 0x97: // SUB A, A
-            CPU_8BIT_SUB(this, mRegAF.high, mRegAF.high);
+            CPU8BitSub(mRegAF.high, mRegAF.high);
             break;
         case 0xD6: // SUB A, d8
-            CPU_8BIT_SUB(this, mRegAF.high, ReadByte(mRegPC.val++) );
+            CPU8BitSub(mRegAF.high, ReadByte(mRegPC.val++) );
             mCyclesDone += 4;
             break;
 
         case 0x98: // SBC A, B
-            CPU_8BIT_SUB(this, mRegAF.high, mRegBC.high, true);
+            CPU8BitSub(mRegAF.high, mRegBC.high, true);
             break;
         case 0x99: // SBC A, C
-            CPU_8BIT_SUB(this, mRegAF.high, mRegBC.low, true);
+            CPU8BitSub(mRegAF.high, mRegBC.low, true);
             break;
         case 0x9A: // SBC A, D
-            CPU_8BIT_SUB(this, mRegAF.high, mRegDE.high, true);
+            CPU8BitSub(mRegAF.high, mRegDE.high, true);
             break;
         case 0x9B: // SBC A, E
-            CPU_8BIT_SUB(this, mRegAF.high, mRegDE.low, true);
+            CPU8BitSub(mRegAF.high, mRegDE.low, true);
             break;
         case 0x9C: // SBC A, H
-            CPU_8BIT_SUB(this, mRegAF.high, mRegHL.high, true);
+            CPU8BitSub(mRegAF.high, mRegHL.high, true);
             break;
         case 0x9D: // SBC A, L
-            CPU_8BIT_SUB(this, mRegAF.high, mRegHL.low, true);
+            CPU8BitSub(mRegAF.high, mRegHL.low, true);
             break;
         case 0x9E: // SBC A, (HL)
-            CPU_8BIT_SUB(this, mRegAF.high, ReadByte(mRegHL.val), true);
+            CPU8BitSub(mRegAF.high, ReadByte(mRegHL.val), true);
             mCyclesDone += 4;
             break;
         case 0x9F: // SBC A, A
-            CPU_8BIT_SUB(this, mRegAF.high, mRegAF.high, true);
+            CPU8BitSub(mRegAF.high, mRegAF.high, true);
             break;
         case 0xDE: // SBC A, d8
-            CPU_8BIT_SUB(this, mRegAF.high, ReadByte(mRegPC.val++), true);
+            CPU8BitSub(mRegAF.high, ReadByte(mRegPC.val++), true);
             mCyclesDone += 4;
             break;
 
         // 8BIT ADD
         case 0x80: // ADD A, B
-            CPU_8BIT_ADD(this, mRegAF.high, mRegBC.high );
+            CPU8BitAdd(mRegAF.high, mRegBC.high );
             break;
         case 0x81: // ADD A, C
-            CPU_8BIT_ADD(this, mRegAF.high, mRegBC.low );
+            CPU8BitAdd(mRegAF.high, mRegBC.low );
             break;
         case 0x82: // ADD A, D
-            CPU_8BIT_ADD(this, mRegAF.high, mRegDE.high );
+            CPU8BitAdd(mRegAF.high, mRegDE.high );
             break;
         case 0x83: // ADD A, E
-            CPU_8BIT_ADD(this, mRegAF.high, mRegDE.low );
+            CPU8BitAdd(mRegAF.high, mRegDE.low );
             break;
         case 0x84: // ADD A, H
-            CPU_8BIT_ADD(this, mRegAF.high, mRegHL.high );
+            CPU8BitAdd(mRegAF.high, mRegHL.high );
             break;
         case 0x85: // ADD A, L
-            CPU_8BIT_ADD(this, mRegAF.high, mRegHL.low );
+            CPU8BitAdd(mRegAF.high, mRegHL.low );
             break;
         case 0x86: // ADD A, (HL)
-            CPU_8BIT_ADD(this, mRegAF.high, ReadByte(mRegHL.val) );
+            CPU8BitAdd(mRegAF.high, ReadByte(mRegHL.val) );
             mCyclesDone += 4;
             break;
         case 0x87: // ADD A, A
-            CPU_8BIT_ADD(this, mRegAF.high, mRegAF.high );
+            CPU8BitAdd(mRegAF.high, mRegAF.high );
             break;
         case 0xC6: // ADD A, d8
-            CPU_8BIT_ADD(this, mRegAF.high, ReadByte(mRegPC.val++) );
+            CPU8BitAdd(mRegAF.high, ReadByte(mRegPC.val++) );
             mCyclesDone += 4;
             break;
         
         case 0x88: // ADC A, B
-            CPU_8BIT_ADD(this, mRegAF.high, mRegBC.high, true);
+            CPU8BitAdd(mRegAF.high, mRegBC.high, true);
             break;
         case 0x89: // ADC A, C
-            CPU_8BIT_ADD(this, mRegAF.high, mRegBC.low, true);
+            CPU8BitAdd(mRegAF.high, mRegBC.low, true);
             break;
         case 0x8A: // ADC A, D
-            CPU_8BIT_ADD(this, mRegAF.high, mRegDE.high, true);
+            CPU8BitAdd(mRegAF.high, mRegDE.high, true);
             break;
         case 0x8B: // ADC A, E
-            CPU_8BIT_ADD(this, mRegAF.high, mRegDE.low, true);
+            CPU8BitAdd(mRegAF.high, mRegDE.low, true);
             break;
         case 0x8C: // ADC A, H
-            CPU_8BIT_ADD(this, mRegAF.high, mRegHL.high, true);
+            CPU8BitAdd(mRegAF.high, mRegHL.high, true);
             break;
         case 0x8D: // ADC A, L
-            CPU_8BIT_ADD(this, mRegAF.high, mRegHL.low, true);
+            CPU8BitAdd(mRegAF.high, mRegHL.low, true);
             break;
         case 0x8E: // ADC A, (HL)
-            CPU_8BIT_ADD(this, mRegAF.high, ReadByte(mRegHL.val), true);
+            CPU8BitAdd(mRegAF.high, ReadByte(mRegHL.val), true);
             mCyclesDone += 4;
             break;
         case 0x8F: // ADC A, A
-            CPU_8BIT_ADD(this, mRegAF.high, mRegAF.high, true);
+            CPU8BitAdd(mRegAF.high, mRegAF.high, true);
             break;
         case 0xCE: // ADC A, d8
-            CPU_8BIT_ADD(this, mRegAF.high, ReadByte(mRegPC.val++), true);
+            CPU8BitAdd(mRegAF.high, ReadByte(mRegPC.val++), true);
             mCyclesDone += 4;
             break;
 
 
         // Comparisions
         case 0xA0: // AND B
-            CPU_8BIT_AND(this, mRegBC.high);
+            CPU8BitAnd(mRegBC.high);
             break;
         case 0xA1: // AND C
-            CPU_8BIT_AND(this, mRegBC.low);
+            CPU8BitAnd(mRegBC.low);
             break;
         case 0xA2: // AND D
-            CPU_8BIT_AND(this, mRegDE.high);
+            CPU8BitAnd(mRegDE.high);
             break;
         case 0xA3: // AND E
-            CPU_8BIT_AND(this, mRegDE.low);
+            CPU8BitAnd(mRegDE.low);
             break;
         case 0xA4: // AND H
-            CPU_8BIT_AND(this, mRegHL.high);
+            CPU8BitAnd(mRegHL.high);
             break;
         case 0xA5: // AND L
-            CPU_8BIT_AND(this, mRegHL.low);
+            CPU8BitAnd(mRegHL.low);
             break;
         case 0xA6: // AND (HL)
-            CPU_8BIT_AND(this, ReadByte(mRegHL.val) );
+            CPU8BitAnd(ReadByte(mRegHL.val) );
             break;
         case 0xA7: // AND A
-            CPU_8BIT_AND(this, mRegAF.high);
+            CPU8BitAnd(mRegAF.high);
             break;
         case 0xE6: // AND d8
-            CPU_8BIT_AND(this, ReadByte(mRegPC.val++) );
+            CPU8BitAnd(ReadByte(mRegPC.val++));
             break;
 
         case 0xB0: // OR B
-            CPU_8BIT_OR(this, mRegBC.high);
+            CPU8BitOr(mRegBC.high);
             break;
         case 0xB1: // OR C
-            CPU_8BIT_OR(this, mRegBC.low);
+            CPU8BitOr(mRegBC.low);
             break;
         case 0xB2: // OR D
-            CPU_8BIT_OR(this, mRegDE.high);
+            CPU8BitOr(mRegDE.high);
             break;
         case 0xB3: // OR E
-            CPU_8BIT_OR(this, mRegDE.low);
+            CPU8BitOr(mRegDE.low);
             break;
         case 0xB4: // OR H
-            CPU_8BIT_OR(this, mRegHL.high);
+            CPU8BitOr(mRegHL.high);
             break;
         case 0xB5: // OR L
-            CPU_8BIT_OR(this, mRegHL.low);
+            CPU8BitOr(mRegHL.low);
             break;
         case 0xB6: // OR (HL)
-            CPU_8BIT_OR(this, ReadByte(mRegHL.val) );
+            CPU8BitOr(ReadByte(mRegHL.val) );
             break;
         case 0xB7: // OR A
-            CPU_8BIT_OR(this, mRegAF.high);
+            CPU8BitOr(mRegAF.high);
             break;
         case 0xF6: // OR d8
-            CPU_8BIT_OR(this, ReadByte(mRegPC.val++) );
+            CPU8BitOr(ReadByte(mRegPC.val++) );
             break;
 
         case 0xA8: // XOR B
-            CPU_8BIT_XOR(this, mRegBC.high);
+            CPU8BitXor(mRegBC.high);
             break;
         case 0xA9: // XOR C
-            CPU_8BIT_XOR(this, mRegBC.low);
+            CPU8BitXor(mRegBC.low);
             break;
         case 0xAA: // XOR D
-            CPU_8BIT_XOR(this, mRegDE.high);
+            CPU8BitXor(mRegDE.high);
             break;
         case 0xAB: // XOR E
-            CPU_8BIT_XOR(this, mRegDE.low);
+            CPU8BitXor(mRegDE.low);
             break;
         case 0xAC: // XOR H
-            CPU_8BIT_XOR(this, mRegHL.high);
+            CPU8BitXor(mRegHL.high);
             break;
         case 0xAD: // XOR L
-            CPU_8BIT_XOR(this, mRegHL.low);
+            CPU8BitXor(mRegHL.low);
             break;
         case 0xAE: // XOR (HL)
-            CPU_8BIT_XOR(this, ReadByte(mRegHL.val) );
+            CPU8BitXor(ReadByte(mRegHL.val) );
             break;
         case 0xAF: // XOR A
-            CPU_8BIT_XOR(this, mRegAF.high);
+            CPU8BitXor(mRegAF.high);
             break;
         case 0xEE: // XOR d8
-            CPU_8BIT_XOR(this, ReadByte(mRegPC.val++) );
+            CPU8BitXor(ReadByte(mRegPC.val++) );
             break;
 
         case 0xB8: // CP B
-            CPU_8BIT_COMPARE(this, mRegBC.high);
+            CPU8BitCompare(mRegBC.high);
             break;
         case 0xB9: // CP C
-            CPU_8BIT_COMPARE(this, mRegBC.low);
+            CPU8BitCompare(mRegBC.low);
             break;
         case 0xBA: // CP D
-            CPU_8BIT_COMPARE(this, mRegDE.high);
+            CPU8BitCompare(mRegDE.high);
             break;
         case 0xBB: // CP E
-            CPU_8BIT_COMPARE(this, mRegDE.low);
+            CPU8BitCompare(mRegDE.low);
             break;
         case 0xBC: // CP H
-            CPU_8BIT_COMPARE(this, mRegHL.high);
+            CPU8BitCompare(mRegHL.high);
             break;
         case 0xBD: // CP L
-            CPU_8BIT_COMPARE(this, mRegHL.low);
+            CPU8BitCompare(mRegHL.low);
             break;
         case 0xBE: // CP (HL)
-            CPU_8BIT_COMPARE(this, ReadByte(mRegHL.val) );
+            CPU8BitCompare(ReadByte(mRegHL.val));
             mCyclesDone += 4;
             break;
         case 0xBF: // CP A
-            CPU_8BIT_COMPARE(this, mRegAF.high);
+            CPU8BitCompare(mRegAF.high);
             break;
         case 0xFE: // CP d8
-            CPU_8BIT_COMPARE(this, ReadByte(mRegPC.val++) );
+            CPU8BitCompare(ReadByte(mRegPC.val++));
             mCyclesDone += 4;
             break;
 
@@ -693,45 +691,45 @@ void gbZ80::ExecuteNextOpcode()
 
         // 16BIT DEC  
         case 0x0B: // DEC BC
-            CPU_16BIT_DEC(this, mRegBC.val);
+            mRegBC.val--;
             mCyclesDone += 4;
             break;
         case 0x1B: // DEC DE
-            CPU_16BIT_DEC(this, mRegDE.val);
+            mRegDE.val--;
             mCyclesDone += 4;
             break;
         case 0x2B: // DEC HL
-            CPU_16BIT_DEC(this, mRegHL.val);
+            mRegHL.val--;
             mCyclesDone += 4;
             break;
         case 0x3B: // DEC SP
-            CPU_16BIT_DEC(this, mRegSP.val);
+            mRegSP.val--;
             mCyclesDone += 4;
             break;
 
         // 16BIT LOAD
         case 0x01: // LD BC, d16
-            CPU_16BIT_LOAD(this, mRegBC.val, ReadWord());
+            mRegBC.val = ReadWord();
             mRegPC.val += 2;
             mCyclesDone += 8;
             break;
         case 0x11: // LD DE, d16
-            CPU_16BIT_LOAD(this, mRegDE.val, ReadWord());
+            mRegDE.val = ReadWord();
             mRegPC.val += 2;
             mCyclesDone += 8;
             break;
         case 0x21: // LD HL, d16
-            CPU_16BIT_LOAD(this, mRegHL.val, ReadWord());
+            mRegHL.val = ReadWord();
             mRegPC.val += 2;
             mCyclesDone += 8;
             break;
         case 0x31: // LD SP, d16
-            CPU_16BIT_LOAD(this, mRegSP.val, ReadWord());
+            mRegSP.val = ReadWord();
             mRegPC.val += 2;
             mCyclesDone += 8;
             break;
         case 0xF9: // LD SP, HL
-            CPU_16BIT_LOAD(this, mRegSP.val, mRegHL.val);
+            mRegSP.val = mRegHL.val;
             mCyclesDone += 4;
             break;
         case 0xF8: // LD HL, SP+r8
@@ -752,7 +750,7 @@ void gbZ80::ExecuteNextOpcode()
             {
                 mRegAF.low |= 1 << gbFlag::Carry;
             }            
-		}break ;
+		} break;
         case 0x08: // LD (a16),SP
         {
             uint16_t word = ReadWord();
@@ -766,19 +764,19 @@ void gbZ80::ExecuteNextOpcode()
 
         // 16-bit add
 		case 0x09: // ADD HL, BC
-            CPU_16BIT_ADD(this, mRegHL.val, mRegBC.val);
+            CPU16BitAdd(mRegHL.val, mRegBC.val);
             mCyclesDone += 4;
             break;
 		case 0x19: // ADD HL, DE
-            CPU_16BIT_ADD(this, mRegHL.val, mRegDE.val);
+            CPU16BitAdd(mRegHL.val, mRegDE.val);
             mCyclesDone += 4;
             break;
 		case 0x29: // ADD HL, HL
-            CPU_16BIT_ADD(this, mRegHL.val, mRegHL.val);
+            CPU16BitAdd(mRegHL.val, mRegHL.val);
             mCyclesDone += 4;
             break;
 		case 0x39: // ADD HL, SP
-            CPU_16BIT_ADD(this, mRegHL.val, mRegSP.val);
+            CPU16BitAdd(mRegHL.val, mRegSP.val);
             mCyclesDone += 4;
             break;
 
@@ -819,19 +817,19 @@ void gbZ80::ExecuteNextOpcode()
 
         // Shifts (Reset Zero flag)
         case 0x07: // RLCA
-            CPU_RLC(this, mRegAF.high);
+            CPU_RLC(mRegAF.high);
             mRegAF.low &= ~(1 << gbFlag::Zero);
             break;
         case 0x0F: // RRCA
-            CPU_RRC(this, mRegAF.high);
+            CPU_RRC(mRegAF.high);
             mRegAF.low &= ~(1 << gbFlag::Zero);
             break;
         case 0x17: // RLA
-            CPU_RL(this, mRegAF.high);
+            CPU_RL(mRegAF.high);
             mRegAF.low &= ~(1 << gbFlag::Zero);
             break;
         case 0x1F: // RRA
-            CPU_RR(this, mRegAF.high);
+            CPU_RR(mRegAF.high);
             mRegAF.low &= ~(1 << gbFlag::Zero);
             break;
 
@@ -840,100 +838,100 @@ void gbZ80::ExecuteNextOpcode()
             mRegPC.val = mRegHL.val;
             break;
 		case 0xC3: // JP a16
-            CPU_JUMP(this, false, 0, false);
+            CPUJump(false, 0, false);
             break;
 		case 0xC2: // JP NZ, a16
-            CPU_JUMP(this, true, gbFlag::Zero, false);
+            CPUJump(true, gbFlag::Zero, false);
             break;
 		case 0xCA: // JP Z, a16
-            CPU_JUMP(this, true, gbFlag::Zero, true);
+            CPUJump(true, gbFlag::Zero, true);
             break;
 		case 0xD2: // JP NC, a16
-            CPU_JUMP(this, true, gbFlag::Carry, false);
+            CPUJump(true, gbFlag::Carry, false);
             break;
 		case 0xDA: // JP C, a16
-            CPU_JUMP(this, true, gbFlag::Carry, true);
+            CPUJump(true, gbFlag::Carry, true);
             break;
         
         case 0x18: // JR r8
-            CPU_JUMP_IMMEDIATE(this);
+            CPUJumpImmediate(false, 0, false);
             break;
 		case 0x20: // JR NZ, r8
-            CPU_JUMP_IMMEDIATE(this, true, gbFlag::Zero, false);
+            CPUJumpImmediate(true, gbFlag::Zero, false);
             break;
 		case 0x28: // JR  Z, r8
-            CPU_JUMP_IMMEDIATE(this, true, gbFlag::Zero, true);
+            CPUJumpImmediate(true, gbFlag::Zero, true);
             break;
 		case 0x30: // JR NC, r8
-            CPU_JUMP_IMMEDIATE(this, true, gbFlag::Carry, false);
+            CPUJumpImmediate(true, gbFlag::Carry, false);
             break;
 		case 0x38: // JR  C, r8
-            CPU_JUMP_IMMEDIATE(this, true, gbFlag::Carry, true);
+            CPUJumpImmediate(true, gbFlag::Carry, true);
             break;
 
         case 0xC9: // RET
-            CPU_RET(this);
+            CPURet(false, 0, false);
             break;
         case 0xC0: // RET NZ
-            CPU_RET(this, true, gbFlag::Zero, false);
+            CPURet(true, gbFlag::Zero, false);
             break;
         case 0xC8: // RET Z
-            CPU_RET(this, true, gbFlag::Zero, true);
+            CPURet(true, gbFlag::Zero, true);
             break;
         case 0xD0: // RET NC
-            CPU_RET(this, true, gbFlag::Carry, false);
+            CPURet(true, gbFlag::Carry, false);
             break;
         case 0xD8: // RET C
-            CPU_RET(this, true, gbFlag::Carry, true);
+            CPURet(true, gbFlag::Carry, true);
             break;
         case 0xD9: // RETI
-            CPU_RET(this);
+            CPURet(false, 0, false);
             mEnableInterrupts = true;
             break;
 
         case 0xCD: // CALL a16
-            CPU_CALL(this);
+            CPUCall(false, 0, false);
             break;
         case 0xC4: // CALL NZ, a16
-            CPU_CALL(this, true, gbFlag::Zero, false);
+            CPUCall(true, gbFlag::Zero, false);
             break;
 		case 0xCC: // CALL  Z, a16
-            CPU_CALL(this, true, gbFlag::Zero, true);
+            CPUCall(true, gbFlag::Zero, true);
             break;
 		case 0xD4: // CALL NC, a16
-            CPU_CALL(this, true, gbFlag::Carry, false);
+            CPUCall(true, gbFlag::Carry, false);
             break;
 		case 0xDC: // CALL  C, a16
-            CPU_CALL(this, true, gbFlag::Carry, true);
+            CPUCall(true, gbFlag::Carry, true);
             break;
 
         case 0xC7: // RST 00H
-            CPU_RESTART(this, 0x00);
+            CPURestart(0x00);
             break;
         case 0xCF: // RST 08H
-            CPU_RESTART(this, 0x08);
+            CPURestart(0x08);
             break;
         case 0xD7: // RST 10H
-            CPU_RESTART(this, 0x10);
+            CPURestart(0x10);
             break;
         case 0xDF: // RST 18H
-            CPU_RESTART(this, 0x18);
+            CPURestart(0x18);
             break;
         case 0xE7: // RST 20H
-            CPU_RESTART(this, 0x20);
+            CPURestart(0x20);
             break;
         case 0xEF: // RST 28H
-            CPU_RESTART(this, 0x28);
+            CPURestart(0x28);
             break;
         case 0xF7: // RST 30H
-            CPU_RESTART(this, 0x30);
+            CPURestart(0x30);
             break;
         case 0xFF: // RST 38H
-            CPU_RESTART(this, 0x38);
+            CPURestart(0x38);
             break;
         
         case 0x27: // DAA
-            CPU_DAA(this);
+            CPU_DAA();
             break;
         case 0x2F: // CPL (flip A register's bits)
         {
@@ -982,90 +980,90 @@ void gbZ80::ExecuteNextOpcode()
 
 // 8 Bit Operations
 
-void CPU_8BIT_INC(gbZ80* _emu, uint8_t& _reg)
+void gbZ80::CPU8BitInc(uint8_t& _reg)
 {
     uint8_t before = _reg;
     _reg++;
 
-    _emu->mRegAF.low &= ~(1 << gbFlag::Zero);      // Reset zero flag
-    _emu->mRegAF.low &= ~(1 << gbFlag::Substract); // Reset substract flag
-    _emu->mRegAF.low &= ~(1 << gbFlag::HalfCarry); // Reset halfcarry flag
+    mRegAF.low &= ~(1 << gbFlag::Zero);      // Reset zero flag
+    mRegAF.low &= ~(1 << gbFlag::Substract); // Reset substract flag
+    mRegAF.low &= ~(1 << gbFlag::HalfCarry); // Reset halfcarry flag
 
     if (_reg == 0)
     {
-        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+        mRegAF.low |= 1 << gbFlag::Zero;
     }
     if ((before & 0xF) == 0xF)
     {
-        _emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
+        mRegAF.low |= 1 << gbFlag::HalfCarry;
     }
 }
 
-void CPU_8BIT_MEMORY_INC(gbZ80* _emu, uint16_t _addr)
-{
-    uint8_t before = _emu->ReadByte(_addr);
-    _emu->WriteByte(_addr, before + 1);
-
-    _emu->mRegAF.low &= ~(1 << gbFlag::Zero);      // Reset zero flag
-    _emu->mRegAF.low &= ~(1 << gbFlag::Substract); // Reset substract flag
-    _emu->mRegAF.low &= ~(1 << gbFlag::HalfCarry); // Reset halfcarry flag
-
-    if ((uint8_t)(before + 1) == 0U)
-    {
-        _emu->mRegAF.low |= 1 << gbFlag::Zero;
-    }
-    if ((before & 0xF) == 0xF)
-    {
-        _emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
-    }
-}
-
-void CPU_8BIT_DEC(gbZ80* _emu, uint8_t& _reg)
+void gbZ80::CPU8BitDec(uint8_t& _reg)
 {
     uint8_t before = _reg;
     _reg--;
 
-    _emu->mRegAF.low &= ~(1 << gbFlag::Zero);      // Reset zero flag
-    _emu->mRegAF.low |=  (1 << gbFlag::Substract); // Set substract flag
-    _emu->mRegAF.low &= ~(1 << gbFlag::HalfCarry); // Reset halfcarry flag
+    mRegAF.low &= ~(1 << gbFlag::Zero);      // Reset zero flag
+    mRegAF.low |= (1 << gbFlag::Substract); // Set substract flag
+    mRegAF.low &= ~(1 << gbFlag::HalfCarry); // Reset halfcarry flag
 
     if (_reg == 0)
     {
-        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+        mRegAF.low |= 1 << gbFlag::Zero;
     }
     if ((before & 0xF) == 0)
     {
-        _emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
+        mRegAF.low |= 1 << gbFlag::HalfCarry;
     }
 }
 
-void CPU_8BIT_MEMORY_DEC(gbZ80* _emu, uint16_t _addr)
+void gbZ80::CPU8BitMemInc(uint16_t _addr)
 {
-    uint8_t before = _emu->ReadByte(_addr);
-    _emu->WriteByte(_addr, before-1);
+    uint8_t before = ReadByte(_addr);
+    WriteByte(_addr, before + 1);
 
-    _emu->mRegAF.low &= ~(1 << gbFlag::Zero);      // Reset zero flag
-    _emu->mRegAF.low |=   1 << gbFlag::Substract;  // Set substract flag
-    _emu->mRegAF.low &= ~(1 << gbFlag::HalfCarry); // Reset halfcarry flag
+    mRegAF.low &= ~(1 << gbFlag::Zero);      // Reset zero flag
+    mRegAF.low &= ~(1 << gbFlag::Substract); // Reset substract flag
+    mRegAF.low &= ~(1 << gbFlag::HalfCarry); // Reset halfcarry flag
+
+    if ((uint8_t)(before + 1) == 0U)
+    {
+        mRegAF.low |= 1 << gbFlag::Zero;
+    }
+    if ((before & 0xF) == 0xF)
+    {
+        mRegAF.low |= 1 << gbFlag::HalfCarry;
+    }
+}
+
+void gbZ80::CPU8BitMemDec(uint16_t _addr)
+{
+    uint8_t before = ReadByte(_addr);
+    WriteByte(_addr, before-1);
+
+    mRegAF.low &= ~(1 << gbFlag::Zero);      // Reset zero flag
+    mRegAF.low |=   1 << gbFlag::Substract;  // Set substract flag
+    mRegAF.low &= ~(1 << gbFlag::HalfCarry); // Reset halfcarry flag
 
     if ((before - 1) == 0)
     {
-        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+        mRegAF.low |= 1 << gbFlag::Zero;
     }
     if ((before & 0xF) == 0)
     {
-        _emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
+        mRegAF.low |= 1 << gbFlag::HalfCarry;
     }
 }
 
-void CPU_8BIT_ADD(gbZ80* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
+void gbZ80::CPU8BitAdd(uint8_t& _reg, uint8_t _amount, bool _add_carry)
 {
     uint8_t carry = 0x00;
 
     // If add carry and carry flag is enabled
     if (_add_carry)
     {
-        if ((_emu->mRegAF.low >> gbFlag::Carry) & 0b1)
+        if ((mRegAF.low >> gbFlag::Carry) & 0b1)
         {
             carry = 1;
         }
@@ -1074,247 +1072,224 @@ void CPU_8BIT_ADD(gbZ80* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
     uint8_t result = (uint8_t)result_full;
 
     // Reset all flags
-    _emu->mRegAF.low = 0x00;
+    mRegAF.low = 0x00;
 
     if  (result == 0)
     {
-        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+        mRegAF.low |= 1 << gbFlag::Zero;
     }
 	if (result_full > 0xFF)
     {
-		_emu->mRegAF.low |= 1 << gbFlag::Carry;
+		mRegAF.low |= 1 << gbFlag::Carry;
     }
 	if (((_reg & 0xF) + (_amount & 0xF) + carry) > 0xF)
     {
-		_emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
+		mRegAF.low |= 1 << gbFlag::HalfCarry;
     }
 
     _reg = result;
 }
 
-void CPU_8BIT_SUB(gbZ80* _emu, uint8_t& _reg, uint8_t _amount, bool _add_carry)
+void gbZ80::CPU8BitSub(uint8_t& reg, uint8_t amount, bool addCarry)
 {
     uint8_t carry = 0x00;
 
     // If add carry and carry flag is enabled
-    if (_add_carry)
+    if (addCarry)
     {
-        if ((_emu->mRegAF.low >> gbFlag::Carry) & 0b1)
+        if ((mRegAF.low >> gbFlag::Carry) & 0b1)
         {
             carry = 1;
         }
     }
-    int result_full = _reg - _amount - carry;
+    int result_full = reg - amount - carry;
     uint8_t result = (uint8_t)result_full;
 
     // Reset all flags
-    _emu->mRegAF.low = 0x00;
-    _emu->mRegAF.low |= 1 << gbFlag::Substract;
+    mRegAF.low = 0x00;
+    mRegAF.low |= 1 << gbFlag::Substract;
 
     if  (result == 0)
     {
-        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+        mRegAF.low |= 1 << gbFlag::Zero;
     }
 	if (result_full < 0)
     {
-		_emu->mRegAF.low |= 1 << gbFlag::Carry;
+		mRegAF.low |= 1 << gbFlag::Carry;
     }
-	if (((_reg & 0xF) - (_amount & 0xF) - carry) < 0)
+	if (((reg & 0xF) - (amount & 0xF) - carry) < 0)
     {
-		_emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
+		mRegAF.low |= 1 << gbFlag::HalfCarry;
     }
 
-    _reg = result;
+    reg = result;
 }
 
-void CPU_REG_LOAD(gbZ80* _emu, uint8_t& _reg, uint8_t _data)
+void gbZ80::CPU16BitAdd(uint16_t& reg, uint16_t value)
 {
-    _reg = _data;
-}
-
-// 16 Bit Operations
-void CPU_16BIT_INC(gbZ80* _emu, uint16_t& _reg)
-{
-    _reg++;
-}
-
-void CPU_16BIT_DEC(gbZ80* _emu, uint16_t& _reg)
-{
-    _reg--;
-}
-
-// Loads the next "argument"
-void CPU_16BIT_LOAD(gbZ80* _emu, uint16_t& _reg, uint16_t _data) 
-{
-    _reg = _data;
-}
-
-void CPU_16BIT_ADD(gbZ80* _emu, uint16_t& _reg, uint16_t _value)
-{
-	unsigned int result = _reg + _value;
+	unsigned int result = reg + value;
 
     // Reset Flags
-	_emu->mRegAF.low &= ~(1 << gbFlag::Substract);
-    _emu->mRegAF.low &= ~(1 << gbFlag::Carry);
-    _emu->mRegAF.low &= ~(1 << gbFlag::HalfCarry);
+	mRegAF.low &= ~(1 << gbFlag::Substract);
+    mRegAF.low &= ~(1 << gbFlag::Carry);
+    mRegAF.low &= ~(1 << gbFlag::HalfCarry);
 
 	if ( (result & 0x10000) != 0)
     {
-		_emu->mRegAF.low |= 1 << gbFlag::Carry;
+		mRegAF.low |= 1 << gbFlag::Carry;
     }
-	if ( (_reg & 0xFFF) + (_value & 0xFFF) > 0xFFF)
+	if ( (reg & 0xFFF) + (value & 0xFFF) > 0xFFF)
     {
-        _emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
+        mRegAF.low |= 1 << gbFlag::HalfCarry;
     }
-    _reg = (uint16_t)result;	
+    reg = (uint16_t)result;	
 }
 
 // Bitwise operations
-void CPU_8BIT_COMPARE(gbZ80* _emu, uint8_t _bits)
+void gbZ80::CPU8BitCompare(uint8_t bits)
 {
     // Substraction flag set, others reset
-    uint8_t before = _emu->mRegAF.high;
-    _emu->mRegAF.low = 0b01000000;
+    uint8_t before = mRegAF.high;
+    mRegAF.low = 0b01000000;
 
-    if (_emu->mRegAF.high == _bits)
+    if (mRegAF.high == bits)
     {
-        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+        mRegAF.low |= 1 << gbFlag::Zero;
     }
-    if (_emu->mRegAF.high < _bits)
+    if (mRegAF.high < bits)
     {
-        _emu->mRegAF.low |= 1 << gbFlag::Carry;
+        mRegAF.low |= 1 << gbFlag::Carry;
     }
     
     int16_t htest = before & 0xF;
-    htest -= (_bits & 0xF);
+    htest -= (bits & 0xF);
     if (htest < 0)
     {
-	    _emu->mRegAF.low |= 1 << gbFlag::HalfCarry;
+	    mRegAF.low |= 1 << gbFlag::HalfCarry;
     }
 }
 
-void CPU_8BIT_AND(gbZ80* _emu, uint8_t _mask)
+void gbZ80::CPU8BitAnd(uint8_t mask)
 {
     // Set Halfcarry, reset everything else
-    _emu->mRegAF.low = 0b0010 << 4; 
+    mRegAF.low = 0b0010 << 4; 
 
     // Do the operation, set zeroflag if result was zero
-    _emu->mRegAF.high &= _mask;
-    if (_emu->mRegAF.high == 0x00)
+    mRegAF.high &= mask;
+    if (mRegAF.high == 0x00)
     {
-        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+        mRegAF.low |= 1 << gbFlag::Zero;
     }
 }
 
-void CPU_8BIT_XOR(gbZ80* _emu, uint8_t _mask)
+void gbZ80::CPU8BitXor(uint8_t mask)
 {
     // Reset Flags
-    _emu->mRegAF.low = 0x00;
+    mRegAF.low = 0x00;
 
     // Do the operation, set zeroflag if result was zero
-    _emu->mRegAF.high ^= _mask;
-    if (_emu->mRegAF.high == 0x00)
-        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+    mRegAF.high ^= mask;
+    if (mRegAF.high == 0x00)
+        mRegAF.low |= 1 << gbFlag::Zero;
 }
 
-void CPU_8BIT_OR(gbZ80* _emu, uint8_t _mask)
+void gbZ80::CPU8BitOr(uint8_t mask)
 {
     // Reset Flags
-    _emu->mRegAF.low = 0x00;
+    mRegAF.low = 0x00;
 
     // Do the operation, set zeroflag if result was zero
-    _emu->mRegAF.high |= _mask;
-    if (_emu->mRegAF.high == 0x00)
-        _emu->mRegAF.low |= 1 << gbFlag::Zero;
+    mRegAF.high |= mask;
+    if (mRegAF.high == 0x00)
+        mRegAF.low |= 1 << gbFlag::Zero;
 }
 
 // Jumps
-void CPU_JUMP(gbZ80* _emu, bool _do_comprision, uint8_t _flag, bool _state)
+void gbZ80::CPUJump(bool doComprision, uint8_t flag, bool state)
 {
-	uint16_t word = _emu->ReadWord( );
-	_emu->mRegPC.val += 2;
-    _emu->mCyclesDone += 8; // Failed comparision takes 12 cycles (4 added before), on successful jump this takes 16cycles
+	uint16_t word = ReadWord();
+	mRegPC.val += 2;
+    mCyclesDone += 8; // Failed comparision takes 12 cycles (4 added before), on successful jump this takes 16cycles
 
-	if (!_do_comprision)
+	if (!doComprision)
 	{
-		_emu->mRegPC.val = word;
-        _emu->mCyclesDone += 4;
+		mRegPC.val = word;
+        mCyclesDone += 4;
 	}
-	else if ( ((_emu->mRegAF.low >> _flag ) & 1) == _state)
+	else if ( ((mRegAF.low >> flag) & 1) == state)
 	{
-		_emu->mRegPC.val = word;
-        _emu->mCyclesDone += 4;
+		mRegPC.val = word;
+        mCyclesDone += 4;
 	}
 
 }
 
-void CPU_JUMP_IMMEDIATE(gbZ80* _emu, bool _do_comprision, uint8_t _flag, bool _state)
+void gbZ80::CPUJumpImmediate(bool doComprision, uint8_t flag, bool state)
 {
-	int8_t byte = (int8_t)_emu->ReadByte(_emu->mRegPC.val);
-    _emu->mCyclesDone += 4; // Failed comparision takes 8 cycles (4 added before), on successful jump this takes 12 cycles
+	int8_t byte = (int8_t)ReadByte(mRegPC.val);
+    mCyclesDone += 4; // Failed comparision takes 8 cycles (4 added before), on successful jump this takes 12 cycles
 
-	if (!_do_comprision)
+	if (!doComprision)
 	{
-		_emu->mRegPC.val += byte;
-        _emu->mCyclesDone += 4;
+		mRegPC.val += byte;
+        mCyclesDone += 4;
 	}
-	else if ( ((_emu->mRegAF.low >> _flag ) & 1) == _state)
+	else if ( ((mRegAF.low >> flag ) & 1) == state)
 	{
-		_emu->mRegPC.val += byte;
-        _emu->mCyclesDone += 4;
+		mRegPC.val += byte;
+        mCyclesDone += 4;
 	}
 
-    _emu->mRegPC.val++;
+    mRegPC.val++;
 }
 
-void CPU_RET(gbZ80* _emu, bool _do_comprision, uint8_t _flag, bool _state)
+void gbZ80::CPURet(bool doComprision, uint8_t flag, bool state)
 {
-    _emu->mCyclesDone += 4; // Failed comparision takes 8 cycles (4 added before), on successful jump this takes 20 cycles
+    mCyclesDone += 4; // Failed comparision takes 8 cycles (4 added before), on successful jump this takes 20 cycles
 
-    if (!_do_comprision)
+    if (!doComprision)
 	{
-		_emu->mRegPC.val = _emu->PopWordOffStack();
-        _emu->mCyclesDone += 12;
+		mRegPC.val = PopWordOffStack();
+        mCyclesDone += 12;
 	}
-    else if ( ((_emu->mRegAF.low >> _flag ) & 1) == _state)
+    else if ( ((mRegAF.low >> flag ) & 1) == state)
 	{
-		_emu->mRegPC.val = _emu->PopWordOffStack();
-        _emu->mCyclesDone += 12;
-	}
-}
-
-void CPU_CALL(gbZ80* _emu, bool _do_comprision, uint8_t _flag, bool _state)
-{
-    uint16_t word = _emu->ReadWord();
-    _emu->mCyclesDone += 8; // Failed comparision takes 12 cycles (4 added before), on successful jump this takes 24 cycles
-    _emu->mRegPC.val += 2;
-
-    if (!_do_comprision)
-	{
-		_emu->PushWordOntoStack(_emu->mRegPC.val);
-        _emu->mCyclesDone += 12;
-		_emu->mRegPC.val = word;
-	} else if ( ((_emu->mRegAF.low >> _flag ) & 1) == _state)
-	{
-		_emu->PushWordOntoStack(_emu->mRegPC.val);
-        _emu->mCyclesDone += 12;
-		_emu->mRegPC.val = word;
+		mRegPC.val = PopWordOffStack();
+        mCyclesDone += 12;
 	}
 }
 
-void CPU_RESTART(gbZ80* _emu, uint8_t _addr)
+void gbZ80::CPUCall(bool doComprision, uint8_t flag, bool state)
 {
-    _emu->PushWordOntoStack( _emu->mRegPC.val );
-    _emu->mRegPC.val = _addr;
-    _emu->mCyclesDone += 12;
+    uint16_t word = ReadWord();
+    mCyclesDone += 8; // Failed comparision takes 12 cycles (4 added before), on successful jump this takes 24 cycles
+    mRegPC.val += 2;
+
+    if (!doComprision)
+	{
+        PushWordOntoStack(mRegPC.val);
+        mCyclesDone += 12;
+        mRegPC.val = word;
+	} else if ( ((mRegAF.low >> flag) & 1) == state)
+	{
+		PushWordOntoStack(mRegPC.val);
+        mCyclesDone += 12;
+		mRegPC.val = word;
+	}
 }
 
-// FUCKING WORKS FINALLY! xd
-void CPU_DAA(gbZ80* _emu)
+void gbZ80::CPURestart(uint8_t addr)
+{
+    PushWordOntoStack(mRegPC.val);
+    mRegPC.val = addr;
+    mCyclesDone += 12;
+}
+
+void gbZ80::CPU_DAA()
 {
     // DAA
-    uint16_t RegA = (uint16_t)_emu->mRegAF.high;
-    uint8_t&  RegF = _emu->mRegAF.low;
+    uint16_t RegA = (uint16_t)mRegAF.high;
+    uint8_t& RegF = mRegAF.low;
 
     if ( !((RegF >> gbFlag::Substract) & 1) )
     {
@@ -1351,7 +1326,7 @@ void CPU_DAA(gbZ80* _emu)
        RegF |= 1 << gbFlag::Zero;
     }
 
-    _emu->mRegAF.high = (uint8_t)RegA;
+    mRegAF.high = (uint8_t)RegA;
 }
 
 
