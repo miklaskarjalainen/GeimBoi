@@ -8,9 +8,8 @@ int main(int argc, char* argv[])
 {
     PROFILE_START();
 
-    appWindow window;
-    if (argc > 1) 
-        window.mGameBoy->LoadRom(argv[1]);
+    const char* loadRom = argc > 1 ? argv[1] : nullptr;
+    appWindow window(loadRom, SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2);
     window.Run();
     
     PROFILE_END();

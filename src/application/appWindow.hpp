@@ -11,22 +11,21 @@ namespace Giffi
 	class appWindow
 	{
 	public:
-		appWindow();
+		appWindow(const char* openRom, int width = SCREEN_WIDTH, int height = SCREEN_HEIGHT);
 		~appWindow();
 		void Run();
+		inline bool ShouldWindowClose() { return mClosing; }
 
 	private:
-		bool ShouldWindowClose();
 		void DoEvents();
 
-	public:
+	private:
+		SDL_Renderer * mRenderer = nullptr;
+		SDL_Window* mWindow = nullptr;
+		
 		std::unique_ptr<appGui> mGui = nullptr;
 		std::shared_ptr<gbGameBoy> mGameBoy = nullptr;
 		bool mClosing = false;
-
-	private:
-		SDL_Renderer* mRenderer = nullptr;
-		SDL_Window* mWindow = nullptr;
 	};
 
 }

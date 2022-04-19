@@ -6,12 +6,9 @@
 
 using namespace Giffi;
 
-appWindow::appWindow()
+appWindow::appWindow(const char* openRom, int width, int height)
 {
     PROFILE_FUNCTION();
-
-    const int width  = 160*2;
-    const int height = 144*2;
 
     // Init SDL2
     if (SDL_Init(SDL_INIT_EVERYTHING))
@@ -38,6 +35,8 @@ appWindow::appWindow()
     mGameBoy->Reset();
     mGameBoy->SetPalette(0x9bbc0f, 0x8bac0f, 0x306230, 0x0f380f);
     mGameBoy->mBootRom.LoadBios("gb_bios.bin");
+    if (openRom)
+        mGameBoy->LoadRom(openRom);
     
     // Gui
     mGui = std::make_unique<appGui>(mRenderer, mGameBoy, width, height);
@@ -57,6 +56,7 @@ void appWindow::Run()
     
     while (!ShouldWindowClose())
     {
+        DoEvents();
         int start_ticks = SDL_GetTicks();
 
         // Update
@@ -115,12 +115,6 @@ appWindow::~appWindow()
         mGameBoy->mCart.SaveBattery(file_name);
     }
     SDL_Quit();
-}
-// Does Window events aswell
-bool appWindow::ShouldWindowClose()
-{
-    DoEvents();
-    return mClosing;
 }
 
 void appWindow::DoEvents()
