@@ -1,8 +1,6 @@
 #include <utils/Benchmark.hpp>
-#include <thread>
 #include "imgui/imgui.h"
 #include "appWindow.hpp"
-#include "appGui.hpp"
 
 using namespace Giffi;
 

@@ -1,12 +1,13 @@
 #pragma once
 #include <memory>
-#include <thread>
 #include <SDL2/SDL.h>
+
 #include "../core/gbGameBoy.hpp"
+
+#include "appGui.hpp"
 
 namespace Giffi
 {
-	class appGui;
 
 	class appWindow
 	{
