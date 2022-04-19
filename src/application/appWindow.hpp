@@ -6,30 +6,27 @@
 
 namespace Giffi
 {
+	class appGui;
 
-class appWindow
-{
-public:
-	// Retruns true on success
-	static void Init();
-	static void Run();
-	static void CleanUp();
-private:
-	static bool ShouldWindowClose();
-	static void DoEvents();
+	class appWindow
+	{
+	public:
+		appWindow();
+		~appWindow();
+		void Run();
 
-public:
-	static std::shared_ptr<gbGameBoy> mGameBoy;
-	static bool mClosing;
+	private:
+		bool ShouldWindowClose();
+		void DoEvents();
 
-private:
-	static SDL_Renderer* mRenderer;
-	static SDL_Window* mWindow;
+	public:
+		std::unique_ptr<appGui> mGui = nullptr;
+		std::shared_ptr<gbGameBoy> mGameBoy = nullptr;
+		bool mClosing = false;
 
-	appWindow() = delete;
-	~appWindow() = delete;
-};
+	private:
+		SDL_Renderer* mRenderer = nullptr;
+		SDL_Window* mWindow = nullptr;
+	};
 
-} // Namespace
-
-
+}

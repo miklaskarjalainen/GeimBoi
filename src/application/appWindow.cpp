@@ -6,12 +6,7 @@
 
 using namespace Giffi;
 
-SDL_Renderer* appWindow::mRenderer = nullptr;
-SDL_Window*   appWindow::mWindow = nullptr;
-std::shared_ptr<gbGameBoy> appWindow::mGameBoy = nullptr;
-bool appWindow::mClosing = false;
-
-void appWindow::Init()
+appWindow::appWindow()
 {
     PROFILE_FUNCTION();
 
@@ -45,10 +40,8 @@ void appWindow::Init()
     mGameBoy->mBootRom.LoadBios("gb_bios.bin");
     
     // Gui
-    appGui::Init(mRenderer, mGameBoy, width, height);
+    mGui = std::make_unique<appGui>(mRenderer, mGameBoy, width, height);
 }
-
-#include <thread>
 
 void appWindow::Run()
 {
@@ -70,8 +63,8 @@ void appWindow::Run()
         {
             PROFILE_SCOPE("Update");
             // Emulator gets updated in the gui, because of "pause"
-            appGui::Update();
-            if (!appGui::IsPaused())
+            mGui->Update();
+            if (!mGui->IsPaused())
                 mGameBoy->FrameAdvance();
         }
 
@@ -91,7 +84,7 @@ void appWindow::Run()
             dst.h -= dst.y;
         
             SDL_RenderCopy(mRenderer, texture, NULL, &dst);
-            appGui::Draw();
+            mGui->Draw();
 
             // Render
             SDL_RenderPresent(mRenderer);
@@ -111,8 +104,7 @@ void appWindow::Run()
     SDL_FreeSurface(surface);
 }
 
-static bool should_close = false;
-void appWindow::CleanUp()
+appWindow::~appWindow()
 {
     PROFILE_FUNCTION();
 
@@ -128,7 +120,7 @@ void appWindow::CleanUp()
 bool appWindow::ShouldWindowClose()
 {
     DoEvents();
-    return should_close;
+    return mClosing;
 }
 
 void appWindow::DoEvents()
@@ -142,7 +134,7 @@ void appWindow::DoEvents()
         {
             case SDL_QUIT:
             {
-                should_close = true;
+                mClosing = true;
                 break;
             }
 
@@ -156,7 +148,7 @@ void appWindow::DoEvents()
                 io.KeyAlt   = ((SDL_GetModState() & KMOD_ALT) != 0);
                 io.KeySuper = ((SDL_GetModState() & KMOD_GUI) != 0);
 
-                if (key == SDL_SCANCODE_ESCAPE)    { should_close = true; break; }
+                if (key == SDL_SCANCODE_ESCAPE)    { mClosing = true; break; }
                 if (key == SDL_SCANCODE_D)         { mGameBoy->PressButton(gbButton::RIGHT);  break; }
                 if (key == SDL_SCANCODE_A)         { mGameBoy->PressButton(gbButton::LEFT);   break; }
                 if (key == SDL_SCANCODE_W)         { mGameBoy->PressButton(gbButton::UP);     break; }
@@ -165,6 +157,9 @@ void appWindow::DoEvents()
                 if (key == SDL_SCANCODE_J)         { mGameBoy->PressButton(gbButton::B);      break; }
                 if (key == SDL_SCANCODE_RETURN)    { mGameBoy->PressButton(gbButton::START); break; }
                 if (key == SDL_SCANCODE_BACKSLASH) { mGameBoy->PressButton(gbButton::SELECT);  break; }
+                
+                if (io.KeyShift && key == SDL_SCANCODE_R) { mGameBoy->Reset(); break; }
+                
                 break;
             }
             case SDL_KEYUP:

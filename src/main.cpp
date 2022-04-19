@@ -8,12 +8,11 @@ int main(int argc, char* argv[])
 {
     PROFILE_START();
 
-    appWindow::Init();
+    appWindow window;
     if (argc > 1) 
-        appWindow::mGameBoy->LoadRom(argv[1]);
-    appWindow::Run();
-    appWindow::CleanUp();
-
+        window.mGameBoy->LoadRom(argv[1]);
+    window.Run();
+    
     PROFILE_END();
     return 0;
 }

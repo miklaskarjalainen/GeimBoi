@@ -9,16 +9,13 @@
 
 using namespace Giffi;
 
-std::shared_ptr<gbGameBoy> appGui::mGameBoy = nullptr;
-bool appGui::mDrawDebug = false;
-bool appGui::mEmuPaused = false;
-
-void appGui::Init(SDL_Renderer* _renderer, std::shared_ptr<gbGameBoy>& _emu, int _widht, int _height) {
+appGui::appGui(SDL_Renderer* renderer, std::shared_ptr<gbGameBoy>& emulator, int widht, int height)
+{
     PROFILE_FUNCTION();
 
-    appGui::mGameBoy = _emu; // Pointer to emulator core
+    mGameBoy = emulator;
     ImGui::CreateContext();
-    ImGuiSDL::Initialize(_renderer, _widht, _height);
+    ImGuiSDL::Initialize(renderer, widht, height);
 
     // MAP KEYS
     ImGuiIO& io = ImGui::GetIO();
@@ -45,9 +42,16 @@ void appGui::Init(SDL_Renderer* _renderer, std::shared_ptr<gbGameBoy>& _emu, int
     io.KeyMap[ImGuiKey_Z] = SDL_SCANCODE_Z;
 }
 
+appGui::~appGui()
+{
+    ImGuiSDL::Deinitialize();
+    ImGui::DestroyContext();
+}
+
 void appGui::Update()
 {
     PROFILE_FUNCTION();
+
     ImGui::NewFrame();
     UpdateTopbar();
     UpdateDebug();

@@ -9,24 +9,23 @@ namespace Giffi
 class appGui
 {
 public:
-	static void Init(struct SDL_Renderer* _renderer, std::shared_ptr<gbGameBoy>& _emu, int _width, int _height);
-	static void Update();
-	static void Draw();
+	appGui(struct SDL_Renderer* renderer, std::shared_ptr<gbGameBoy>& emulator, int width, int height);
+	~appGui();
 
-	static bool IsPaused();
+	void Update();
+	void Draw();
+
+	bool IsPaused();
 private:
-	static void OpenRomDialog();
+	void OpenRomDialog();
 
-	static void UpdateTopbar();
-	static void UpdateDebug();
+	void UpdateTopbar();
+	void UpdateDebug();
 
 private:
-	static std::shared_ptr<gbGameBoy> mGameBoy;
-	static bool mDrawDebug;
-	static bool mEmuPaused;
-
-	appGui() = delete;
-	~appGui() = delete;
+	std::shared_ptr<gbGameBoy> mGameBoy = nullptr;
+	bool mDrawDebug = false;
+	bool mEmuPaused = false;
 };
 
 } // Namespace
