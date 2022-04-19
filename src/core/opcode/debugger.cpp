@@ -2,7 +2,7 @@
 #include <string>
 #include "debugger.hpp"
 
-const static std::string opcode_assembly[0x100] = {
+static const char* opcode_assembly[0x100] = {
 	// 0x00-0x0F
 	"NOP"        ,"LD BC,d16","LD (BC),A","INC BC","INC BC","DEC B","LD B,d8","RLCA",
 	"LD (a16),SP","ADD HL,BC","LD A,(BC)","DEC BC","INC C" ,"DEC C","LD C,d8","RRCA",
@@ -68,7 +68,7 @@ const static std::string opcode_assembly[0x100] = {
 	"LD HL,SP+r8" ,"LD SP,HL","LD A,(a16)","EI" ,"NULL","NULL"   ,"CP d8","RST 38H"
 };
 
-const static std::string cb_assembly[0x100] = {
+static const char* cb_assembly[0x100] = {
 	// 0x00 - 0x0F
 	"RLC B", "RLC C", "RLC D", "RLC E", "RLC H", "RLC L", "RLC (HL)", "RLC A",
 	"RRC B", "RRC C", "RRC D", "RRC E", "RRC H", "RRC L", "RRC (HL)", "RRC A",
@@ -134,7 +134,7 @@ const static std::string cb_assembly[0x100] = {
 	"SET 7, B", "SET 7, C", "SET 7, D", "SET 7, E", "SET 7, H", "SET 7, L", "SET 7, (HL)", "SET 7, A",
 };
 
-const static uint8_t opcode_length[0x100] = {
+const uint8_t opcode_length[0x100] = {
 	1,3,1,1,1,1,2,1,3,1,1,1,1,1,2,1,
 	2,3,1,1,1,1,2,1,2,1,1,1,1,1,2,1,
 	2,3,1,1,1,1,2,1,2,1,1,1,1,1,2,1,
@@ -156,7 +156,7 @@ const static uint8_t opcode_length[0x100] = {
 	2,1,2,1,1,1,2,1,2,1,3,1,1,1,2,1,
 };
 
-std::string_view Giffi::GetAssembly(uint16_t opcode) {
+const char* Giffi::GetAssembly(uint16_t opcode) {
 	if ((opcode & 0x00FF) == 0x00CB) {
 		return cb_assembly[opcode >> 8];
 	}
