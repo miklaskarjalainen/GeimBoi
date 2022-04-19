@@ -1,6 +1,9 @@
 #pragma once
 #include <cstdint>
 
+#define SCREEN_WIDTH 160
+#define SCREEN_HEIGHT 144
+
 namespace Giffi
 {
 class gbGameBoy;

@@ -154,14 +154,13 @@ void gbCart::Reset()
     }
 }
 
-bool gbCart::LoadRom(const std::string& _path)
+bool gbCart::LoadRom(const std::string& path)
 {
     PROFILE_FUNCTION();
-
     // Load
-    if (!Dir::FileExists(_path))
+    if (!Dir::FileExists(path))
     {
-        printf("Can't find a file at %s\n", _path.c_str());
+        printf("Can't find a file at %s\n", path.c_str());
         mGameLoaded = false;
         return false;
     }
@@ -170,17 +169,17 @@ bool gbCart::LoadRom(const std::string& _path)
     mGameBoy->Reset();
 
     // Load Rom
-    std::ifstream rf(_path, std::ios::binary);
+    std::ifstream rf(path, std::ios::binary);
     rf.read((char*)mCart, sizeof(mCart));
     if (rf.bad())
     {    
-        printf("An error occurred when trying to read a romfile at %s!\n", _path.c_str());
+        printf("An error occurred when trying to read a romfile at %s!\n", path.c_str());
         rf.close();
         mGameLoaded = false;
         return false;
     }
     rf.close();
-    printf("Rom %s loaded\n", _path.c_str());
+    printf("Rom %s loaded\n", path.c_str());
 
     // Get MBC
     mMBC = gbMBC::CreateMBC(this);
