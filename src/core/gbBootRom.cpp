@@ -32,23 +32,11 @@ bool gbBootRom::LoadBios(const std::string& _path)
 	return true;
 }
 
-uint8_t gbBootRom::ReadByte(uint16_t _addr) const
+uint8_t gbBootRom::ReadByte(uint16_t addr) const
 {
-	if (_addr == 0xFF)
-	{
+	if (addr == 0xFF)
 		mLoaded = false;
-	}
 
-	return mBootRom[_addr];
+	return mBootRom[addr];
 } 
-
-void gbBootRom::Reset()
-{
-	mLoaded = true;
-}
-
-bool gbBootRom::IsBiosLoaded() const
-{
-	return mLoaded && mHasBios;
-}
 

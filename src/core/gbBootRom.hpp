@@ -12,11 +12,12 @@ namespace Giffi
 		~gbBootRom() = default;
 
 		// Retruns true if the load was successful
-		bool LoadBios(const std::string& _path);
-		uint8_t ReadByte(uint16_t _addr) const;
-		void Reset();
+		bool LoadBios(const std::string& path);
+		uint8_t ReadByte(uint16_t addr) const;
 
-		bool IsBiosLoaded() const;
+		inline void Reset() { mLoaded = true; }
+		inline bool IsBiosLoaded() const { return mLoaded && mHasBios; }
+
 	private:
 		uint8_t mBootRom[0x100] = {};
 		mutable bool mLoaded = false; // Mapped into the gameboy's bus?
