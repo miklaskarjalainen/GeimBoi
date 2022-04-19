@@ -135,8 +135,8 @@ void appGui::UpdateDebug()
     PROFILE_FUNCTION();
     if (!mDrawDebug) { return; }
 
-    static const gbZ80* sCpu   = &mGameBoy->mCpu;
-    static const gbCart* sCart = &mGameBoy->mCart;
+    const gbZ80* cpu   = &mGameBoy->mCpu;
+    const gbCart* cart = &mGameBoy->mCart;
     // Cpu
     {
         // Window
@@ -145,30 +145,30 @@ void appGui::UpdateDebug()
 
         // Registers
         ImGui::Text("Registers:");
-        ImGui::Text("A:0x%02X F:0x%02X", sCpu->mRegAF.high, sCpu->mRegAF.low);
-        ImGui::Text("B:0x%02X C:0x%02X", sCpu->mRegBC.high, sCpu->mRegBC.low);
-        ImGui::Text("D:0x%02X E:0x%02X", sCpu->mRegDE.high, sCpu->mRegDE.low);
-        ImGui::Text("H:0x%02X L:0x%02X", sCpu->mRegHL.high, sCpu->mRegHL.low);
-        ImGui::Text("PC: 0x%04X", sCpu->mRegPC.val);
-        ImGui::Text("SP: 0x%04X", sCpu->mRegSP.val);
+        ImGui::Text("A:0x%02X F:0x%02X", cpu->mRegAF.high, cpu->mRegAF.low);
+        ImGui::Text("B:0x%02X C:0x%02X", cpu->mRegBC.high, cpu->mRegBC.low);
+        ImGui::Text("D:0x%02X E:0x%02X", cpu->mRegDE.high, cpu->mRegDE.low);
+        ImGui::Text("H:0x%02X L:0x%02X", cpu->mRegHL.high, cpu->mRegHL.low);
+        ImGui::Text("PC: 0x%04X", cpu->mRegPC.val);
+        ImGui::Text("SP: 0x%04X", cpu->mRegSP.val);
         ImGui::NewLine();
         // Flags
         ImGui::Text("Flags:");
-        ImGui::Text("Carry: %u HalfCarry: %u", sCpu->GetFlag(gbFlag::Carry), sCpu->GetFlag(gbFlag::HalfCarry));
-        ImGui::Text("Zero:  %u Substract: %u", sCpu->GetFlag(gbFlag::Zero),  sCpu->GetFlag(gbFlag::Substract));
+        ImGui::Text("Carry: %u HalfCarry: %u", cpu->GetFlag(gbFlag::Carry), cpu->GetFlag(gbFlag::HalfCarry));
+        ImGui::Text("Zero:  %u Substract: %u", cpu->GetFlag(gbFlag::Zero), cpu->GetFlag(gbFlag::Substract));
         ImGui::NewLine();
         // Interrupt flag
         ImGui::Text("Interrupt Flag:");
-        ImGui::Text("Vblank: %u LCD:    %u", sCpu->GetIF(gbInterrupt::VBlank), sCpu->GetIF(gbInterrupt::LCD));
-        ImGui::Text("Timer:  %u Joypad: %u", sCpu->GetIF(gbInterrupt::Timer),  sCpu->GetIF(gbInterrupt::Joypad));
+        ImGui::Text("Vblank: %u LCD:    %u", cpu->GetIF(gbInterrupt::VBlank), cpu->GetIF(gbInterrupt::LCD));
+        ImGui::Text("Timer:  %u Joypad: %u", cpu->GetIF(gbInterrupt::Timer), cpu->GetIF(gbInterrupt::Joypad));
         ImGui::NewLine();
         // Interrupt enable
         ImGui::Text("Interrupt Enable:");
-        ImGui::Text("Vblank: %u LCD:    %u", sCpu->GetIE(gbInterrupt::VBlank), sCpu->GetIE(gbInterrupt::LCD));
-        ImGui::Text("Timer:  %u Joypad: %u", sCpu->GetIE(gbInterrupt::Timer),  sCpu->GetIE(gbInterrupt::Joypad));
+        ImGui::Text("Vblank: %u LCD:    %u", cpu->GetIE(gbInterrupt::VBlank), cpu->GetIE(gbInterrupt::LCD));
+        ImGui::Text("Timer:  %u Joypad: %u", cpu->GetIE(gbInterrupt::Timer), cpu->GetIE(gbInterrupt::Joypad));
         ImGui::NewLine();
         // Other
-        ImGui::Text("IME: %u HALT: %u", sCpu->GetIME(), sCpu->IsHalted());
+        ImGui::Text("IME: %u HALT: %u", cpu->GetIME(), cpu->IsHalted());
 
         ImGui::End();
     }
@@ -178,17 +178,17 @@ void appGui::UpdateDebug()
         // Window
         ImGui::Begin("Cartridge", nullptr, ImGuiWindowFlags_NoResize);
         ImGui::SetWindowSize(ImVec2(160, 205));
-        ImGui::Text("Game: %s", sCart->GetGameName().c_str());
-        ImGui::Text("Version: %u", sCart->GetGameVersion());
-        ImGui::Text("Type: %s", sCart->GetCartTypeText().c_str());
-        ImGui::Text("RomBanks: %u", sCart->GetRomBankCount());
-        ImGui::Text("Ram: %uKb", sCart->GetRamSize());
+        ImGui::Text("Game: %s", cart->GetGameName().c_str());
+        ImGui::Text("Version: %u", cart->GetGameVersion());
+        ImGui::Text("Type: %s", cart->GetCartTypeText().c_str());
+        ImGui::Text("RomBanks: %u", cart->GetRomBankCount());
+        ImGui::Text("Ram: %uKb", cart->GetRamSize());
         ImGui::NewLine();
         
-        ImGui::Text("RomBankCount: %u", sCart->GetRomBankCount());
-        ImGui::Text("CurRomBank: %u", sCart->GetCurRomBank());
-        ImGui::Text("RamBankCount: %u", sCart->GetRamBankCount());
-        ImGui::Text("CurRamBank: %u", sCart->GetCurRamBank()); 
+        ImGui::Text("RomBankCount: %u", cart->GetRomBankCount());
+        ImGui::Text("CurRomBank: %u", cart->GetCurRomBank());
+        ImGui::Text("RamBankCount: %u", cart->GetRamBankCount());
+        ImGui::Text("CurRamBank: %u", cart->GetCurRamBank());
         ImGui::End();
     }
 
@@ -212,12 +212,12 @@ void appGui::UpdateDebug()
         ImGui::SetWindowSize(ImVec2(140, 136));
 
 
-        ImGui::Text("LastOp: %s", GetAssembly(sCpu->mLastExecutedOpcode).data());
-        ImGui::Text("NextOp: %s", GetAssembly(sCpu->ReadByte(sCpu->mRegPC.val)).data());
+        ImGui::Text("LastOp: %s", GetAssembly(cpu->mLastExecutedOpcode));
+        ImGui::Text("NextOp: %s", GetAssembly(cpu->ReadByte(cpu->mRegPC.val)));
 
         if (ImGui::Button("FrameAdvance")) { mGameBoy->FrameAdvance(); mEmuPaused = true; }
         if (ImGui::Button("ExecuteOpcode")) { mGameBoy->Clock(); mEmuPaused = true; }
-        ImGui::ProgressBar((float)sCpu->mCyclesDone / 70221.0f);
+        ImGui::ProgressBar((float)cpu->mCyclesDone / 70221.0f);
         
         ImGui::End();
     }
@@ -229,17 +229,17 @@ void appGui::UpdateDebug()
         ImGui::Begin("Debugger", nullptr, ImGuiWindowFlags_None);
 
         for (int16_t offset = 0; offset < 256;) {
-            const uint16_t addr = sCpu->mRegPC.val + offset;
+            const uint16_t addr = cpu->mRegPC.val + offset;
             if (addr < 0)
                 continue;
 
             std::stringstream assembly;
-            uint16_t opcode = sCpu->ReadWord(addr);
+            uint16_t opcode = cpu->ReadWord(addr);
             assembly << GetAssembly(opcode) << std::hex;
 
             // prints arguments for the assembly
             for (uint8_t i = 0; i < GetLength(opcode) - 1; i++) {
-                assembly << " [0x" << (unsigned int)sCpu->ReadByte(addr + i) << "]";
+                assembly << " [0x" << (unsigned int)cpu->ReadByte(addr + i) << "]";
             }
 
             if (offset == 0)
