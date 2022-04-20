@@ -38,6 +38,9 @@ namespace Giffi
         void SetPalette   (gbColor white, gbColor lgray, gbColor dgray, gbColor black);
         void PressButton  (gbButton key);
         void ReleaseButton(gbButton key);
+        inline bool IsButtonPressed(gbButton key) {
+            return (mBtsPressed >> key) & 0b1;
+        }
 
         uint8_t  ReadByte(uint16_t addr) const;
         uint16_t ReadWord() const;
@@ -49,7 +52,7 @@ namespace Giffi
         inline bool LoadBios(const std::string& path) {
             return mBootRom.LoadBios(path);
         }
-        inline bool IsBiosLoaded() {
+        inline bool IsBiosLoaded() const {
             return mBootRom.IsBiosLoaded();
         }
 
