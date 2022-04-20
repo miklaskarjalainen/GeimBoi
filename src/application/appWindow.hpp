@@ -15,7 +15,7 @@ namespace Giffi
 		appWindow(const char* openRom, int width = SCREEN_WIDTH, int height = SCREEN_HEIGHT);
 		~appWindow();
 		void Run();
-		inline bool ShouldWindowClose() { return mClosing; }
+		inline bool ShouldWindowClose() const { return mClosing; }
 
 	private:
 		void DoEvents();
