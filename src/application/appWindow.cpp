@@ -28,11 +28,10 @@ appWindow::appWindow(const char* openRom, int width, int height)
         exit(1);
     }
 
-    // Init GameBoy
+    // GameBoy
     mGameBoy = std::make_shared<gbGameBoy>();
-    mGameBoy->Reset();
     mGameBoy->SetPalette(0x9bbc0f, 0x8bac0f, 0x306230, 0x0f380f);
-    mGameBoy->mBootRom.LoadBios("gb_bios.bin");
+    mGameBoy->LoadBios("gb_bios.bin");
     if (openRom)
         mGameBoy->LoadRom(openRom);
     
@@ -140,16 +139,58 @@ void appWindow::DoEvents()
                 io.KeyAlt   = ((SDL_GetModState() & KMOD_ALT) != 0);
                 io.KeySuper = ((SDL_GetModState() & KMOD_GUI) != 0);
 
-                if (key == SDL_SCANCODE_ESCAPE)    { mClosing = true; break; }
-                if (key == SDL_SCANCODE_D)         { mGameBoy->PressButton(gbButton::RIGHT);  break; }
-                if (key == SDL_SCANCODE_A)         { mGameBoy->PressButton(gbButton::LEFT);   break; }
-                if (key == SDL_SCANCODE_W)         { mGameBoy->PressButton(gbButton::UP);     break; }
-                if (key == SDL_SCANCODE_S)         { mGameBoy->PressButton(gbButton::DOWN);   break; }
+                // Direction buttons, can't hold opposite directions at the same time
+                if (key == SDL_SCANCODE_D)
+                { 
+                    if (io.KeysDown[SDL_SCANCODE_A])
+                    {
+                        mGameBoy->ReleaseButton(gbButton::LEFT);
+                        mGameBoy->ReleaseButton(gbButton::RIGHT);
+                        break;
+                    }
+                    mGameBoy->PressButton(gbButton::RIGHT);
+                    break;
+                }
+                if (key == SDL_SCANCODE_A)
+                {
+                    if (io.KeysDown[SDL_SCANCODE_D])
+                    {
+                        mGameBoy->ReleaseButton(gbButton::LEFT);
+                        mGameBoy->ReleaseButton(gbButton::RIGHT);
+                        break;
+                    }
+                    mGameBoy->PressButton(gbButton::LEFT);
+                    break;
+                }
+                if (key == SDL_SCANCODE_W)
+                { 
+                    if (io.KeysDown[SDL_SCANCODE_S])
+                    {
+                        mGameBoy->ReleaseButton(gbButton::UP);
+                        mGameBoy->ReleaseButton(gbButton::DOWN);
+                        break;
+                    }
+                    mGameBoy->PressButton(gbButton::UP);
+                    break;
+                }
+                if (key == SDL_SCANCODE_S)
+                { 
+                    if (io.KeysDown[SDL_SCANCODE_W])
+                    {
+                        mGameBoy->ReleaseButton(gbButton::UP);
+                        mGameBoy->ReleaseButton(gbButton::DOWN);
+                        break;
+                    }
+                    mGameBoy->PressButton(gbButton::DOWN);   
+                    break; 
+                }
+                
                 if (key == SDL_SCANCODE_K)         { mGameBoy->PressButton(gbButton::A);      break; }
                 if (key == SDL_SCANCODE_J)         { mGameBoy->PressButton(gbButton::B);      break; }
                 if (key == SDL_SCANCODE_RETURN)    { mGameBoy->PressButton(gbButton::START); break; }
                 if (key == SDL_SCANCODE_BACKSLASH) { mGameBoy->PressButton(gbButton::SELECT);  break; }
                 
+                if (key == SDL_SCANCODE_ESCAPE) { mClosing = true; break; }
                 if (io.KeyShift && key == SDL_SCANCODE_R) { mGameBoy->Reset(); break; }
                 
                 break;
@@ -163,10 +204,40 @@ void appWindow::DoEvents()
                 io.KeyAlt   = ((SDL_GetModState() & KMOD_ALT) != 0);
                 io.KeySuper = ((SDL_GetModState() & KMOD_GUI) != 0);
 
-                if (key == SDL_SCANCODE_D)         { mGameBoy->ReleaseButton(gbButton::RIGHT);  break; }
-                if (key == SDL_SCANCODE_A)         { mGameBoy->ReleaseButton(gbButton::LEFT);   break; }
-                if (key == SDL_SCANCODE_W)         { mGameBoy->ReleaseButton(gbButton::UP);     break; }
-                if (key == SDL_SCANCODE_S)         { mGameBoy->ReleaseButton(gbButton::DOWN);   break; }
+                if (key == SDL_SCANCODE_D) 
+                { 
+                    mGameBoy->ReleaseButton(gbButton::RIGHT);
+                    if (io.KeysDown[SDL_SCANCODE_A]) {
+                        mGameBoy->PressButton(gbButton::LEFT);
+                    }
+                    break;
+                }
+                if (key == SDL_SCANCODE_A)
+                {
+                    mGameBoy->ReleaseButton(gbButton::LEFT);
+                    if (io.KeysDown[SDL_SCANCODE_D]) {
+                        mGameBoy->PressButton(gbButton::RIGHT);
+                    }
+                    break;
+                }
+                if (key == SDL_SCANCODE_W)
+                {
+                    mGameBoy->ReleaseButton(gbButton::UP);
+                    if (io.KeysDown[SDL_SCANCODE_S]) {
+                        mGameBoy->PressButton(gbButton::DOWN);
+                    }
+                    break;
+                }
+                if (key == SDL_SCANCODE_S)
+                {
+                    mGameBoy->ReleaseButton(gbButton::DOWN);
+                    if (io.KeysDown[SDL_SCANCODE_W])
+                    {
+                        mGameBoy->PressButton(gbButton::UP);
+                    }
+                    break;
+                }
+                
                 if (key == SDL_SCANCODE_K)         { mGameBoy->ReleaseButton(gbButton::A);      break; }
                 if (key == SDL_SCANCODE_J)         { mGameBoy->ReleaseButton(gbButton::B);      break; }
                 if (key == SDL_SCANCODE_RETURN)    { mGameBoy->ReleaseButton(gbButton::START);  break; }
