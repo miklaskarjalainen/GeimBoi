@@ -49,8 +49,12 @@ void appWindow::Run()
     constexpr Uint32 rmask = 0x000000FF;
     constexpr Uint32 gmask = 0x0000FF00;
     constexpr Uint32 bmask = 0x00FF0000;
-    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(&mGameBoy->mPpu.frontBuffer, 160, 144, depth, pitch, rmask, gmask, bmask, NULL);
-    
+    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(mGameBoy->mPpu.frontBuffer, 160, 144, depth, pitch, rmask, gmask, bmask, NULL);
+    if (!surface) {
+        printf("Error creating a surface for screenbuffer! %s\n", SDL_GetError());
+        exit(-1);
+    }
+
     while (!ShouldWindowClose())
     {
         DoEvents();

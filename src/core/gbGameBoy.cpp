@@ -42,7 +42,7 @@ void gbGameBoy::PressButton(gbButton key)
     mBtsPressed |= 1 << key; // In gameboy's memory "0 = pressed", but this makes more sense for more normal people xd.
 
     // Request an interupt?
-    if (!was_pressed) { return; }       // Button was already held
+    if (!was_pressed) { return; }     // Button was already held
     uint8_t btn_opts = mRom[0xFF00];  // Programmer wants direction or action buttons?
     if ( (key > 3) && !((btn_opts >> 5) & 0b1) )       // Is action and wants action
     {

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <array>
 
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 144
@@ -11,8 +12,8 @@ class gbZ80;
 
 struct gbColor
 {
-    gbColor(uint8_t _r = 0, uint8_t _g = 0, uint8_t _b = 0)
-        :r(_r), g(_g), b(_b) {}
+    gbColor(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0)
+        :r(r), g(g), b(b) {}
     gbColor(const gbColor& other)
         :r(other.r), g(other.g), b(other.b) {}
     gbColor(const int hex_code)
@@ -24,20 +25,51 @@ class gbPPU
 {
 public:
     gbPPU(gbGameBoy* _gameboy)
-        : mGameBoy(_gameboy) 
+        : mGameBoy(_gameboy)
     {
+        frontBuffer = reinterpret_cast<gbBuffer*>(new gbBuffer);
+        if (frontBuffer == nullptr) {
+            printf("could not allocate memory for frontBuffer! (malloc returned nullptr)\n");
+            exit(-1);
+        }
+        memset(frontBuffer, 0, sizeof(gbBuffer));
+
         dmgPalette[0] = { 217,217,217 };
         dmgPalette[1] = { 128,128,128 };
         dmgPalette[2] = {  97, 97, 97 };
         dmgPalette[3] = {  12, 12, 12 };
     };
-    ~gbPPU() = default;
+    ~gbPPU()
+    {
+        delete[] frontBuffer;
+    }
 public:
-    gbColor dmgPalette[4];
-    gbColor frontBuffer[144][160];
+    using gbBuffer = gbColor[SCREEN_HEIGHT * SCREEN_WIDTH];
+
+    std::array<gbColor, 4> dmgPalette;
+    gbBuffer* frontBuffer = nullptr;
 
     void Reset();
     void CheckCoinsidenceFlag(); // Aka LY=LYC
+
+    enum ppuMode : uint8_t {
+        HBLANK = 0b00,
+        VBLANK = 0b01,
+        OAM_SEARCH = 0b10,
+        TRANSFERRING_DATA = 0b11,
+    };
+
+    uint8_t GetLY()   const;
+    uint8_t GetLYC()  const;
+    uint8_t GetSTAT() const;
+    uint8_t GetLCDC() const;
+    ppuMode GetMode() const;
+    
+    bool LCD_Enable()         const;
+    bool LCD_WindowEnable()   const;
+    bool LCD_ObjEnable()      const;
+    bool LCD_BgWindowEnable() const;
+
 private:
     // Color ids used by the gameboy.
     enum gbColorId 
@@ -48,16 +80,16 @@ private:
         BLACK = 0b11,
     };
 
-    gbColorId GetPixelColor(uint8_t col, uint16_t _addr);
+    gbColorId GetPixelColor(uint8_t col, uint16_t addr);
 
-    void UpdateGraphics(uint16_t _cycles);
+    void UpdateGraphics(uint16_t cycles);
     void SetLCDStatus    ();
     void RenderScanline  ();
     void RenderBackground();
     void RenderSprites	 ();
     
 private:
-    int  mScanlineCounter = 456;// 1 scanline is drawn every 456 cpu cycles, this keeps track of it.
+    int  mScanlineCounter = 456; // 1 scanline is drawn every 456 cpu cycles, this keeps track of it.
     gbGameBoy* mGameBoy = nullptr;
 
     friend gbZ80;

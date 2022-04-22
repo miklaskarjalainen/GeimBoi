@@ -5,9 +5,9 @@
 
 using namespace Giffi;
 
-gbPPU::gbColorId gbPPU::GetPixelColor(uint8_t col, uint16_t _addr)
+gbPPU::gbColorId gbPPU::GetPixelColor(uint8_t col, uint16_t addr)
 {
-    uint8_t palette = mGameBoy->ReadByte(_addr);
+    uint8_t palette = mGameBoy->ReadByte(addr);
     uint8_t high = 0;
     uint8_t low = 0;
 
@@ -29,17 +29,16 @@ gbPPU::gbColorId gbPPU::GetPixelColor(uint8_t col, uint16_t _addr)
 void gbPPU::Reset()
 {
     mScanlineCounter = 456;
-    memset(&frontBuffer, 0, sizeof(frontBuffer));
+    memset(frontBuffer, 0, sizeof(gbColor[144 * 160]));
 }
 
-void gbPPU::UpdateGraphics(uint16_t _cycles)
+void gbPPU::UpdateGraphics(uint16_t cycles)
 {
     SetLCDStatus();
-    const uint8_t LCD_CONTROL = mGameBoy->mRom[0xFF40]; // Settings for the lcd
 
-    if (LCD_CONTROL >> 7) // LCD_ENABLE
+    if (LCD_Enable()) // LCD_ENABLE
     {
-        mScanlineCounter -= _cycles;
+        mScanlineCounter -= cycles;
     }
 
     if (mScanlineCounter <= 0)
@@ -51,11 +50,11 @@ void gbPPU::UpdateGraphics(uint16_t _cycles)
 
 void gbPPU::SetLCDStatus()
 {
-    uint8_t LCD_CONTROL = mGameBoy->mRom[0xFF40]; 
-    uint8_t LCD_STATUS  = mGameBoy->mRom[0xFF41];
+    uint8_t LCD_CONTROL = GetLCDC();
+    uint8_t LCD_STATUS  = GetSTAT();
     uint8_t LY  = mGameBoy->mRom[0xFF44]; // Current scanline
 
-    if (!((LCD_CONTROL >> 7) & 1)) // If screen is disabled
+    if (!LCD_Enable())
     {
         mScanlineCounter = 456;
         mGameBoy->mRom[0xFF41] &= 0b11111100; // LCD Status to 0x00
@@ -106,8 +105,7 @@ void gbPPU::SetLCDStatus()
 
 void gbPPU::RenderScanline()
 {
-    uint8_t LCD_CONTROL = mGameBoy->mRom[0xFF40]; // Settings for the lcd
-    if (!(LCD_CONTROL >> 7)) { return; }
+    if (!LCD_Enable()) { return; }
     
     uint8_t& curScanline = mGameBoy->mRom[0xFF44]; // 0-153
     curScanline++;
@@ -124,7 +122,6 @@ void gbPPU::RenderScanline()
 
     if ( curScanline < 144U) // 0-144 is visible to the viewport
     {
-        PROFILE_SCOPE("Rendering scanline");
         RenderBackground();
         RenderSprites();
     }    
@@ -134,7 +131,7 @@ void gbPPU::RenderBackground()
 {  
     uint8_t LCDControl = mGameBoy->mRom[0xFF40];
 
-    if (!((LCDControl >> 0) & 1)) // LCD Enabled?
+    if (!LCD_BgWindowEnable()) // Background enable
         return;
     
     const uint8_t  LY   = mGameBoy->mRom[0xFF44]; // Scanline
@@ -211,16 +208,15 @@ void gbPPU::RenderBackground()
         {
             continue;
         }
-    
-        frontBuffer[LY][pixel] = color;
+        (*frontBuffer)[SCREEN_WIDTH * LY +pixel] = color;
     }
 }
 
 void gbPPU::RenderSprites()
 {
-    uint8_t lcdControl = mGameBoy->mRom[0xFF40];
-    if ( (lcdControl >> 1) & 0) { return; } // OBJ enabled?
+    if ( !LCD_ObjEnable() ) { return; }
 
+    uint8_t lcdControl = mGameBoy->mRom[0xFF40];
     uint8_t spritesPerScanline = 10;
     int ySize = (lcdControl >> 2) & 1 ? 16 : 8;
 
@@ -291,7 +287,7 @@ void gbPPU::RenderSprites()
                     continue ;
                 }
 
-                frontBuffer[scanline][pixel] = color;
+                (*frontBuffer)[SCREEN_WIDTH * scanline + pixel] = color;
             }
         }
     }
@@ -300,11 +296,9 @@ void gbPPU::RenderSprites()
 // Aka LY=LYC
 void gbPPU::CheckCoinsidenceFlag()
 {
-    const uint8_t  LY  = mGameBoy->mRom[0xFF44]; // Current scanline
-    const uint8_t  LYC = mGameBoy->mRom[0xFF45]; // This is set by a the game, if same as LY then a interrupt is requested
     uint8_t& lcdStatus = mGameBoy->mRom[0xFF41]; 
     
-    if (LY == LYC)
+    if (GetLY() == GetLYC())
     {    
         lcdStatus |= 1 << 2;      // Set LY=LYC flag on the lcd
         if ((lcdStatus >> 6) & 1) // Is LY=LYC interrupt enabled.
@@ -317,3 +311,49 @@ void gbPPU::CheckCoinsidenceFlag()
         lcdStatus &= ~(1 << 2);   // Reset LY=LYC flag on the lcd
     }
 }
+
+inline uint8_t gbPPU::GetLY() const 
+{
+    return mGameBoy->mRom[0xFF44];
+}
+
+inline uint8_t gbPPU::GetLYC() const
+{
+    return mGameBoy->mRom[0xFF45];
+}
+
+inline uint8_t gbPPU::GetSTAT() const 
+{
+    return mGameBoy->mRom[0xFF41]; 
+};
+
+inline uint8_t gbPPU::GetLCDC() const 
+{
+    return mGameBoy->mRom[0xFF40];
+};
+
+inline gbPPU::ppuMode gbPPU::GetMode() const
+{ 
+    return (ppuMode)(GetSTAT() & 0b11); 
+}
+
+inline bool gbPPU::LCD_Enable() const
+{
+    return (mGameBoy->mRom[0xFF40] >> 7) & 0b1;
+}
+
+inline bool gbPPU::LCD_WindowEnable() const
+{
+    return (mGameBoy->mRom[0xFF40] >> 5) & 0b1;
+}
+
+inline bool gbPPU::LCD_ObjEnable() const 
+{
+    return (mGameBoy->mRom[0xFF40] >> 1) & 0b1;
+}
+
+inline bool gbPPU::LCD_BgWindowEnable() const
+{
+    return (mGameBoy->mRom[0xFF40] >> 0) & 0b1;
+}
+
