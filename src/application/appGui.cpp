@@ -1,18 +1,15 @@
 #include <sstream>
 #include <SDL2/SDL.h>
-#include <utils/Benchmark.hpp>
 #include "appGui.hpp"
 #include "appSettings.hpp"
 #include "imgui/imgui.h"
 #include "imgui/imgui_sdl.h"
-#include "utils/FileDialogs.hpp"
+#include "FileDialogs/FileDialogs.hpp"
 
 using namespace Giffi;
 
 appGui::appGui(SDL_Renderer* renderer, std::shared_ptr<gbGameBoy>& emulator, int widht, int height)
 {
-    PROFILE_FUNCTION();
-
     mGameBoy = emulator;
     ImGui::CreateContext();
     ImGuiSDL::Initialize(renderer, widht, height);
@@ -50,8 +47,6 @@ appGui::~appGui()
 
 void appGui::Update()
 {
-    PROFILE_FUNCTION();
-
     ImGui::NewFrame();
     UpdateTopbar();
     UpdateDebug();
@@ -59,8 +54,6 @@ void appGui::Update()
 
 void appGui::Draw()
 {
-    PROFILE_FUNCTION();
-
     ImGui::Render();
     ImGuiSDL::Render(ImGui::GetDrawData());
 }
@@ -72,7 +65,6 @@ bool appGui::IsPaused()
 
 void appGui::UpdateTopbar()
 {
-    PROFILE_FUNCTION();
     ImGuiIO& io = ImGui::GetIO();
     
     ImGui::Begin("NavBar", 0, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
@@ -132,7 +124,6 @@ void appGui::OpenRomDialog()
 
 void appGui::UpdateDebug()
 {
-    PROFILE_FUNCTION();
     if (!mDrawDebug) { return; }
 
     const gbZ80* cpu   = &mGameBoy->mCpu;

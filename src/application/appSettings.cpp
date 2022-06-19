@@ -5,7 +5,6 @@
     #include <unistd.h>
 #endif
 #include <boost/property_tree/ini_parser.hpp>
-#include <utils/Benchmark.hpp>
 #include "appSettings.hpp"
 
 using namespace Giffi;

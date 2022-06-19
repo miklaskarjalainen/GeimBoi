@@ -1,7 +1,8 @@
 #pragma once
 #include <cstdint>
-#include <string>
 #include <cstring>
+#include <string>
+#include <memory>
 
 namespace Giffi
 {

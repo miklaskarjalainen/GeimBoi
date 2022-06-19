@@ -1,4 +1,3 @@
-#include <utils/Benchmark.hpp>
 #include "imgui/imgui.h"
 #include "appWindow.hpp"
 
@@ -6,8 +5,6 @@ using namespace Giffi;
 
 appWindow::appWindow(const char* openRom, int width, int height)
 {
-    PROFILE_FUNCTION();
-
     // Init SDL2
     if (SDL_Init(SDL_INIT_EVERYTHING))
     {
@@ -41,15 +38,13 @@ appWindow::appWindow(const char* openRom, int width, int height)
 
 void appWindow::Run()
 {
-    PROFILE_FUNCTION();
-
     // Create Surface out of raw pixel data.
     constexpr int pitch = 3 * 160;
     constexpr int depth = 24;
     constexpr Uint32 rmask = 0x000000FF;
     constexpr Uint32 gmask = 0x0000FF00;
     constexpr Uint32 bmask = 0x00FF0000;
-    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(mGameBoy->mPpu.frontBuffer, 160, 144, depth, pitch, rmask, gmask, bmask, NULL);
+    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(mGameBoy->mPpu.frontBuffer, 160, 144, depth, pitch, rmask, gmask, bmask, (uint32_t)NULL);
     if (!surface) {
         printf("Error creating a surface for screenbuffer! %s\n", SDL_GetError());
         exit(-1);
@@ -62,7 +57,6 @@ void appWindow::Run()
 
         // Update
         {
-            PROFILE_SCOPE("Update");
             // Emulator gets updated in the gui, because of "pause"
             mGui->Update();
             if (!mGui->IsPaused())
@@ -72,7 +66,6 @@ void appWindow::Run()
 
         // Rendering
         {
-            PROFILE_SCOPE("Rendering");
             SDL_Texture* texture = SDL_CreateTextureFromSurface(mRenderer, surface);
 
             // Clear Background
@@ -93,7 +86,6 @@ void appWindow::Run()
         }
 
         {
-            PROFILE_SCOPE("SDL_Delay");
             // Using delay to target 60fps
             int end_ticks = SDL_GetTicks();
             if (16 - (end_ticks - start_ticks) > 0)
@@ -107,8 +99,6 @@ void appWindow::Run()
 
 appWindow::~appWindow()
 {
-    PROFILE_FUNCTION();
-
     // Save Game on exit
     if (mGameBoy->mCart.IsGameLoaded())
     {

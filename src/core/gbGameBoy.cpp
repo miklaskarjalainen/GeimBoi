@@ -1,4 +1,3 @@
-#include <utils/Benchmark.hpp>
 #include <cstring>
 #include <string>
 #include <filesystem>
@@ -61,8 +60,6 @@ void gbGameBoy::ReleaseButton(gbButton key)
 
 void gbGameBoy::Reset()
 {
-    PROFILE_FUNCTION();
-
     mCpu.Reset();
     mCart.Reset();
     mPpu.Reset();

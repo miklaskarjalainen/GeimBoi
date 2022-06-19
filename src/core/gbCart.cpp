@@ -1,5 +1,4 @@
 #include <boost/filesystem.hpp>
-#include <utils/Benchmark.hpp>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -156,7 +155,6 @@ void gbCart::Reset()
 
 bool gbCart::LoadRom(const std::string& path)
 {
-    PROFILE_FUNCTION();
     // Load
     if (!boost::filesystem::is_regular_file(path))
     {

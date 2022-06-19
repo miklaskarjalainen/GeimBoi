@@ -1,6 +1,8 @@
 #pragma once
 #include <cstring>
 #include <cstdint>
+#include <cstdlib>
+#include <cstdio>
 #include <array>
 
 #define SCREEN_WIDTH 160

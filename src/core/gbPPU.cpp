@@ -1,4 +1,3 @@
-#include <utils/Benchmark.hpp>
 #include "gbPPU.hpp"
 #include "gbZ80.hpp"
 #include "gbGameBoy.hpp"
