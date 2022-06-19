@@ -1,12 +1,18 @@
 #pragma once
 #include <string>
 #include <SDL2/SDL.h>
+#include "../core/gbPPU.hpp" // screen size macros
 
 namespace GeimBoi
 {
     class appSettings {
     public:
         static std::string lastrom_path;
+
+        static struct Window {
+            uint16_t width = SCREEN_WIDTH*2;
+            uint16_t height = SCREEN_HEIGHT*2;
+        } window;
 
         static struct Controls {
             uint16_t up    = SDL_SCANCODE_W;

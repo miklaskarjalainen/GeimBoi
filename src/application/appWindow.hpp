@@ -10,7 +10,7 @@ namespace GeimBoi
 	class appWindow
 	{
 	public:
-		appWindow(const char* openRom, int width = SCREEN_WIDTH, int height = SCREEN_HEIGHT);
+		appWindow(const char* openRom);
 		~appWindow();
 		void Run();
 		inline bool ShouldWindowClose() const { return mClosing; }

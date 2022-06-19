@@ -7,7 +7,7 @@ using namespace GeimBoi;
 int main(int argc, char* argv[])
 {
     const char* loadRom = argc > 1 ? argv[1] : nullptr;
-    appWindow window(loadRom, SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2);
+    appWindow window(loadRom);
     window.Run();
     return 0;
 }

@@ -13,6 +13,7 @@ using namespace GeimBoi;
 using namespace boost::property_tree;
 
 std::string appSettings::lastrom_path = "";
+appSettings::Window appSettings::window = {};
 appSettings::Controls appSettings::controls = {};
 
 void appSettings::Load(const std::string& path)
@@ -25,6 +26,10 @@ void appSettings::Load(const std::string& path)
 
     // get fields
     lastrom_path = file.get<std::string>("general.lastrom_path", lastrom_path);
+
+    // disallow sizes smaller than gameboyscreen
+    window.width  = file.get<uint16_t>("window.width" , window.width);
+    window.height = file.get<uint16_t>("window.height" , window.height);
 
     controls.up    = file.get<uint16_t>("controls.up"   , controls.up); 
     controls.down  = file.get<uint16_t>("controls.down" , controls.down); 
@@ -44,6 +49,9 @@ void appSettings::Save(const std::string& path)
     
     // set fields
     iniFile.add("general.lastrom_path", lastrom_path);
+
+    iniFile.add("window.width" , window.width);
+    iniFile.add("window.height", window.height);
 
     iniFile.add("controls.up"   , controls.up);
     iniFile.add("controls.down" , controls.down);

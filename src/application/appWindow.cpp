@@ -4,10 +4,12 @@
 
 using namespace GeimBoi;
 
-appWindow::appWindow(const char* openRom, int width, int height)
+appWindow::appWindow(const char* openRom)
 {
     // Init settings / config
     appSettings::Load(SettingsPath);
+    const auto width = appSettings::window.width;
+    const auto height = appSettings::window.height;
 
     // Init SDL2
     if (SDL_Init(SDL_INIT_EVERYTHING))
@@ -25,6 +27,7 @@ appWindow::appWindow(const char* openRom, int width, int height)
         printf("Unable to create window: %s\n", SDL_GetError());
         exit(1);
     }
+    SDL_SetWindowMinimumSize(mWindow, SCREEN_WIDTH, SCREEN_HEIGHT);
     
     mRenderer= SDL_CreateRenderer(mWindow, 0, SDL_RENDERER_ACCELERATED);
     if (mRenderer == NULL)
@@ -271,8 +274,13 @@ void appWindow::DoEvents()
             {
                 if (events.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
                 {
-                    io.DisplaySize.x = (float)(events.window.data1);
-                    io.DisplaySize.y = (float)(events.window.data2);
+                    const Sint16 new_width  = events.window.data1;
+                    const Sint16 new_height = events.window.data2;
+                    
+                    appSettings::window.width  = static_cast<uint16_t>(new_width);
+                    appSettings::window.height = static_cast<uint16_t>(new_height);
+                    io.DisplaySize.x = static_cast<float>(new_width);
+                    io.DisplaySize.y = static_cast<float>(new_height);
                 }
                 break;
             }
