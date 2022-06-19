@@ -1,5 +1,6 @@
 #include <utils/Benchmark.hpp>
 #include <fstream>
+#include <iostream>
 #include "application/appWindow.hpp"
 
 using namespace Giffi;

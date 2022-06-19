@@ -4,6 +4,7 @@
 #elif __unix__
     #include <unistd.h>
 #endif
+#include <boost/property_tree/ini_parser.hpp>
 #include <utils/Benchmark.hpp>
 #include "appSettings.hpp"
 
@@ -11,16 +12,12 @@ using namespace Giffi;
 
 void appSettings::SetLastRomPath(const std::string& path)
 {
-    Get().m_IniFile.SetValue("General", "LastRomPath", path);
+    Get().iniFile.put("General.LastRomPath", path);
 }
 
 std::string appSettings::GetLastRomPath()
 {
-    if (!Get().m_IniFile.HasValue("General", "LastRomPath"))
-    {
-        return get_current_dir_name();
-    }
-    return Get().m_IniFile.GetValue<std::string>("General", "LastRomPath");
+    return Get().iniFile.get<std::string>("General.LastRomPath", std::string(get_current_dir_name()));
 }
 
 appSettings& appSettings::Get()
@@ -29,10 +26,12 @@ appSettings& appSettings::Get()
     return p;
 }
 
-appSettings::appSettings()
-    : m_IniFile(iniFilePath) {}
+appSettings::appSettings() {
+    boost::property_tree::ini_parser::read_ini(iniFilePath, iniFile);
+}
 
 appSettings::~appSettings()
 {
-    m_IniFile.SaveFile(iniFilePath);
+    std::fstream file(iniFilePath);
+    boost::property_tree::write_ini(file, iniFile);
 }

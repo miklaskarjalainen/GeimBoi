@@ -1,9 +1,9 @@
 # (Simple) Makefile for linux #
 
 CPP     := g++
-ARGS    := -std=c++17 # c++17 needed for variant (FileIni.hpp), would like to get this to c++14 tho.
+ARGS    := -std=c++14
 
-LIBS    := -lSDL2 -lSDL2main
+LIBS    := -lSDL2 -lSDL2main -lboost_filesystem
 INCLUDE := -Ivendor/include
 
 SRCS    := src/*.cpp src/application/*.cpp src/application/imgui/*.cpp src/core/*.cpp src/core/opcode/*.cpp src/core/mbc/*.cpp 

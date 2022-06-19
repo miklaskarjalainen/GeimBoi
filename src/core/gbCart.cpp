@@ -1,5 +1,5 @@
+#include <boost/filesystem.hpp>
 #include <utils/Benchmark.hpp>
-#include <utils/Dir.hpp>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -158,7 +158,7 @@ bool gbCart::LoadRom(const std::string& path)
 {
     PROFILE_FUNCTION();
     // Load
-    if (!Dir::FileExists(path))
+    if (!boost::filesystem::is_regular_file(path))
     {
         printf("Can't find a file at %s\n", path.c_str());
         mGameLoaded = false;

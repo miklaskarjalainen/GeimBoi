@@ -1,5 +1,5 @@
+#include <boost/filesystem.hpp>
 #include <utils/Benchmark.hpp>
-#include <utils/Dir.hpp>
 #include <fstream>
 #include "gbMBC.hpp"
 #include "gbMBC1.hpp"
@@ -66,7 +66,7 @@ bool gbMBC::LoadBatteryImpl(const std::string& _path, uint8_t* dst, size_t size)
 {
     PROFILE_FUNCTION();
 
-    if (!Dir::FileExists(_path))
+    if (!boost::filesystem::is_regular_file(_path))
     {
         printf("No savefile at %s\n", _path.c_str());
         return false;

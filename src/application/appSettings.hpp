@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "utils/FileIni.hpp"
+#include <boost/property_tree/ptree.hpp>
 
 namespace Giffi
 {
@@ -17,8 +17,7 @@ namespace Giffi
         static appSettings& Get();
     
     private:
-        const std::string iniFilePath = "settings.ini";
-        FileIni m_IniFile;
-
+        const std::string iniFilePath = "./settings.ini";
+        boost::property_tree::ptree iniFile;
     };
 }
