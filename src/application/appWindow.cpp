@@ -139,9 +139,9 @@ void appWindow::DoEvents()
                 io.KeySuper = ((SDL_GetModState() & KMOD_GUI) != 0);
 
                 // Direction buttons, can't hold opposite directions at the same time
-                if (key == SDL_SCANCODE_D)
+                if (key == appSettings::controls.right)
                 { 
-                    if (io.KeysDown[SDL_SCANCODE_A])
+                    if (io.KeysDown[appSettings::controls.left])
                     {
                         mGameBoy->ReleaseButton(gbButton::LEFT);
                         mGameBoy->ReleaseButton(gbButton::RIGHT);
@@ -150,9 +150,9 @@ void appWindow::DoEvents()
                     mGameBoy->PressButton(gbButton::RIGHT);
                     break;
                 }
-                if (key == SDL_SCANCODE_A)
+                if (key == appSettings::controls.left)
                 {
-                    if (io.KeysDown[SDL_SCANCODE_D])
+                    if (io.KeysDown[appSettings::controls.right])
                     {
                         mGameBoy->ReleaseButton(gbButton::LEFT);
                         mGameBoy->ReleaseButton(gbButton::RIGHT);
@@ -161,9 +161,9 @@ void appWindow::DoEvents()
                     mGameBoy->PressButton(gbButton::LEFT);
                     break;
                 }
-                if (key == SDL_SCANCODE_W)
+                if (key == appSettings::controls.up)
                 { 
-                    if (io.KeysDown[SDL_SCANCODE_S])
+                    if (io.KeysDown[appSettings::controls.down])
                     {
                         mGameBoy->ReleaseButton(gbButton::UP);
                         mGameBoy->ReleaseButton(gbButton::DOWN);
@@ -172,9 +172,9 @@ void appWindow::DoEvents()
                     mGameBoy->PressButton(gbButton::UP);
                     break;
                 }
-                if (key == SDL_SCANCODE_S)
+                if (key == appSettings::controls.down)
                 { 
-                    if (io.KeysDown[SDL_SCANCODE_W])
+                    if (io.KeysDown[appSettings::controls.up])
                     {
                         mGameBoy->ReleaseButton(gbButton::UP);
                         mGameBoy->ReleaseButton(gbButton::DOWN);
@@ -184,10 +184,10 @@ void appWindow::DoEvents()
                     break; 
                 }
                 
-                if (key == SDL_SCANCODE_K)         { mGameBoy->PressButton(gbButton::A);      break; }
-                if (key == SDL_SCANCODE_J)         { mGameBoy->PressButton(gbButton::B);      break; }
-                if (key == SDL_SCANCODE_RETURN)    { mGameBoy->PressButton(gbButton::START); break; }
-                if (key == SDL_SCANCODE_BACKSLASH) { mGameBoy->PressButton(gbButton::SELECT);  break; }
+                if (key == appSettings::controls.a)      { mGameBoy->PressButton(gbButton::A);      break; }
+                if (key == appSettings::controls.b)      { mGameBoy->PressButton(gbButton::B);      break; }
+                if (key == appSettings::controls.start)  { mGameBoy->PressButton(gbButton::START); break; }
+                if (key == appSettings::controls.select) { mGameBoy->PressButton(gbButton::SELECT);  break; }
                 
                 if (key == SDL_SCANCODE_ESCAPE) { mClosing = true; break; }
                 if (io.KeyShift && key == SDL_SCANCODE_R) { mGameBoy->Reset(); break; }
@@ -203,44 +203,44 @@ void appWindow::DoEvents()
                 io.KeyAlt   = ((SDL_GetModState() & KMOD_ALT) != 0);
                 io.KeySuper = ((SDL_GetModState() & KMOD_GUI) != 0);
 
-                if (key == SDL_SCANCODE_D) 
+                if (key == appSettings::controls.right) 
                 { 
                     mGameBoy->ReleaseButton(gbButton::RIGHT);
-                    if (io.KeysDown[SDL_SCANCODE_A]) {
+                    if (io.KeysDown[appSettings::controls.left]) {
                         mGameBoy->PressButton(gbButton::LEFT);
                     }
                     break;
                 }
-                if (key == SDL_SCANCODE_A)
+                if (key == appSettings::controls.left)
                 {
                     mGameBoy->ReleaseButton(gbButton::LEFT);
-                    if (io.KeysDown[SDL_SCANCODE_D]) {
+                    if (io.KeysDown[appSettings::controls.right]) {
                         mGameBoy->PressButton(gbButton::RIGHT);
                     }
                     break;
                 }
-                if (key == SDL_SCANCODE_W)
+                if (key == appSettings::controls.up)
                 {
                     mGameBoy->ReleaseButton(gbButton::UP);
-                    if (io.KeysDown[SDL_SCANCODE_S]) {
+                    if (io.KeysDown[appSettings::controls.down]) {
                         mGameBoy->PressButton(gbButton::DOWN);
                     }
                     break;
                 }
-                if (key == SDL_SCANCODE_S)
+                if (key == appSettings::controls.down)
                 {
                     mGameBoy->ReleaseButton(gbButton::DOWN);
-                    if (io.KeysDown[SDL_SCANCODE_W])
+                    if (io.KeysDown[appSettings::controls.up])
                     {
                         mGameBoy->PressButton(gbButton::UP);
                     }
                     break;
                 }
                 
-                if (key == SDL_SCANCODE_K)         { mGameBoy->ReleaseButton(gbButton::A);      break; }
-                if (key == SDL_SCANCODE_J)         { mGameBoy->ReleaseButton(gbButton::B);      break; }
-                if (key == SDL_SCANCODE_RETURN)    { mGameBoy->ReleaseButton(gbButton::START);  break; }
-                if (key == SDL_SCANCODE_BACKSLASH) { mGameBoy->ReleaseButton(gbButton::SELECT);  break; }
+                if (key == appSettings::controls.a)      { mGameBoy->ReleaseButton(gbButton::A);      break; }
+                if (key == appSettings::controls.b)      { mGameBoy->ReleaseButton(gbButton::B);      break; }
+                if (key == appSettings::controls.start)  { mGameBoy->ReleaseButton(gbButton::START);  break; }
+                if (key == appSettings::controls.select) { mGameBoy->ReleaseButton(gbButton::SELECT);  break; }
                 break;
             }
             case SDL_TEXTINPUT:
