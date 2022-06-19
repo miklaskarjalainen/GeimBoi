@@ -18,7 +18,6 @@ ifeq ($(build), release)
 endif
 ifeq ($(build), debug)
 	ARGS += -g
-	ARGS += -DDO_PROFILING
 	BIN = bin/Debug/gbBoy.o
 endif
 
