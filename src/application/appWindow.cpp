@@ -58,7 +58,7 @@ void appWindow::Run()
         // Update
         {
             // Emulator gets updated in the gui, because of "pause"
-            mGui->Update();
+            mGui->Draw();
             if (!mGui->IsPaused())
                 mGameBoy->FrameAdvance();
         }
@@ -78,7 +78,7 @@ void appWindow::Run()
             dst.h -= dst.y;
         
             SDL_RenderCopy(mRenderer, texture, NULL, &dst);
-            mGui->Draw();
+            mGui->Render();
 
             // Render
             SDL_RenderPresent(mRenderer);

@@ -45,14 +45,17 @@ appGui::~appGui()
     ImGui::DestroyContext();
 }
 
-void appGui::Update()
+void appGui::Draw()
 {
     ImGui::NewFrame();
-    UpdateTopbar();
-    UpdateDebug();
+    DrawTopbar();
+    DrawDebug();
+    DrawAuthors();
+    DrawLicences();
+    DrawInfo();
 }
 
-void appGui::Draw()
+void appGui::Render()
 {
     ImGui::Render();
     ImGuiSDL::Render(ImGui::GetDrawData());
@@ -63,7 +66,7 @@ bool appGui::IsPaused()
     return mEmuPaused;
 }
 
-void appGui::UpdateTopbar()
+void appGui::DrawTopbar()
 {
     ImGuiIO& io = ImGui::GetIO();
     
@@ -90,9 +93,12 @@ void appGui::UpdateTopbar()
         }
         if (ImGui::BeginMenu("About"))
         {
-            ImGui::Text("GeimBoy DEV");
-            ImGui::Text("Developed by Giffi");
-            ImGui::Text("Uses: SDL2 & ImGui");
+            if (ImGui::MenuItem("Authors"))
+                mDrawAuthors = !mDrawAuthors;
+            if (ImGui::MenuItem("Licences"))
+                mDrawLicences = !mDrawLicences;
+            if (ImGui::MenuItem("Info"))
+                mDrawInfo = !mDrawInfo;
             ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
@@ -100,31 +106,10 @@ void appGui::UpdateTopbar()
     ImGui::End();
 }
 
-void appGui::OpenRomDialog()
+void appGui::DrawDebug()
 {
-    // File open
-    std::string path = appSettings::GetLastRomPath();
-    auto f = pfd::open_file("Open rom", path,
-                            { "GB(C) Roms", "*.gb *.gbc",
-                            "All Files", "*" },
-                            pfd::opt::none);
-    
-    if (f.result().size() == 1)
-    {
-        // Load
-        mGameBoy->LoadRom(f.result()[0]);
-        if (mGameBoy->mCart.IsGameLoaded())
-        {
-            const std::string file_name = mGameBoy->mCart.GetGameName() + ".sav";
-            mGameBoy->mCart.LoadBattery(file_name);
-            appSettings::SetLastRomPath(f.result()[0]);
-        }
-    }
-}
-
-void appGui::UpdateDebug()
-{
-    if (!mDrawDebug) { return; }
+    if (!mDrawDebug) 
+        return;
 
     const gbZ80* cpu   = &mGameBoy->mCpu;
     const gbCart* cart = &mGameBoy->mCart;
@@ -242,5 +227,188 @@ void appGui::UpdateDebug()
             offset += GetLength(opcode);
         }
         ImGui::End();
+    }
+}
+
+void appGui::DrawAuthors()
+{
+    if (!mDrawAuthors)
+        return;
+
+    ImGui::Begin("Authors", &mDrawAuthors, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::SetWindowSize(ImVec2(260, 120));
+
+    ImGui::Text("Developers");
+    ImGui::Separator();
+    ImGui::Text("Miklas Karjalainen (giffi-dev)");
+    
+    ImGui::End();
+}
+
+void appGui::DrawLicences()
+{
+    if (!mDrawLicences)
+        return;
+
+    ImGui::Begin("Licences", &mDrawLicences, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::SetWindowSize(ImVec2(480, 169));
+
+    if (ImGui::CollapsingHeader("GeimBoi"))
+    {
+        ImGui::TextWrapped("MIT Licence\n\n"
+
+        "Copyright (c) 2021 Miklas Karjalainen\n\n"
+
+        "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        "of this software and associated documentation files (the \"Software\"), to deal"
+        "in the Software without restriction, including without limitation the rights"
+        "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell"
+        "copies of the Software, and to permit persons to whom the Software is"
+        "furnished to do so, subject to the following conditions:\n\n"
+
+        "The above copyright notice and this permission notice shall be included in all"
+        "copies or substantial portions of the Software.\n\n"
+
+        "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
+        "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
+        "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE"
+        "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER"
+        "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,"
+        "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.");
+    }
+    if (ImGui::CollapsingHeader("SDL2"))
+    {
+        ImGui::TextWrapped("This software is provided 'as-is', without any express or implied"
+        "warranty.  In no event will the authors be held liable for any damages"
+        "arising from the use of this software.\n\n"
+
+        "Permission is granted to anyone to use this software for any purpose,"
+        "including commercial applications, and to alter it and redistribute it"
+        "freely, subject to the following restrictions:\n\n"
+
+        "1. The origin of this software must not be misrepresented; you must not"
+        "claim that you wrote the original software. If you use this software"
+        "in a product, an acknowledgment in the product documentation would be"
+        "appreciated but is not required.\n"
+        "2. Altered source versions must be plainly marked as such, and must not be"
+        "misrepresented as being the original software.\n"
+        "3. This notice may not be removed or altered from any source distribution.");
+    }
+    if (ImGui::CollapsingHeader("Dear ImGui"))
+    {
+        ImGui::TextWrapped("The MIT License (MIT)\n\n"
+
+        "Copyright (c) 2014-2022 Omar Cornut\n\n"
+
+        "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        "of this software and associated documentation files (the \"Software\"), to deal"
+        "in the Software without restriction, including without limitation the rights"
+        "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell"
+        "copies of the Software, and to permit persons to whom the Software is"
+        "furnished to do so, subject to the following conditions:\n\n"
+
+        "The above copyright notice and this permission notice shall be included in all"
+        "copies or substantial portions of the Software.\n\n"
+
+        "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
+        "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
+        "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE"
+        "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER"
+        "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,"
+        "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.");
+    }
+    if (ImGui::CollapsingHeader("imgui_sdl"))
+    {
+        ImGui::TextWrapped("MIT License\n"
+        "Copyright (c) 2018\n\n"
+
+        "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        "of this software and associated documentation files (the \"Software\"), to deal"
+        "in the Software without restriction, including without limitation the rights"
+        "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell"
+        "copies of the Software, and to permit persons to whom the Software is"
+        "furnished to do so, subject to the following conditions:\n\n"
+
+        "The above copyright notice and this permission notice shall be included in all"
+        "copies or substantial portions of the Software.\n\n"
+
+        "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
+        "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
+        "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE"
+        "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER"
+        "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,"
+        "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.");
+    }
+    if (ImGui::CollapsingHeader("Portable File Dialogs"))
+    {
+        ImGui::TextWrapped("Copyright © 2018 - 2020 Sam Hocevar <sam@hocevar.net>\n\n"
+
+        "This library is free software. It comes without any warranty, to"
+        "the extent permitted by applicable law. You can redistribute it"
+        "and/or modify it under the terms of the Do What the Fuck You Want"
+        "to Public License, Version 2, as published by the WTFPL Task Force."
+        "See http://www.wtfpl.net/ for more details.");
+    }
+    if (ImGui::CollapsingHeader("Boost C++ Libraries"))
+    {
+        ImGui::TextWrapped("Boost Software License - Version 1.0 - August 17th, 2003\n\n"
+
+        "Permission is hereby granted, free of charge, to any person or organization"
+        "obtaining a copy of the software and accompanying documentation covered by"
+        "this license (the \"Software\") to use, reproduce, display, distribute,"
+        "execute, and transmit the Software, and to prepare derivative works of the"
+        "Software, and to permit third-parties to whom the Software is furnished to"
+        "do so, all subject to the following:\n\n"
+
+        "The copyright notices in the Software and this entire statement, including"
+        "the above license grant, this restriction and the following disclaimer,"
+        "must be included in all copies of the Software, in whole or in part, and"
+        "all derivative works of the Software, unless such copies or derivative"
+        "works are solely in the form of machine-executable object code generated by"
+        "a source language processor.\n\n"
+
+        "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
+        "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
+        "FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT"
+        "SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE"
+        "FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,"
+        "ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER"
+        "DEALINGS IN THE SOFTWARE.");
+    }
+
+    ImGui::End();   
+}
+
+void appGui::DrawInfo()
+{
+    if (!mDrawInfo)
+        return;
+    
+    ImGui::Begin("Info", &mDrawInfo, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::SetWindowSize(ImVec2(190, 85));
+    ImGui::TextWrapped("GeimBoi is developed and maintained by giffi-dev");
+    ImGui::Text("Licence: %s", "MIT");
+    ImGui::End();   
+}
+
+void appGui::OpenRomDialog()
+{
+    // File open
+    std::string path = appSettings::GetLastRomPath();
+    auto f = pfd::open_file("Open rom", path,
+                            { "GB(C) Roms", "*.gb *.gbc",
+                            "All Files", "*" },
+                            pfd::opt::none);
+    
+    if (f.result().size() == 1)
+    {
+        // Load
+        mGameBoy->LoadRom(f.result()[0]);
+        if (mGameBoy->mCart.IsGameLoaded())
+        {
+            const std::string file_name = mGameBoy->mCart.GetGameName() + ".sav";
+            mGameBoy->mCart.LoadBattery(file_name);
+            appSettings::SetLastRomPath(f.result()[0]);
+        }
     }
 }
