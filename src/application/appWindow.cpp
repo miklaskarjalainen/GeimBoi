@@ -15,6 +15,10 @@ appWindow::appWindow(const char* openRom, int width, int height)
         printf("Unable to init sdl2: %s\n", SDL_GetError()); 
         exit(1);
     }
+
+    // fixes a screen flash when starting and closing the application on KDE
+    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0"); 
+
     mWindow  = SDL_CreateWindow("GeimBoy", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE);
     if (mWindow == NULL)
     {
