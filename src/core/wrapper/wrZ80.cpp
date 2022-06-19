@@ -3,7 +3,7 @@
 #include "wrapper.hpp"
 #include "../gbZ80.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 DLL_EXPORT bool Z80_GetFlag(gbZ80* _ptr, gbFlag _flag)
 {

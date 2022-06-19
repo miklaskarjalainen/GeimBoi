@@ -1,12 +1,14 @@
 #pragma once
 #include <cstdint>
 
-union Reg16
-{
-	struct
+namespace GeimBoi {
+	union Reg16
 	{
-		uint8_t low;
-		uint8_t high;
+		struct
+		{
+			uint8_t low;
+			uint8_t high;
+		};
+		uint16_t val;
 	};
-	uint16_t val;
-};
+}

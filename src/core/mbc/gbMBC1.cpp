@@ -1,7 +1,7 @@
 #include "../gbCart.hpp"
 #include "gbMBC1.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 gbMBC1::gbMBC1(gbCart* _cart)
     : gbMBC(_cart)

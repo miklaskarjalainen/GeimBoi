@@ -6,7 +6,7 @@
 
 #include "appGui.hpp"
 
-namespace Giffi
+namespace GeimBoi
 {
 
 	class appWindow

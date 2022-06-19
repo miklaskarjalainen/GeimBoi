@@ -3,7 +3,7 @@
 #include "wrapper.hpp"
 #include "../gbCart.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 DLL_EXPORT const char* Cart_GetGameName(gbCart* _ptr)
 {

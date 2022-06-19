@@ -2,7 +2,7 @@
 #include <iostream>
 #include "application/appWindow.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 int main(int argc, char* argv[])
 {

@@ -1,7 +1,7 @@
 #include "imgui/imgui.h"
 #include "appWindow.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 appWindow::appWindow(const char* openRom, int width, int height)
 {

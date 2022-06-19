@@ -7,7 +7,7 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include "appSettings.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 void appSettings::SetLastRomPath(const std::string& path)
 {

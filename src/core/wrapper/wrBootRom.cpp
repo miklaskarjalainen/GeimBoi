@@ -3,7 +3,7 @@
 #include "wrapper.hpp"
 #include "../gbBootRom.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 DLL_EXPORT bool BootRom_LoadBios(gbBootRom* _ptr, const char* _path)
 {

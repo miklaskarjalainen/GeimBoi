@@ -4,7 +4,7 @@
 #include <memory>
 #include "mbc/gbMBC.hpp"
 
-namespace Giffi
+namespace GeimBoi
 {
 
 class gbGameBoy;

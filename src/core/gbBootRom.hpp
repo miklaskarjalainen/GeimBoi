@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <string>
 
-namespace Giffi
+namespace GeimBoi
 {
 	class gbGameBoy;
 	class gbBootRom

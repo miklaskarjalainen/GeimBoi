@@ -3,7 +3,7 @@
 #include <string>
 #include "../core/gbGameBoy.hpp"
 
-namespace Giffi
+namespace GeimBoi
 {
 
 class appGui

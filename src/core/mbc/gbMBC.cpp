@@ -6,7 +6,7 @@
 #include "gbMBC3.hpp"
 #include "../gbCart.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 uint8_t gbMBC::ReadByte(uint16_t _addr) const
 {

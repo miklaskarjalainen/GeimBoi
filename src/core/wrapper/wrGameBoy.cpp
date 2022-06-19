@@ -7,7 +7,7 @@
 #include "../gbCart.hpp"
 #include "../gbBootRom.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 // gbGameBoy //
 DLL_EXPORT gbGameBoy* GameBoy_Create()

@@ -6,7 +6,7 @@
 #include "imgui/imgui_sdl.h"
 #include "FileDialogs/FileDialogs.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 appGui::appGui(SDL_Renderer* renderer, std::shared_ptr<gbGameBoy>& emulator, int widht, int height)
 {

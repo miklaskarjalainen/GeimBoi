@@ -9,7 +9,7 @@
 
 #include "reg.hpp"
 
-namespace Giffi
+namespace GeimBoi
 {
 
     enum gbButton : uint8_t

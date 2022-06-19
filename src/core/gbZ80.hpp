@@ -1,7 +1,7 @@
 #pragma once
 #include "reg.hpp"
 
-namespace Giffi
+namespace GeimBoi
 {
 
     class gbGameBoy;

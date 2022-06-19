@@ -8,7 +8,7 @@
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 144
 
-namespace Giffi
+namespace GeimBoi
 {
 class gbGameBoy;
 class gbZ80;

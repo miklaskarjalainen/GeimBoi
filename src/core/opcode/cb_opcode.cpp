@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "../gbZ80.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
     
 void gbZ80::ExecuteExtendedOpcode()
 {
@@ -934,7 +934,7 @@ void gbZ80::ExecuteExtendedOpcode()
     }
 }
 
-namespace Giffi
+namespace GeimBoi
 {
 
 // Swap low and high nibbles of a register (8BIT)

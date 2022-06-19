@@ -2,7 +2,7 @@
 #include "gbPPU.hpp"
 #include "gbGameBoy.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 // Advances the emulator by a single CYCLE
 void gbZ80::Clock()

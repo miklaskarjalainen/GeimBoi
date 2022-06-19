@@ -155,13 +155,13 @@ const uint8_t opcode_length[0x100] = {
 	2,1,2,1,1,1,2,1,2,1,3,1,1,1,2,1,
 };
 
-const char* Giffi::GetAssembly(uint16_t opcode) {
+const char* GeimBoi::GetAssembly(uint16_t opcode) {
 	if ((opcode & 0x00FF) == 0x00CB) {
 		return cb_assembly[opcode >> 8];
 	}
 	return opcode_assembly[opcode & 0xFF];
 }
 
-uint8_t Giffi::GetLength(uint16_t opcode) {
+uint8_t GeimBoi::GetLength(uint16_t opcode) {
 	return opcode_length[opcode & 0xFF];
 }

@@ -2,7 +2,7 @@
 #include "gbZ80.hpp"
 #include "gbGameBoy.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 gbPPU::gbColorId gbPPU::GetPixelColor(uint8_t col, uint16_t addr)
 {

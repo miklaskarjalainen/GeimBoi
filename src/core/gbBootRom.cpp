@@ -2,7 +2,7 @@
 #include <fstream>
 #include "gbBootRom.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 bool gbBootRom::LoadBios(const std::string& _path)
 {

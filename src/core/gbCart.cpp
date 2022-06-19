@@ -5,7 +5,7 @@
 #include "gbGameBoy.hpp"
 #include "gbCart.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 std::string gbCart::GetGameName() const
 {

@@ -1,7 +1,7 @@
 #pragma once
 #include "gbMBC.hpp"
 
-namespace Giffi
+namespace GeimBoi
 {
 	class gbMBC1 : public gbMBC
 	{

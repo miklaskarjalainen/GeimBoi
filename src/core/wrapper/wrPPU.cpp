@@ -3,7 +3,7 @@
 #include "wrapper.hpp"
 #include "../gbPPU.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 struct gbColorFloat {
 	float r, g, b;

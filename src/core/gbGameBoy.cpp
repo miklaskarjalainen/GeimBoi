@@ -3,7 +3,7 @@
 #include <filesystem>
 #include "gbGameBoy.hpp"
 
-using namespace Giffi;
+using namespace GeimBoi;
 
 gbGameBoy::gbGameBoy()
     : mCpu(this), mPpu(this), mCart(this)

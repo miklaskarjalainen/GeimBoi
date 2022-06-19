@@ -2,7 +2,7 @@
 #include <string>
 #include <boost/property_tree/ptree.hpp>
 
-namespace Giffi
+namespace GeimBoi
 {
     class appSettings
     {

@@ -1,7 +1,7 @@
 #pragma once
 #include "gbMBC.hpp"
 
-namespace Giffi
+namespace GeimBoi
 {
 	// Supports ROM sizes up to 2mb (16 banks), and has a internal ram of 512 x 4bits
 	class gbMBC2 : public gbMBC

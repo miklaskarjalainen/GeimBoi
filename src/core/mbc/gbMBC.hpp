@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 
-namespace Giffi
+namespace GeimBoi
 {
 	class gbCart;
 

@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "../gbZ80.hpp"
 
-namespace Giffi
+namespace GeimBoi
 {
     
 void gbZ80::ExecuteNextOpcode()
