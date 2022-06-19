@@ -1,23 +1,18 @@
 #pragma once
 #include <string>
-#include <boost/property_tree/ptree.hpp>
 
 namespace GeimBoi
 {
-    class appSettings
-    {
+    class appSettings {
     public:
-        static void SetLastRomPath(const std::string& path);
-        static std::string GetLastRomPath();
+        static std::string lastrom_path;
 
-    private:
-        appSettings();
-        ~appSettings(); 
-        
-        static appSettings& Get();
+        static void Load(const std::string& path);
+        static void Save(const std::string& path);
     
     private:
-        const std::string iniFilePath = "./settings.ini";
-        boost::property_tree::ptree iniFile;
+        appSettings() = delete;
+        appSettings(const appSettings&) = delete;
+        ~appSettings() = delete;
     };
 }

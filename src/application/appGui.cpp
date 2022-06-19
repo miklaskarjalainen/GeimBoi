@@ -394,7 +394,7 @@ void appGui::DrawInfo()
 void appGui::OpenRomDialog()
 {
     // File open
-    std::string path = appSettings::GetLastRomPath();
+    std::string path = appSettings::lastrom_path;
     auto f = pfd::open_file("Open rom", path,
                             { "GB(C) Roms", "*.gb *.gbc",
                             "All Files", "*" },
@@ -408,7 +408,7 @@ void appGui::OpenRomDialog()
         {
             const std::string file_name = mGameBoy->mCart.GetGameName() + ".sav";
             mGameBoy->mCart.LoadBattery(file_name);
-            appSettings::SetLastRomPath(f.result()[0]);
+            appSettings::lastrom_path = f.result()[0];
         }
     }
 }

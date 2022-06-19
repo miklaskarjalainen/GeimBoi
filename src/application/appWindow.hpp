@@ -1,10 +1,8 @@
 #pragma once
 #include <memory>
 #include <SDL2/SDL.h>
-
-#include "../core/gbGameBoy.hpp"
-
 #include "appGui.hpp"
+#include "../core/gbGameBoy.hpp"
 
 namespace GeimBoi
 {
@@ -27,6 +25,9 @@ namespace GeimBoi
 		std::unique_ptr<appGui> mGui = nullptr;
 		std::shared_ptr<gbGameBoy> mGameBoy = nullptr;
 		bool mClosing = false;
+	
+	private:
+		const std::string SettingsPath = "./settings.ini"; 
 	};
 
 }

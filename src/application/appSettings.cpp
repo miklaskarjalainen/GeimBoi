@@ -4,33 +4,38 @@
 #elif __unix__
     #include <unistd.h>
 #endif
+#include <boost/filesystem.hpp>
+#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include "appSettings.hpp"
 
 using namespace GeimBoi;
 
-void appSettings::SetLastRomPath(const std::string& path)
+std::string appSettings::lastrom_path = "";
+
+void appSettings::Load(const std::string& path)
 {
-    Get().iniFile.put("General.LastRomPath", path);
+    if (!boost::filesystem::is_regular_file(path))
+        return;
+
+    boost::property_tree::ptree file;
+    boost::property_tree::ini_parser::read_ini(path, file);
+
+    // get fields
+    lastrom_path = file.get<std::string>("general.lastrom_path", lastrom_path); 
+    
+    printf("%s loaded succesfully!\n", path.c_str());
 }
 
-std::string appSettings::GetLastRomPath()
+void appSettings::Save(const std::string& path)
 {
-    return Get().iniFile.get<std::string>("General.LastRomPath", std::string(get_current_dir_name()));
-}
+    boost::property_tree::ptree iniFile;
+    
+    // set fields
+    iniFile.add("general.lastrom_path", lastrom_path);
 
-appSettings& appSettings::Get()
-{
-    static appSettings p;
-    return p;
-}
+    // save file
+    boost::property_tree::write_ini(path, iniFile);    
 
-appSettings::appSettings() {
-    boost::property_tree::ini_parser::read_ini(iniFilePath, iniFile);
-}
-
-appSettings::~appSettings()
-{
-    std::fstream file(iniFilePath);
-    boost::property_tree::write_ini(file, iniFile);
+    printf("%s was saved succesfully!\n", path.c_str());
 }

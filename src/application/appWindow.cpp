@@ -1,10 +1,14 @@
 #include "imgui/imgui.h"
 #include "appWindow.hpp"
+#include "appSettings.hpp"
 
 using namespace GeimBoi;
 
 appWindow::appWindow(const char* openRom, int width, int height)
 {
+    // Init settings / config
+    appSettings::Load(SettingsPath);
+
     // Init SDL2
     if (SDL_Init(SDL_INIT_EVERYTHING))
     {
@@ -106,6 +110,7 @@ appWindow::~appWindow()
         mGameBoy->mCart.SaveBattery(file_name);
     }
     SDL_Quit();
+    appSettings::Save(SettingsPath);    
 }
 
 void appWindow::DoEvents()
