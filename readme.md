@@ -5,7 +5,7 @@ GeimBoi is a GameBoy DMG emulator written in C++ using [SDL2](https://www.libsdl
 
 ## Building:
 - **Windows:**  `(Visual Studio): should be just the matter of opening the GeimBoy.sln file an pressing compile. (assuming you have working c++ building environment.)`
-- **Linux Arch:** `pamac install gcc make lib32-sdl2 && make -build=release -j4`
+- **Linux Arch:** `sudo pacman -S gcc make lib32-sdl2 boost && make -build=release -j4`
 
 ## Features:
 - **MBC1:** support (passes Mooneye's mbc1 tests)
@@ -25,10 +25,12 @@ GeimBoi is a GameBoy DMG emulator written in C++ using [SDL2](https://www.libsdl
 ![supermarioland_ss](pictures/supermarioland.png)
 
 ## Credits:
-### Software:
+### Libraries Used:
 - [SDL2](https://www.libsdl.org/download-2.0.php) a cross-platform development library designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware via OpenGL and Direct3D.
-- [Dear ImGui](https://github.com/ocornut/imgui) a bloat-free graphical user interface library for C++.
 - [ImGuiSDL2](https://github.com/Tyyppi77/imgui_sdl) a lightweight SDL2 based renderer for Dear ImGui.
+- [Dear ImGui](https://github.com/ocornut/imgui) a bloat-free graphical user interface library for C++.
+- [Portable File Dialogs](https://github.com/samhocevar/portable-file-dialogs) simple to use crossplatform filedialogs.
+- [Boost](https://github.com/boostorg/boost) C++ crossplatform standard library.
 ### Docs:
 - [Pan Docs](https://gbdev.io/pandocs/) a technical reference guide for the GameBoy.
 - [Gekkio's Complete Technical Guide](https://gekkio.fi/files/gb-docs/gbctr.pdf)
