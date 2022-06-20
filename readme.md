@@ -27,7 +27,6 @@ GeimBoi is a GameBoy DMG emulator written in C++ using [SDL2](https://www.libsdl
 ## Credits:
 ### Libraries Used:
 - [SDL2](https://www.libsdl.org/download-2.0.php) a cross-platform development library designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware via OpenGL and Direct3D.
-- [ImGuiSDL2](https://github.com/Tyyppi77/imgui_sdl) a lightweight SDL2 based renderer for Dear ImGui.
 - [Dear ImGui](https://github.com/ocornut/imgui) a bloat-free graphical user interface library for C++.
 - [Portable File Dialogs](https://github.com/samhocevar/portable-file-dialogs) simple to use crossplatform filedialogs.
 - [Boost](https://github.com/boostorg/boost) C++ crossplatform standard library.
