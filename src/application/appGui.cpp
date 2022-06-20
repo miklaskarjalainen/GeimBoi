@@ -5,15 +5,15 @@
 #include "appSettings.hpp"
 #include "gui/rebindButton.hpp"
 #include "imgui/imgui.h"
-#include "imgui/imgui_sdl.h"
+#include "imgui/imgui_impl_sdl.h"
+#include "imgui/imgui_impl_sdlrenderer.h"
 
 using namespace GeimBoi;
 
-appGui::appGui(SDL_Renderer* renderer, std::shared_ptr<gbGameBoy>& emulator, int widht, int height)
+appGui::appGui(SDL_Window* window, SDL_Renderer* renderer, std::shared_ptr<gbGameBoy>& emulator, int widht, int height)
 {
     mGameBoy = emulator;
     ImGui::CreateContext();
-    ImGuiSDL::Initialize(renderer, widht, height);
 
     // MAP KEYS
     ImGuiIO& io = ImGui::GetIO();
@@ -38,17 +38,24 @@ appGui::appGui(SDL_Renderer* renderer, std::shared_ptr<gbGameBoy>& emulator, int
     io.KeyMap[ImGuiKey_X] = SDL_SCANCODE_X;
     io.KeyMap[ImGuiKey_Y] = SDL_SCANCODE_Y;
     io.KeyMap[ImGuiKey_Z] = SDL_SCANCODE_Z;
+
+    ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
+    ImGui_ImplSDLRenderer_Init(renderer);
 }
 
 appGui::~appGui()
 {
-    ImGuiSDL::Deinitialize();
+    ImGui_ImplSDLRenderer_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 }
 
 void appGui::Draw()
 {
+    ImGui_ImplSDLRenderer_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
+
     DrawTopbar();
     DrawControls();
     DrawDebug();
@@ -60,7 +67,7 @@ void appGui::Draw()
 void appGui::Render()
 {
     ImGui::Render();
-    ImGuiSDL::Render(ImGui::GetDrawData());
+    ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
 }
 
 bool appGui::IsPaused()
