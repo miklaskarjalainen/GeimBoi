@@ -1,6 +1,5 @@
 #pragma once
 #include <cstdint>
-#include <cstring>
 #include <string>
 #include <memory>
 
@@ -17,9 +16,9 @@ namespace GeimBoi
 	};
 
 	/*
-		MBC (Memory Bank Controller) is essentually a mapper on the cartridge,
+		MBC (Memory Bank Controller) is essentially a mapper on the cartridge,
 		but there can also be a Battery, RAM or other hardware.
-		Basicly inherited classes accounts for any extra hardware in the cartridge.
+		Basically inherited classes accounts for any extra hardware in the cartridge.
 	*/
 	class gbMBC
 	{
