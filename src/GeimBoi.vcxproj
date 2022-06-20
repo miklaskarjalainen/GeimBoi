@@ -67,7 +67,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{67ccc219-65b2-42cb-b0b3-99dd1841c496}</ProjectGuid>
-    <RootNamespace>PixelPlatformer</RootNamespace>
+    <RootNamespace>GeimBoi</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
