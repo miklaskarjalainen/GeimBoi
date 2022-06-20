@@ -1,6 +1,7 @@
 #include "imgui/imgui.h"
 #include "appWindow.hpp"
 #include "appSettings.hpp"
+#include "gui/rebindButton.hpp"
 
 using namespace GeimBoi;
 
@@ -139,6 +140,8 @@ void appWindow::DoEvents()
             case SDL_KEYDOWN:
             {
                 uint16_t key = events.key.keysym.scancode;
+                rebindButton::LastKeyDown = key;
+
                 io.KeysDown[key] = true;
                 io.KeyShift = ((SDL_GetModState() & KMOD_SHIFT) != 0);
                 io.KeyCtrl  = ((SDL_GetModState() & KMOD_CTRL) != 0);

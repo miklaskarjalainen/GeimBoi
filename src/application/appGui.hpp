@@ -20,6 +20,7 @@ private:
 	void OpenRomDialog();
 
 	void DrawTopbar();
+	void DrawControls();
 	void DrawDebug();
 	void DrawAuthors();
 	void DrawLicences();
@@ -27,6 +28,7 @@ private:
 
 private:
 	std::shared_ptr<gbGameBoy> mGameBoy = nullptr;
+	bool mDrawControls = false;
 	bool mDrawDebug = false;
 	bool mDrawAuthors = false;
 	bool mDrawLicences = false;

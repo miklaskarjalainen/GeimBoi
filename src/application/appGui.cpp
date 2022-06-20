@@ -1,10 +1,11 @@
 #include <sstream>
 #include <SDL2/SDL.h>
+#include <FileDialogs/FileDialogs.hpp>
 #include "appGui.hpp"
 #include "appSettings.hpp"
+#include "gui/rebindButton.hpp"
 #include "imgui/imgui.h"
 #include "imgui/imgui_sdl.h"
-#include "FileDialogs/FileDialogs.hpp"
 
 using namespace GeimBoi;
 
@@ -49,6 +50,7 @@ void appGui::Draw()
 {
     ImGui::NewFrame();
     DrawTopbar();
+    DrawControls();
     DrawDebug();
     DrawAuthors();
     DrawLicences();
@@ -87,6 +89,8 @@ void appGui::DrawTopbar()
         }
         if (ImGui::BeginMenu("Settings"))
         {
+            if (ImGui::MenuItem("Controls"))
+                mDrawControls = !mDrawControls;
             ImGui::Checkbox("Pause", &mEmuPaused);
             ImGui::Checkbox("Show Debug", &mDrawDebug);
             ImGui::EndMenu();
@@ -106,6 +110,33 @@ void appGui::DrawTopbar()
     ImGui::End();
 }
 
+void appGui::DrawControls()
+{
+    if (!mDrawControls)
+        return;
+
+    // Window
+    ImGui::Begin("Controls", &mDrawControls, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::SetWindowSize(ImVec2(156, 208));
+
+    static std::vector<rebindButton> buttons = {
+        rebindButton("Up", appSettings::controls.up),
+        rebindButton("Down", appSettings::controls.down),
+        rebindButton("Right", appSettings::controls.right),
+        rebindButton("Left", appSettings::controls.left),
+        rebindButton("Start", appSettings::controls.start),
+        rebindButton("Select", appSettings::controls.select),
+        rebindButton("A", appSettings::controls.a),
+        rebindButton("B", appSettings::controls.b),
+    };
+
+    for (auto& b : buttons)
+        b.Draw();
+    
+    ImGui::End();
+}
+
+
 void appGui::DrawDebug()
 {
     if (!mDrawDebug) 
@@ -113,6 +144,7 @@ void appGui::DrawDebug()
 
     const gbZ80* cpu   = &mGameBoy->mCpu;
     const gbCart* cart = &mGameBoy->mCart;
+
     // Cpu
     {
         // Window

@@ -6,7 +6,7 @@ ARGS    := -std=c++14
 LIBS    := -lSDL2 -lSDL2main -lboost_filesystem
 INCLUDE := -Ivendor/include
 
-SRCS    := src/*.cpp src/application/*.cpp src/application/imgui/*.cpp src/core/*.cpp src/core/opcode/*.cpp src/core/mbc/*.cpp 
+SRCS    := src/*.cpp src/application/*.cpp src/application/gui/*.cpp src/application/imgui/*.cpp src/core/*.cpp src/core/opcode/*.cpp src/core/mbc/*.cpp 
 OBJS    := $(patsubst %.cpp,%.o,$(wildcard $(SRCS)/*.cpp))
 BIN     := bin/Release/gbBoy.o
 
