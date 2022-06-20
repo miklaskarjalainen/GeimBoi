@@ -18,6 +18,7 @@
     <ClCompile Include="application\appGui.cpp" />
     <ClCompile Include="application\appSettings.cpp" />
     <ClCompile Include="application\appWindow.cpp" />
+    <ClCompile Include="application\gui\rebindButton.cpp" />
     <ClCompile Include="application\imgui\imgui.cpp" />
     <ClCompile Include="application\imgui\imgui_demo.cpp" />
     <ClCompile Include="application\imgui\imgui_draw.cpp" />
@@ -42,6 +43,7 @@
     <ClInclude Include="application\appGui.hpp" />
     <ClInclude Include="application\appSettings.hpp" />
     <ClInclude Include="application\appWindow.hpp" />
+	<ClCompile Include="application\gui\rebindButton.hpp" />
     <ClInclude Include="application\imgui\imconfig.h" />
     <ClInclude Include="application\imgui\imgui.h" />
     <ClInclude Include="application\imgui\imgui_internal.h" />
