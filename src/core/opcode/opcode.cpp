@@ -26,7 +26,7 @@ void gbZ80::ExecuteNextOpcode()
             WriteByte(0xFF04, 0); // Reset Divider Counter
             mDividerCounter = 0;
             mRegPC.val++;
-            [[fallthrough]];
+            /* fallthrough */
         case 0x76: // HALT
         {
             uint8_t IE = ReadByte(0xFFFF);
