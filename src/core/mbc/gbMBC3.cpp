@@ -1,3 +1,4 @@
+#include <cstring>
 #include <time.h>
 #include "../gbCart.hpp"
 #include "gbMBC3.hpp"

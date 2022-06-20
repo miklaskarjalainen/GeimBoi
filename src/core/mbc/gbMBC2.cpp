@@ -1,3 +1,4 @@
+#include <cstring>
 #include "../gbCart.hpp"
 #include "gbMBC2.hpp"
 
