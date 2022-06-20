@@ -289,7 +289,7 @@ void appGui::DrawLicences()
     {
         ImGui::TextWrapped("MIT Licence\n\n"
 
-        "Copyright (c) 2021 Miklas Karjalainen\n\n"
+        "Copyright (c) 2021-2022 Miklas Karjalainen\n\n"
 
         "Permission is hereby granted, free of charge, to any person obtaining a copy"
         "of this software and associated documentation files (the \"Software\"), to deal"
