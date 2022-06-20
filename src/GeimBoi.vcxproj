@@ -43,7 +43,7 @@
     <ClInclude Include="application\appGui.hpp" />
     <ClInclude Include="application\appSettings.hpp" />
     <ClInclude Include="application\appWindow.hpp" />
-	<ClCompile Include="application\gui\rebindButton.hpp" />
+    <ClInclude Include="application\gui\rebindButton.hpp" />
     <ClInclude Include="application\imgui\imconfig.h" />
     <ClInclude Include="application\imgui\imgui.h" />
     <ClInclude Include="application\imgui\imgui_internal.h" />
