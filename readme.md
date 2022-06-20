@@ -18,7 +18,7 @@ GeimBoi is a GameBoy DMG emulator written in C++ using [SDL2](https://www.libsdl
 - **Accuracy:** This emulator is not currently timing/cycle accurate, and i'm not planning to make this 100% perfect, but atleast to pass some of the timing tests.
 - **GBC Support:** GameBoy Color support down the line.
 - **SaveState:** There're not currently savestates available.
-- **GUI:** Lacks a lot of features, like bindable controls.
+- **GUI:** Lacks a lot of features.
 
 ## Screenshots:
 ![pokemonrb_ss](pictures/pokemonrb.png)
