@@ -1,3 +1,4 @@
+# <p align=center> <img src="logo.svg" alt="drawing" width="192"/>
 # <p align=center> GeimBoi
 GeimBoi is a GameBoy DMG emulator written in C++ using [SDL2](https://www.libsdl.org/download-2.0.php) and [ImGui](https://github.com/ocornut/imgui). GeimBoi was done as a programming exercise and to learn more about emulation. This Emulator isn't perfect by ANY means and HAS bugs.
 
