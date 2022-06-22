@@ -22,6 +22,7 @@ namespace GeimBoi
 
         void WriteByte(uint16_t addr, uint8_t data);
 
+        float masterVolume = 1.0f;
         apuChannel1 channel1;
         apuChannel2 channel2;
     private:

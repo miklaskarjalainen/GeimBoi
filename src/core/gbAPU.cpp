@@ -14,7 +14,7 @@ gbAPU::gbAPU(gbGameBoy* emu)
 
     // Init format
     spec.freq = 44100;
-    spec.format = AUDIO_S16SYS;
+    spec.format = AUDIO_F32SYS;
     spec.samples = 128;
     spec.callback = sdl2_callback;
     spec.userdata = this;
@@ -51,20 +51,21 @@ void gbAPU::sdl2_callback(void* userdata, uint8_t *stream, int len)
     // User data is our gbApu class
     gbAPU* audio = reinterpret_cast<gbAPU*>(userdata);
     memset(stream, 0, len); // from heap so can be random data 
+    const float Volume = audio->masterVolume * 0.15f;
     
-    // format is S16 instead of argument's U8
-    int16_t* snd = reinterpret_cast<int16_t*>(stream);
+    // format is F32 instead of argument's U8
+    float_t* snd = reinterpret_cast<float_t*>(stream);
     len /= sizeof(*snd);
 
     // buffer used for mixing channels.
-    int16_t buffer[len];
+    float_t buffer[len];
 
     // Channel 1
     memset(&buffer, 0, sizeof(buffer));
     for(int i = 0; i < len; i++)
     {
         const double dt = audio->timeElapsed + ((1.0f / 44100.0)*i);
-        buffer[i] = (5000 * audio->channel1.GetAmplitude(dt));
+        buffer[i] = (float)audio->channel1.GetAmplitude(dt) * Volume;
     }
     SDL_MixAudio(stream, reinterpret_cast<uint8_t*>(buffer), len*sizeof(*snd), SDL_MIX_MAXVOLUME);
 
@@ -73,7 +74,7 @@ void gbAPU::sdl2_callback(void* userdata, uint8_t *stream, int len)
     for(int i = 0; i < len; i++)
     {
         const double dt = audio->timeElapsed + ((1.0f / 44100.0)*i);
-        buffer[i] = (5000 * audio->channel2.GetAmplitude(dt));
+        buffer[i] = (float)audio->channel2.GetAmplitude(dt) * Volume;
     }
     SDL_MixAudio(stream, reinterpret_cast<uint8_t*>(buffer), len*sizeof(*snd), SDL_MIX_MAXVOLUME);
 
