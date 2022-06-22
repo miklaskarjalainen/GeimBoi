@@ -18,6 +18,8 @@ namespace GeimBoi
         void Reset();
         void UpdateTimers(uint16_t cycles);
 
+        void WriteByte(uint16_t addr, uint8_t data);
+
         apuChannel1 channel1;
     private:
         double timeElapsed = 0.0;

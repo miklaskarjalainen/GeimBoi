@@ -1,25 +1,16 @@
 #include "apuChannel1.hpp"
+#include "apuDefenitions.hpp"
 #include "../gbGameBoy.hpp"
 #include "soundWaves.hpp"
 
 using namespace GeimBoi;
 
-static double volume = 1.0f;
-#define CPU_CYCLES_PER_FRAME 70221
-#define CPU_CYCLES_PER_SWEEP 549 // 70221 / 128
-
-#define SOUND_LENGTH(t1) ((64.0-t1)*(1.0/256.0)) // seconds
+#define CPU_CYCLES_PER_SWEEP 549 // (70221 / 128)
 
 apuChannel1::apuChannel1(gbGameBoy* gb)
-    : mGameBoy(gb)
-{
+    : mGameBoy(gb) {}
 
-}
-
-apuChannel1::~apuChannel1()
-{
-    
-}
+apuChannel1::~apuChannel1() {}
 
 void apuChannel1::DoSweep(uint16_t cycles)
 {
@@ -57,44 +48,116 @@ void apuChannel1::DoSweep(uint16_t cycles)
     }
 }
 
+void apuChannel1::DoEnvelope(uint16_t cycles)
+{
+    uint8_t NR12 = mGameBoy->ReadByte(0xFF12);
+    uint8_t num_sweep = NR12 & 0b111;
+    if (num_sweep == 0)
+        return;
+
+    constexpr double SECOND = ((double)CPU_CYCLES_PER_FRAME * 60.0);
+    constexpr double STEP   = SECOND / (SECOND*64);
+    mEnvelopeTimer += (double)cycles / SECOND;
+
+    if (mEnvelopeTimer > (STEP * num_sweep))
+    {
+        mEnvelopeTimer = 0.0;
+        bool increase = (NR12 >> 3) & 0b1;
+        uint8_t volume = (NR12 & 0b11110000) >> 4;
+        if (increase)
+        {
+            volume++;
+        }
+        else
+        {
+            volume--;
+        }
+        volume <<= 4;
+        NR12 &= ~(0b11110000);
+        NR12 |= volume;
+        mGameBoy->WriteByte(0xFF12, NR12);
+    }
+}
+
 void apuChannel1::UpdateTimers(uint16_t cycles)
 {
     DoSweep(cycles);
+    DoEnvelope(cycles);
 
-    // square wave length
-    const uint8_t NR11 = mGameBoy->ReadByte(0xFF11);
-    const uint8_t WAVE_DUTY = (NR11 >> 6); 
-    switch (WAVE_DUTY)
+    const uint8_t NR14 = mGameBoy->ReadByte(0xFF14);
+    mSoundLengthTimer += (double)cycles / ((double)CPU_CYCLES_PER_FRAME * 60.0);
+    
+    bool use_length = (NR14 >> 6) & 0b1;
+    if (use_length && mSoundLengthTimer >= mSoundLength)
     {
-        // these are opposite than in the docs, because of the squarewave function. 
-        case 0b00:
-            mCycleDuty = 0.75f;
-            break;
-        case 0b01:
-            mCycleDuty = 0.50f;
-            break;
-        case 0b10:
-            mCycleDuty = 0.25f;
-            break;
-        case 0b11:
-            mCycleDuty = 0.125f;
-            break;
-        default: printf("something went wrong lmao\n");
+        mEnabled = false;
     }
 
     // handle volume (NR12)
     const uint8_t NR12 = mGameBoy->ReadByte(0xFF12);
     const uint8_t VOLUME = (NR12 & 0b11110000) >> 4;
-    volume = VOLUME == 0 ? volume = 0.0 : volume = 1.0 * VOLUME / 15;
+    mVolume = VOLUME == 0 ? 0.0 : 1.0 * VOLUME / 15;
+}
 
-    // calculate frequency (NR13 & NR14)
-    const uint16_t NR14 = mGameBoy->ReadByte(0xFF14);
-    uint16_t frequency = mGameBoy->ReadByte(0xFF13);
-    mFreq = ((NR14 & 0b111) << 8) | frequency;
+void apuChannel1::WriteByte(uint16_t addr, uint8_t data)
+{
+    if (addr == 0xFF11)
+    {
+        // length
+        const uint8_t sound_length = (data & 0b00111111);
+        mSoundLength = (64.0-(double)sound_length) * (1.0 / 256.0);
+
+        // duty
+        switch (data >> 6)
+        {
+            case 0b00:
+                mCycleDuty = 0.125f;
+                break;
+            case 0b01:
+                mCycleDuty = 0.25f;
+                break;
+            case 0b10:
+                mCycleDuty = 0.50f;
+                break;
+            case 0b11:
+                mCycleDuty = 0.75f;
+                break;
+            default: printf("something went wrong lmao\n");
+        }
+
+        mGameBoy->mRom[addr] = data;
+    }
+    else if (addr == 0xFF13) 
+    {
+        // lower 8 bits of freq (which is 11 bits)
+        mFreq &= ~(0b11111111);
+        mFreq |= data;
+
+        mGameBoy->mRom[addr] = data;
+    }
+    else if (addr == 0xFF14)
+    {
+        // higher 3 bits of freq
+        mFreq &= ~((0b111) << 8);
+        mFreq |= (data & 0b111) << 8;
+
+        // restarting current sound
+        bool restart = data & (0b1 << 7);
+        if (restart)
+        {
+            mEnabled = true;
+            mSoundLengthTimer = 0.0;
+        }
+
+        mGameBoy->mRom[addr] = data;
+    }
 }
 
 double apuChannel1::GetAmplitude(double dt)
 {
+    if (!mEnabled)
+        return 0.0;
+        
     double f = 131072.0/(2048.0-(double)mFreq);
-    return HarmonicSquareWave(f, mCycleDuty, 20.0, dt) * volume;
+    return HarmonicSquareWave(f, mCycleDuty, 20.0, dt) * mVolume;
 }

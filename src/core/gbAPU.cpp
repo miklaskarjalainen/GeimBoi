@@ -67,3 +67,12 @@ void gbAPU::sdl2_callback(void* userdata, uint8_t *stream, int len)
     SDL_MixAudio(stream, reinterpret_cast<uint8_t*>(buffer), len*sizeof(*snd), SDL_MIX_MAXVOLUME);
     audio->timeElapsed += (1.0f / 44100.0) * len;
 }
+
+void gbAPU::WriteByte(uint16_t addr, uint8_t data)
+{
+    if (addr == 0xFF11 || addr == 0xFF13 || addr == 0xFF14)
+    {
+        channel1.WriteByte(addr, data);
+    }
+    
+}

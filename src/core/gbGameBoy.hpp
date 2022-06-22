@@ -64,10 +64,10 @@ namespace GeimBoi
         gbCart mCart;
         gbBootRom mBootRom;
 
+        // TODO: make private, for the time being here.
         void WriteByte(uint16_t addr, uint8_t data);
-
-    private:
         uint8_t mRom[0x10000];
+    private:
         uint8_t mBtsPressed = 0x00; // 0 = pressed
 
         friend gbAPU;
