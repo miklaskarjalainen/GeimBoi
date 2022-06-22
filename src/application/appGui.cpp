@@ -100,6 +100,10 @@ void appGui::DrawTopbar()
                 mDrawControls = !mDrawControls;
             ImGui::Checkbox("Pause", &mEmuPaused);
             ImGui::Checkbox("Show Debug", &mDrawDebug);
+            if (ImGui::SliderFloat("Volume", &appSettings::master_volume, 0.0f, 1.0f, "%.2f"))
+            {
+                mGameBoy->mApu.masterVolume = appSettings::master_volume;
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("About"))

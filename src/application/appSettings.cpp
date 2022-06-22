@@ -12,6 +12,7 @@
 using namespace GeimBoi;
 using namespace boost::property_tree;
 
+float appSettings::master_volume = 0.30f;
 std::string appSettings::lastrom_path = "";
 appSettings::Window appSettings::window = {};
 appSettings::Controls appSettings::controls = {};
@@ -25,6 +26,7 @@ void appSettings::Load(const std::string& path)
     ini_parser::read_ini(path, file);
 
     // get fields
+    master_volume = file.get<float>("general.master_volume", master_volume);
     lastrom_path = file.get<std::string>("general.lastrom_path", lastrom_path);
 
     // disallow sizes smaller than gameboyscreen
@@ -48,6 +50,7 @@ void appSettings::Save(const std::string& path)
     ptree iniFile;
     
     // set fields
+    iniFile.add("general.master_volume", master_volume);
     iniFile.add("general.lastrom_path", lastrom_path);
 
     iniFile.add("window.width" , window.width);
