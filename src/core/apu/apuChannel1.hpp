@@ -24,7 +24,7 @@ namespace GeimBoi
         virtual double GetAmplitude(double time);
     private:
         bool mEnabled = true;
-        double mVolume = 0.0;
+        double mVolume = .0;
         float mCycleDuty = 0.5f; 
         uint16_t mFreq = 0b0;
         int16_t mSweepTimer = 0;

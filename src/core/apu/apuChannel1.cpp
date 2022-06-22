@@ -1,3 +1,4 @@
+#include <cassert>
 #include "apuChannel1.hpp"
 #include "apuDefenitions.hpp"
 #include "../gbGameBoy.hpp"
@@ -31,13 +32,9 @@ void apuChannel1::DoSweep(uint16_t cycles)
             const bool Adds = !(NR10 & 0b1000);
 
             if (Adds)
-            {
                 mFreq = mFreq + (mFreq / (uint16_t)(SweepCount * SweepCount));
-            }
             else
-            {
                 mFreq = mFreq - (mFreq / (uint16_t)(SweepCount * SweepCount));
-            }
         }
 
         // store new sweep time
@@ -62,9 +59,9 @@ void apuChannel1::DoEnvelope(uint16_t cycles)
     if (mEnvelopeTimer > (STEP * num_sweep))
     {
         mEnvelopeTimer = 0.0;
-        bool increase = (NR12 >> 3) & 0b1;
+        const bool Adds = (NR12 >> 3) & 0b1;
         uint8_t volume = (NR12 & 0b11110000) >> 4;
-        if (increase)
+        if (Adds)
         {
             volume++;
         }
@@ -72,9 +69,14 @@ void apuChannel1::DoEnvelope(uint16_t cycles)
         {
             volume--;
         }
-        volume <<= 4;
         NR12 &= ~(0b11110000);
-        NR12 |= volume;
+        NR12 |= (volume << 4);
+
+        // volume not in range, set volume to 0 and disable envelope.
+        if (volume > 15)
+        {   
+            NR12 &= ~(0b11110111);
+        }
         mGameBoy->WriteByte(0xFF12, NR12);
     }
 }
@@ -122,7 +124,7 @@ void apuChannel1::WriteByte(uint16_t addr, uint8_t data)
             case 0b11:
                 mCycleDuty = 0.75f;
                 break;
-            default: printf("something went wrong lmao\n");
+            default: assert(false);
         }
 
         mGameBoy->mRom[addr] = data;
@@ -157,7 +159,7 @@ double apuChannel1::GetAmplitude(double dt)
 {
     if (!mEnabled)
         return 0.0;
-        
+
     double f = 131072.0/(2048.0-(double)mFreq);
-    return HarmonicSquareWave(f, mCycleDuty, 20.0, dt) * mVolume;
+    return HarmonicSquareWave(f, mCycleDuty, 25.0, dt) * mVolume;
 }
