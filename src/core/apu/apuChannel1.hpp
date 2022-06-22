@@ -6,13 +6,7 @@ namespace GeimBoi
 
     class gbGameBoy;
 
-    class apuBaseChannel
-    {
-    public:
-        virtual double GetAmplitude(double) = 0;
-    };
-
-    class apuChannel1 : public apuBaseChannel
+    class apuChannel1
     {
     public:
         apuChannel1(gbGameBoy* gb);
@@ -21,7 +15,7 @@ namespace GeimBoi
         void UpdateTimers(uint16_t cycles);
         void WriteByte(uint16_t addr, uint8_t data);
         
-        virtual double GetAmplitude(double time);
+        double GetAmplitude(double time);
     private:
         bool mEnabled = true;
         double mVolume = .0;
