@@ -64,7 +64,6 @@ namespace GeimBoi
         gbCart mCart;
         gbBootRom mBootRom;
 
-    private:
         void WriteByte(uint16_t addr, uint8_t data);
 
     private:

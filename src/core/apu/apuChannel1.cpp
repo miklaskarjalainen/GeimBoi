@@ -6,7 +6,7 @@ using namespace GeimBoi;
 
 static double volume = 1.0f;
 #define CPU_CYCLES_PER_FRAME 70221
-#define CPU_CYCLES_PER_SWEEP 549
+#define CPU_CYCLES_PER_SWEEP 549 // 70221 / 128
 
 #define SOUND_LENGTH(t1) ((64.0-t1)*(1.0/256.0)) // seconds
 
@@ -23,16 +23,21 @@ apuChannel1::~apuChannel1()
 
 void apuChannel1::DoSweep(uint16_t cycles)
 {
-    const uint8_t NR10 = mGameBoy->ReadByte(0xFF10);
-    const uint8_t SweepTime = (NR10 & 0b01110000) >> 4; 
+    uint8_t NR10 = mGameBoy->ReadByte(0xFF10);
+    uint8_t SweepTime = (NR10 & 0b01110000) >> 4; 
     if (SweepTime > 0)
     {
         mSweepTimer += cycles;
         if (mSweepTimer > CPU_CYCLES_PER_SWEEP)
         {
+            mSweepTimer = 0;
+            SweepTime--;
+        } 
+
+        const uint8_t SweepCount = (NR10 & 0b111);
+        if (SweepTime == 0 && SweepCount != 0)
+        {
             const bool Adds = !(NR10 & 0b1000);
-            const uint8_t SweepCount = (NR10 & 0b111);
-            if (SweepCount == 0) return;
 
             if (Adds)
             {
@@ -44,6 +49,11 @@ void apuChannel1::DoSweep(uint16_t cycles)
             }
         }
 
+        // store new sweep time
+        SweepTime <<= 4;
+        NR10 &= ~(0b01110000);
+        NR10 |= SweepTime;
+        mGameBoy->WriteByte(0xFF10, NR10);
     }
 }
 
