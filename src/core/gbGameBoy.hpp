@@ -1,5 +1,6 @@
 #pragma once 
 #include <cstdint>
+#include "gbAPU.hpp"
 #include "gbZ80.hpp"
 #include "gbPPU.hpp"
 #include "gbCart.hpp"
@@ -57,6 +58,7 @@ namespace GeimBoi
         }
 
     public:
+        gbAPU  mApu;
         gbPPU  mPpu;
         gbZ80  mCpu;
         gbCart mCart;
@@ -69,6 +71,7 @@ namespace GeimBoi
         uint8_t mRom[0x10000];
         uint8_t mBtsPressed = 0x00; // 0 = pressed
 
+        friend gbAPU;
         friend gbZ80;
         friend gbPPU;
         friend gbCart;

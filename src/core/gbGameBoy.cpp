@@ -6,7 +6,7 @@
 using namespace GeimBoi;
 
 gbGameBoy::gbGameBoy()
-    : mCpu(this), mPpu(this), mCart(this)
+    : mApu(this), mCpu(this), mPpu(this), mCart(this)
 {
     Reset();
 }
@@ -60,6 +60,7 @@ void gbGameBoy::ReleaseButton(gbButton key)
 
 void gbGameBoy::Reset()
 {
+    mApu.Reset();
     mCpu.Reset();
     mCart.Reset();
     mPpu.Reset();

@@ -12,6 +12,7 @@ void gbZ80::Clock()
     int delta_cycles = mCyclesDone - cur_cycle;
 
     UpdateTimers(delta_cycles);
+    mGameBoy->mApu.UpdateTimers(delta_cycles);
     mGameBoy->mPpu.UpdateGraphics(delta_cycles);
     DoInterrupts();
 }
