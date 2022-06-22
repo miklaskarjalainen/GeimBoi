@@ -1,6 +1,7 @@
-# <p align=center> <img src="logo.svg" alt="drawing" width="192"/>
-# <p align=center> GeimBoi
-GeimBoi is a GameBoy DMG emulator written in C++ using [SDL2](https://www.libsdl.org/download-2.0.php) and [ImGui](https://github.com/ocornut/imgui). GeimBoi was done as a programming exercise and to learn more about emulation. This Emulator isn't perfect by ANY means and HAS bugs.
+<p align=center> <img src="logo.svg" alt="drawing" width="192"/> </p>
+<h2 align=center> <b> GeimBoi </b> </h2>
+
+**GeimBoi** is a GameBoy DMG emulator written in C++ using [SDL2](https://www.libsdl.org/download-2.0.php) and [ImGui](https://github.com/ocornut/imgui). GeimBoi was done as a programming exercise and to learn more about emulation. This Emulator isn't perfect by ANY means and HAS bugs.
 
 ![gameboy_ss](pictures/geimboy.png)
 
@@ -15,7 +16,7 @@ GeimBoi is a GameBoy DMG emulator written in C++ using [SDL2](https://www.libsdl
 - **Saving:** roms with a battery gets it's ram dumbed into a *.sav file on exit and loaded on game power on.
 
 ## Todo:
-- **Audio:** This emulator doesn't have any audio emulation at this time.
+- **Audio:** Audio emulation is currently WIP. Audio emulation is very primitive.
 - **Accuracy:** This emulator is not currently timing/cycle accurate, and i'm not planning to make this 100% perfect, but atleast to pass some of the timing tests.
 - **GBC Support:** GameBoy Color support down the line.
 - **SaveState:** There're not currently savestates available.
