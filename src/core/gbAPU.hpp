@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <array>
 #include "apu/apuChannel1.hpp"
+#include "apu/apuChannel2.hpp"
 
 namespace GeimBoi
 {
@@ -10,6 +11,7 @@ namespace GeimBoi
     class gbGameBoy;
 
     /* Audio Processing Unit */
+    // TODO: Frame sequencer, might get rid of all the desyncing issues.
     class gbAPU {
     public:
         gbAPU(gbGameBoy* gb);
@@ -21,6 +23,7 @@ namespace GeimBoi
         void WriteByte(uint16_t addr, uint8_t data);
 
         apuChannel1 channel1;
+        apuChannel2 channel2;
     private:
         double timeElapsed = 0.0;
         gbGameBoy* mGameBoy;

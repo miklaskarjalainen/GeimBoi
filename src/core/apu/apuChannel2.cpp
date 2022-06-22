@@ -1,54 +1,20 @@
 #include <cassert>
-#include "apuChannel1.hpp"
+#include "apuChannel2.hpp"
 #include "apuDefenitions.hpp"
 #include "../gbGameBoy.hpp"
 #include "soundWaves.hpp"
 
 using namespace GeimBoi;
 
-#define CPU_CYCLES_PER_SWEEP 549 // (70221 / 128)
-
-apuChannel1::apuChannel1(gbGameBoy* gb)
+apuChannel2::apuChannel2(gbGameBoy* gb)
     : mGameBoy(gb) {}
 
-apuChannel1::~apuChannel1() {}
+apuChannel2::~apuChannel2() {}
 
-void apuChannel1::DoSweep(uint16_t cycles)
+void apuChannel2::DoEnvelope(uint16_t cycles)
 {
-    uint8_t NR10 = mGameBoy->ReadByte(0xFF10);
-    uint8_t SweepTime = (NR10 & 0b01110000) >> 4; 
-    if (SweepTime > 0)
-    {
-        mSweepTimer += cycles;
-        if (mSweepTimer > CPU_CYCLES_PER_SWEEP)
-        {
-            mSweepTimer = 0;
-            SweepTime--;
-        } 
-
-        const uint8_t SweepCount = (NR10 & 0b111);
-        if (SweepTime == 0 && SweepCount != 0)
-        {
-            const bool Adds = !(NR10 & 0b1000);
-
-            if (Adds)
-                mFreq = mFreq + (mFreq / (uint16_t)(SweepCount * SweepCount));
-            else
-                mFreq = mFreq - (mFreq / (uint16_t)(SweepCount * SweepCount));
-        }
-
-        // store new sweep time
-        SweepTime <<= 4;
-        NR10 &= ~(0b01110000);
-        NR10 |= SweepTime;
-        mGameBoy->WriteByte(0xFF10, NR10);
-    }
-}
-
-void apuChannel1::DoEnvelope(uint16_t cycles)
-{
-    uint8_t NR12 = mGameBoy->ReadByte(0xFF12);
-    uint8_t num_sweep = NR12 & 0b111;
+    uint8_t NR22 = mGameBoy->ReadByte(0xFF17);
+    uint8_t num_sweep = NR22 & 0b111;
     if (num_sweep == 0)
         return;
 
@@ -59,8 +25,8 @@ void apuChannel1::DoEnvelope(uint16_t cycles)
     if (mEnvelopeTimer > (STEP * num_sweep))
     {
         mEnvelopeTimer = 0.0;
-        const bool Adds = (NR12 >> 3) & 0b1;
-        uint8_t volume = (NR12 & 0b11110000) >> 4;
+        const bool Adds = (NR22 >> 3) & 0b1;
+        uint8_t volume = (NR22 & 0b11110000) >> 4;
         if (Adds)
         {
             volume++;
@@ -69,42 +35,40 @@ void apuChannel1::DoEnvelope(uint16_t cycles)
         {
             volume--;
         }
-        NR12 &= ~(0b11110000);
-        NR12 |= (volume << 4);
+        NR22 &= ~(0b11110000);
+        NR22 |= (volume << 4);
 
         // volume not in range, set volume to 0 and disable envelope.
         if (volume > 15)
         {   
-            NR12 &= ~(0b11110111);
+            NR22 &= ~(0b11110111);
         }
-        mGameBoy->WriteByte(0xFF12, NR12);
+        mGameBoy->WriteByte(0xFF12, NR22);
     }
 }
 
-void apuChannel1::UpdateTimers(uint16_t cycles)
+void apuChannel2::UpdateTimers(uint16_t cycles)
 {
-    DoSweep(cycles);
     DoEnvelope(cycles);
-
-    const uint8_t NR14 = mGameBoy->ReadByte(0xFF14);
     mSoundLengthTimer += (double)cycles / ((double)CPU_CYCLES_PER_FRAME * 60.0);
     
-    bool use_length = (NR14 >> 6) & 0b1;
+    const uint8_t NR21 = mGameBoy->ReadByte(0xFF16);
+    const bool use_length = (NR21 >> 6) & 0b1;
     if (use_length && mSoundLengthTimer >= mSoundLength)
     {
         mEnabled = false;
     }
 
-    // handle volume (NR12)
-    const uint8_t NR12 = mGameBoy->ReadByte(0xFF12);
-    const uint8_t VOLUME = (NR12 & 0b11110000) >> 4;
+    // handle volume (NR22)
+    const uint8_t NR22 = mGameBoy->ReadByte(0xFF17);
+    const uint8_t VOLUME = (NR22 & 0b11110000) >> 4;
     mVolume = VOLUME == 0 ? 0.0 : 1.0 * VOLUME / 15;
 }
 
-void apuChannel1::WriteByte(uint16_t addr, uint8_t data)
+void apuChannel2::WriteByte(uint16_t addr, uint8_t data)
 {
     // Sound/Wave pattern duty
-    if (addr == 0xFF11)
+    if (addr == 0xFF16)
     {
         // length
         const uint8_t sound_length = (data & 0b00111111);
@@ -131,7 +95,7 @@ void apuChannel1::WriteByte(uint16_t addr, uint8_t data)
         mGameBoy->mRom[addr] = data;
     }
     // Frequency low (lower 8 bits of freq (which is 11 bits)
-    else if (addr == 0xFF13) 
+    else if (addr == 0xFF18) 
     {
         mFreq &= ~(0b11111111);
         mFreq |= data;
@@ -139,7 +103,7 @@ void apuChannel1::WriteByte(uint16_t addr, uint8_t data)
         mGameBoy->mRom[addr] = data;
     }
     // Frequency high
-    else if (addr == 0xFF14)
+    else if (addr == 0xFF19)
     {
         // higher 3 bits of freq
         mFreq &= ~((0b111) << 8);
@@ -157,7 +121,7 @@ void apuChannel1::WriteByte(uint16_t addr, uint8_t data)
     }
 }
 
-double apuChannel1::GetAmplitude(double dt)
+double apuChannel2::GetAmplitude(double dt)
 {
     if (!mEnabled)
         return 0.0;

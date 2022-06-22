@@ -8,7 +8,7 @@ using namespace GeimBoi;
 static SDL_AudioSpec spec;
 
 gbAPU::gbAPU(gbGameBoy* emu)
-    : mGameBoy(emu), channel1(emu)
+    : mGameBoy(emu), channel1(emu), channel2(emu)
 {
     SDL_InitSubSystem(SDL_INIT_AUDIO);
 
@@ -43,6 +43,7 @@ void gbAPU::Reset()
 void gbAPU::UpdateTimers(uint16_t cycles) 
 {
     channel1.UpdateTimers(cycles);
+    channel2.UpdateTimers(cycles);
 }
 
 void gbAPU::sdl2_callback(void* userdata, uint8_t *stream, int len)
@@ -55,9 +56,10 @@ void gbAPU::sdl2_callback(void* userdata, uint8_t *stream, int len)
     int16_t* snd = reinterpret_cast<int16_t*>(stream);
     len /= sizeof(*snd);
 
-    // Channel 1
+    // buffer used for mixing channels.
     int16_t buffer[len];
-    // prob not needed
+
+    // Channel 1
     memset(&buffer, 0, sizeof(buffer));
     for(int i = 0; i < len; i++)
     {
@@ -65,6 +67,17 @@ void gbAPU::sdl2_callback(void* userdata, uint8_t *stream, int len)
         buffer[i] = (5000 * audio->channel1.GetAmplitude(dt));
     }
     SDL_MixAudio(stream, reinterpret_cast<uint8_t*>(buffer), len*sizeof(*snd), SDL_MIX_MAXVOLUME);
+
+    // Channel 2
+    memset(&buffer, 0, sizeof(buffer));
+    for(int i = 0; i < len; i++)
+    {
+        const double dt = audio->timeElapsed + ((1.0f / 44100.0)*i);
+        buffer[i] = (5000 * audio->channel2.GetAmplitude(dt));
+    }
+    SDL_MixAudio(stream, reinterpret_cast<uint8_t*>(buffer), len*sizeof(*snd), SDL_MIX_MAXVOLUME);
+
+
     audio->timeElapsed += (1.0f / 44100.0) * len;
 }
 
@@ -74,5 +87,8 @@ void gbAPU::WriteByte(uint16_t addr, uint8_t data)
     {
         channel1.WriteByte(addr, data);
     }
-    
+    else if (addr == 0xFF16 || addr == 0xFF18 || addr == 0xFF19)
+    {
+        channel2.WriteByte(addr, data);
+    }
 }

@@ -194,10 +194,14 @@ void gbGameBoy::WriteByte(uint16_t addr, uint8_t data)
             mCpu.mCounterFreq = new_freq;
         }
     }
-    else if (addr == 0xFF11 || addr == 0xFF13 || addr == 0xFF14) // Apu
+    else if (addr == 0xFF11 || addr == 0xFF13 || addr == 0xFF14) // Apu (channel1)
     {
         mApu.WriteByte(addr, data);
     } 
+    else if (addr == 0xFF16 || addr == 0xFF18 || addr == 0xFF19) // Apu (channel2)
+    {
+        mApu.WriteByte(addr, data);
+    }
     else if ( addr == 0xFF40 ) // Control
     {
         bool lcd_enabled  = (mRom[0xFF40] >> 7) & 1;
