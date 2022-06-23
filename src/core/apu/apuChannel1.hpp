@@ -1,38 +1,27 @@
 #pragma once
 #include <cstdint>
+#include "apuSquare.hpp"
 
 namespace GeimBoi
 {
 
     class gbGameBoy;
+    class gbAPU;
 
-    class apuChannel1
+    class apuChannel1 : public apuSquare
     {
     public:
         apuChannel1(gbGameBoy* gb);
-        ~apuChannel1();
+        ~apuChannel1() = default;
 
-        void UpdateTimers(uint16_t cycles);
-        void WriteByte(uint16_t addr, uint8_t data);
-        
-        double GetAmplitude(double time);
+        void Restart();
     private:
-        bool mEnabled = true;
-        double mVolume = .0;
-        float mCycleDuty = 0.5f; 
-        uint16_t mFreq = 0b0;
-        int16_t mSweepTimer = 0;
-
-        double mSoundLength = 0.0; // seconds
-        double mSoundLengthTimer = 0.0; // seconds
-
-        double mEnvelopeTimer = 0.0;
-
+        void ClockSweep();
+    
     private:
-        void DoEnvelope(uint16_t cycles);
-        void DoSweep(uint16_t cycles);
+        uint8_t mSweepTimer = 0;
 
-        gbGameBoy* mGameBoy;
+        friend gbAPU;
     };
 
 }

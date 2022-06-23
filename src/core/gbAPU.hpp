@@ -5,6 +5,8 @@
 #include "apu/apuChannel1.hpp"
 #include "apu/apuChannel2.hpp"
 
+#define CPU_CYCLES_PER_FRAME 70221
+
 namespace GeimBoi
 {
 
@@ -19,15 +21,15 @@ namespace GeimBoi
 
         void Reset();
         void UpdateTimers(uint16_t cycles);
-
         void WriteByte(uint16_t addr, uint8_t data);
 
         float masterVolume = 1.0f;
         apuChannel1 channel1;
         apuChannel2 channel2;
     private:
+        uint32_t mSequenceCounter = 0; // goes to 512hz and resets
         double timeElapsed = 0.0;
-        gbGameBoy* mGameBoy;
+        gbGameBoy* mGameBoy = nullptr;
     
     private:
         static void sdl2_callback(void* userdata, uint8_t *stream, int len);

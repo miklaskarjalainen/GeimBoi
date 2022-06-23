@@ -8,14 +8,14 @@ using namespace GeimBoi;
 static SDL_AudioSpec spec;
 
 gbAPU::gbAPU(gbGameBoy* emu)
-    : mGameBoy(emu), channel1(emu), channel2(emu)
+    : channel1(emu), channel2(emu),  mGameBoy(emu)
 {
     SDL_InitSubSystem(SDL_INIT_AUDIO);
 
     // Init format
     spec.freq = 44100;
     spec.format = AUDIO_F32SYS;
-    spec.samples = 128;
+    spec.samples = 256;
     spec.callback = sdl2_callback;
     spec.userdata = this;
     spec.channels = 1;
@@ -38,12 +38,35 @@ gbAPU::~gbAPU()
 
 void gbAPU::Reset() 
 {
+    channel1.Restart();
+    channel2.Restart();
 }
 
 void gbAPU::UpdateTimers(uint16_t cycles) 
 {
-    channel1.UpdateTimers(cycles);
-    channel2.UpdateTimers(cycles);
+    // frame sequencer
+    const uint32_t end_time = mSequenceCounter + cycles;
+    while (mSequenceCounter != end_time)
+    {
+        mSequenceCounter++;
+        // 256hz
+        if ((mSequenceCounter % 16458) == 0)
+        {
+            channel1.ClockLength();
+            channel2.ClockLength();
+        }
+        // 128hz
+        if ((mSequenceCounter % 32916) == 0)
+        {
+            channel1.ClockSweep();
+        }
+        // 64hz
+        if ((mSequenceCounter % 65832) == 0)
+        {
+            channel1.ClockEnvelope();
+            channel2.ClockEnvelope();
+        }
+    }
 }
 
 void gbAPU::sdl2_callback(void* userdata, uint8_t *stream, int len)
@@ -84,12 +107,13 @@ void gbAPU::sdl2_callback(void* userdata, uint8_t *stream, int len)
 
 void gbAPU::WriteByte(uint16_t addr, uint8_t data)
 {
-    if (addr == 0xFF11 || addr == 0xFF13 || addr == 0xFF14)
+    if (addr == 0xFF11 || addr == 0xFF12 || addr == 0xFF13 || addr == 0xFF14)
     {
         channel1.WriteByte(addr, data);
     }
-    else if (addr == 0xFF16 || addr == 0xFF18 || addr == 0xFF19)
+    else if (addr == 0xFF16 || addr == 0xFF17 || addr == 0xFF18 || addr == 0xFF19)
     {
         channel2.WriteByte(addr, data);
     }
 }
+

@@ -136,6 +136,7 @@ uint8_t gbGameBoy::ReadByte(uint16_t addr) const
 
         return buttons;
     }
+    
     // else return memory
     return mRom[addr];
 }
@@ -194,11 +195,11 @@ void gbGameBoy::WriteByte(uint16_t addr, uint8_t data)
             mCpu.mCounterFreq = new_freq;
         }
     }
-    else if (addr == 0xFF11 || addr == 0xFF13 || addr == 0xFF14) // Apu (channel1)
+    else if (addr == 0xFF11 || addr == 0xFF12 || addr == 0xFF13 || addr == 0xFF14) // Apu (channel1)
     {
         mApu.WriteByte(addr, data);
     } 
-    else if (addr == 0xFF16 || addr == 0xFF18 || addr == 0xFF19) // Apu (channel2)
+    else if (addr == 0xFF16 || addr == 0xFF17 || addr == 0xFF18 || addr == 0xFF19) // Apu (channel2)
     {
         mApu.WriteByte(addr, data);
     }
