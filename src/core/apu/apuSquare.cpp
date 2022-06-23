@@ -15,7 +15,7 @@ apuSquare::~apuSquare() {}
 
 void apuSquare::Restart()
 {
-    mEnabled = true;
+    mEnabled = false;
     mVolume = (mGameBoy->ReadByte(mEnvelopeAddr) & 0b11110000) >> 4;;
     mEnvelopeTimer = (mGameBoy->ReadByte(mEnvelopeAddr) & 0b111);
     mEnvelopeEnabled = mEnvelopeTimer != 0;
