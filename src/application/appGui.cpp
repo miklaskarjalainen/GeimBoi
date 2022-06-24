@@ -112,7 +112,7 @@ void appGui::DrawTopbar()
     
     if (ImGui::BeginMenuBar())
     {
-        if (ImGui::BeginMenu("GeimBoy"))
+        if (ImGui::BeginMenu("GeimBoi"))
         {
             if (ImGui::MenuItem("Open Rom..."))
             { 
