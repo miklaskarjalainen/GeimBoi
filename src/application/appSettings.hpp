@@ -20,10 +20,10 @@ namespace GeimBoi
             uint16_t down  = SDL_SCANCODE_S;
             uint16_t right = SDL_SCANCODE_D;
             uint16_t left  = SDL_SCANCODE_A;
-            uint16_t start = SDL_SCANCODE_RETURN;
             uint16_t select = SDL_SCANCODE_BACKSPACE;
-            uint16_t a = SDL_SCANCODE_K;
+            uint16_t start = SDL_SCANCODE_RETURN;
             uint16_t b = SDL_SCANCODE_J;
+            uint16_t a = SDL_SCANCODE_K;
         } controls;
 
         static void Load(const std::string& path);

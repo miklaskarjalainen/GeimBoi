@@ -12,13 +12,13 @@ namespace GeimBoi {
 
     }
 
-    void rebindButton::Draw()
+    void rebindButton::Draw(const ImVec2 size)
     {
         const bool binding_this = sCurrentlyBinding == this;
         const char* btn_text = binding_this ? "..." : SDL_GetScancodeName((SDL_Scancode)mSetting);
         std::string t = mButtonText + ": [" + btn_text + "]";
 
-        if (ImGui::Button(t.c_str(), { 140, 18 }))
+        if (ImGui::Button(t.c_str(), size))
         {
             sCurrentlyBinding = this;
             LastKeyDown = 0;

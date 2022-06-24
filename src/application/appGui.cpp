@@ -1,4 +1,5 @@
 #include <sstream>
+#include <cassert>
 #include <SDL2/SDL.h>
 #include <FileDialogs/FileDialogs.hpp>
 #include "appGui.hpp"
@@ -9,7 +10,7 @@
 #include "imgui/imgui_impl_sdlrenderer.h"
 
 using namespace GeimBoi;
-
+ 
 appGui::appGui(SDL_Window* window, SDL_Renderer* renderer, std::shared_ptr<gbGameBoy>& emulator, int widht, int height)
 {
     mGameBoy = emulator;
@@ -57,7 +58,7 @@ void appGui::Draw()
     ImGui::NewFrame();
 
     DrawTopbar();
-    DrawControls();
+    DrawOptions();
     DrawDebug();
     DrawAuthors();
     DrawLicences();
@@ -96,14 +97,11 @@ void appGui::DrawTopbar()
         }
         if (ImGui::BeginMenu("Settings"))
         {
-            if (ImGui::MenuItem("Controls"))
-                mDrawControls = !mDrawControls;
+            if (ImGui::MenuItem("Options"))
+                mDrawOptions = !mDrawOptions;
             ImGui::Checkbox("Pause", &mEmuPaused);
             ImGui::Checkbox("Show Debug", &mDrawDebug);
-            if (ImGui::SliderFloat("Volume", &appSettings::master_volume, 0.0f, 1.0f, "%.2f"))
-            {
-                mGameBoy->mApu.masterVolume = appSettings::master_volume;
-            }
+            
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("About"))
@@ -121,32 +119,160 @@ void appGui::DrawTopbar()
     ImGui::End();
 }
 
-void appGui::DrawControls()
+void appGui::DrawOptions()
 {
-    if (!mDrawControls)
+    if (!mDrawOptions)
         return;
 
-    // Window
-    ImGui::Begin("Controls", &mDrawControls, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-    ImGui::SetWindowSize(ImVec2(156, 208));
+    ImGui::Begin("Options", &mDrawOptions, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+    ImGui::SetWindowSize({ 618, 160 });
+    ImGui::Columns(2, nullptr, false);
+    ImGui::SetColumnOffset(1, 140);
 
-    static std::vector<rebindButton> buttons = {
-        rebindButton("Up", appSettings::controls.up),
-        rebindButton("Down", appSettings::controls.down),
-        rebindButton("Right", appSettings::controls.right),
-        rebindButton("Left", appSettings::controls.left),
-        rebindButton("Start", appSettings::controls.start),
-        rebindButton("Select", appSettings::controls.select),
-        rebindButton("A", appSettings::controls.a),
-        rebindButton("B", appSettings::controls.b),
+    enum class Selection
+    {
+        Binds,
+        Audio,
+        Palette,
     };
 
-    for (auto& b : buttons)
-        b.Draw();
+    static Selection selection = Selection::Binds;
+    const ImGuiStyle* style = &ImGui::GetStyle();
+
+    // Tabs
+    {
+        const ImVec2 ButtonSize = { 140 - (style->WindowPadding.x * 2), 32 };
+
+        ImGui::Spacing();
+        if (ImGui::Button("Binds", ButtonSize))
+            selection = Selection::Binds;
+        ImGui::Spacing();
+        if (ImGui::Button("Audio", ButtonSize))
+            selection = Selection::Audio;
+        ImGui::Spacing();
+        if (ImGui::Button("Palette", ButtonSize))
+            selection = Selection::Palette;
+
+        ImGui::SetCursorPosY(ImGui::GetWindowHeight() - 8);
+    }
+
+    ImGui::NextColumn();
+
+    // Contents
+    {
+        switch (selection)
+        {
+        case Selection::Binds:
+        {
+            static std::vector<rebindButton> buttons = {
+            /* 0 */ rebindButton("Up", appSettings::controls.up),
+            /* 1 */ rebindButton("Down", appSettings::controls.down),
+            /* 2 */ rebindButton("Left", appSettings::controls.left),
+            /* 3 */ rebindButton("Right", appSettings::controls.right),
+            /* 4 */ rebindButton("Select", appSettings::controls.select),
+            /* 5 */ rebindButton("Start", appSettings::controls.start),
+            /* 6 */ rebindButton("B", appSettings::controls.b),
+            /* 7 */ rebindButton("A", appSettings::controls.a),
+            };
+
+            ImGui::NewLine();
+            const float CursorStartX = ImGui::GetCursorPosX();
+
+            // Draw Dpad
+            const ImVec2 ButtonSize = { 96, 28 };
+            ImGui::SetCursorPosX(CursorStartX + (ButtonSize.x / 2));
+            buttons[0].Draw(ButtonSize);
+            ImGui::SetCursorPosX(CursorStartX);
+            const float CursorPosMiddleY = ImGui::GetCursorPosY();
+            buttons[2].Draw(ButtonSize);
+            ImGui::SameLine();
+            buttons[3].Draw(ButtonSize);
+            ImGui::SetCursorPosX(CursorStartX + (ButtonSize.x / 2));
+            const float CursorPosLowY = ImGui::GetCursorPosY();
+            buttons[1].Draw(ButtonSize);
+
+            // Draw Start & Select
+            const ImVec2 WideButtonSize = { 148, 28 };
+            ImGui::SetCursorPosY(CursorPosLowY);
+            ImGui::SetCursorPosX(CursorStartX + (ButtonSize.x * 1.5f) + (style->FramePadding.x * 2));
+            buttons[4].Draw(WideButtonSize);
+            ImGui::SameLine();
+            buttons[5].Draw(WideButtonSize);
+
+            // Draw A & B
+            const ImVec2 ActionButtonSize = { 64, 28 };
+            ImGui::SetCursorPosY(CursorPosMiddleY);
+            ImGui::SetCursorPosX(CursorStartX + (ButtonSize.x * 3.33f));
+            buttons[6].Draw(ActionButtonSize);
+            ImGui::SameLine();
+            buttons[7].Draw(ActionButtonSize);
+            break;
+        }
+        case Selection::Audio:
+        {
+            ImGui::Text("Volume: ");
+            ImGui::SameLine();
+            if (ImGui::SliderFloat("##", &appSettings::master_volume, 0.0f, 1.0f, "%.1f", ImGuiSliderFlags_NoRoundToFormat))
+            {
+                mGameBoy->mApu.masterVolume = appSettings::master_volume;
+            }
+            break;
+        }
+        case Selection::Palette:
+        {
+            static ImColor c1 = ImColor(0xff0fbc9b);
+            static ImColor c2 = ImColor(0xff0fac8b);
+            static ImColor c3 = ImColor(0xff306230);
+            static ImColor c4 = ImColor(0xff0f380f);
+            auto update_palette = [&]()
+            {
+                gbColor color1;
+                color1.r = c1.Value.x * 255;
+                color1.g = c1.Value.y * 255;
+                color1.b = c1.Value.z * 255;
+                gbColor color2;
+                color2.r = c2.Value.x * 255;
+                color2.g = c2.Value.y * 255;
+                color2.b = c2.Value.z * 255;
+                gbColor color3;
+                color3.r = c3.Value.x * 255;
+                color3.g = c3.Value.y * 255;
+                color3.b = c3.Value.z * 255;
+                gbColor color4;
+                color4.r = c4.Value.x * 255;
+                color4.g = c4.Value.y * 255;
+                color4.b = c4.Value.z * 255;
+                mGameBoy->SetPalette(color1, color2, color3, color4);
+            };
+            
+            if (ImGui::ColorEdit3("1", (float*)&c1, ImGuiColorEditFlags_Uint8))
+                update_palette();
+            if (ImGui::ColorEdit3("2", (float*)&c2, ImGuiColorEditFlags_Uint8))
+                update_palette();
+            if (ImGui::ColorEdit3("3", (float*)&c3, ImGuiColorEditFlags_Uint8))
+                update_palette();
+            if (ImGui::ColorEdit3("4", (float*)&c4, ImGuiColorEditFlags_Uint8))
+                update_palette();
+            
+
+            if (ImGui::Button("Reset", { 48, 24 }))
+            {
+                c1 = ImColor(0xff0fbc9b);
+                c2 = ImColor(0xff0fac8b);
+                c3 = ImColor(0xff306230);
+                c4 = ImColor(0xff0f380f);
+                update_palette();
+            }
+            break;
+        }
+        default:
+            assert(false);
+        }
+    }
+
     
     ImGui::End();
 }
-
 
 void appGui::DrawDebug()
 {
@@ -262,7 +388,7 @@ void appGui::DrawDebug()
             }
 
             if (offset == 0)
-                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(96, 96, 255, 255));
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 4, 255));
             ImGui::Text("0x%04X: %s", addr, assembly.str().c_str());
             if (offset == 0)
                 ImGui::PopStyleColor();
