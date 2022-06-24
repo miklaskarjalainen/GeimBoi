@@ -16,6 +16,31 @@ appGui::appGui(SDL_Window* window, SDL_Renderer* renderer, std::shared_ptr<gbGam
     mGameBoy = emulator;
     ImGui::CreateContext();
 
+    // Color scheme
+    ImGuiStyle* style = &ImGui::GetStyle();
+    style->Colors[ImGuiCol_MenuBarBg]     = ImColor(23, 115, 5);
+    style->Colors[ImGuiCol_TitleBg]       = ImColor(98, 187, 17);
+    style->Colors[ImGuiCol_TitleBgActive] = ImColor(98, 187, 17);
+    style->Colors[ImGuiCol_Border]    = ImColor(110, 213, 19);
+    style->Colors[ImGuiCol_WindowBg]  = ImColor(23, 115, 5);
+    style->Colors[ImGuiCol_PopupBg]   = ImColor(23, 115, 5);
+
+    style->Colors[ImGuiCol_Header]        = ImColor(0, 80, 0);
+    style->Colors[ImGuiCol_HeaderHovered] = ImColor(98, 187, 17);
+    style->Colors[ImGuiCol_HeaderActive]  = ImColor(0, 107, 145);
+    style->Colors[ImGuiCol_Separator]     = ImColor(98, 187, 17);
+
+    style->Colors[ImGuiCol_FrameBg]         = ImColor(0, 60, 0);
+    style->Colors[ImGuiCol_FrameBgHovered]  = ImColor(0, 80, 0);
+    style->Colors[ImGuiCol_FrameBgActive]   = ImColor(0, 100, 0);
+
+    style->Colors[ImGuiCol_Button]        = ImColor(0, 80, 0); 
+    style->Colors[ImGuiCol_ButtonHovered] = ImColor(98, 187, 17);
+    style->Colors[ImGuiCol_ButtonActive]  = ImColor(0, 107, 145);
+
+    style->Colors[ImGuiCol_SliderGrab]      = ImColor(98, 187, 17);
+    style->Colors[ImGuiCol_SliderGrabActive]= ImColor(0, 107, 145);
+
     // MAP KEYS
     ImGuiIO& io = ImGui::GetIO();
     io.KeyMap[ImGuiKey_Tab] = SDL_SCANCODE_TAB;
