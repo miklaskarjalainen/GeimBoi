@@ -75,7 +75,7 @@ void gbAPU::sdl2_callback(void* userdata, uint8_t *stream, int len)
     // User data is our gbApu class
     gbAPU* audio = reinterpret_cast<gbAPU*>(userdata);
     memset(stream, 0, len); // from heap so can be random data 
-    const float Volume = audio->masterVolume * 0.15f;
+    const float Volume = audio->masterVolume * 0.50f;
     
     // format is F32 instead of argument's U8
     float_t* snd = reinterpret_cast<float_t*>(stream);
