@@ -74,6 +74,13 @@
     <ClInclude Include="core\reg.hpp" />
     <ClInclude Include="core\mbc\gbMBC1.hpp" />
     <ClInclude Include="core\mbc\gbMBC3.hpp" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GeimBoi.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\icon.ico" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
