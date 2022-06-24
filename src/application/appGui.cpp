@@ -21,9 +21,10 @@ appGui::appGui(SDL_Window* window, SDL_Renderer* renderer, std::shared_ptr<gbGam
     style->Colors[ImGuiCol_MenuBarBg]     = ImColor(23, 115, 5);
     style->Colors[ImGuiCol_TitleBg]       = ImColor(98, 187, 17);
     style->Colors[ImGuiCol_TitleBgActive] = ImColor(98, 187, 17);
-    style->Colors[ImGuiCol_Border]    = ImColor(110, 213, 19);
-    style->Colors[ImGuiCol_WindowBg]  = ImColor(23, 115, 5);
-    style->Colors[ImGuiCol_PopupBg]   = ImColor(23, 115, 5);
+    style->Colors[ImGuiCol_Border]        = ImColor(110, 213, 19);
+    style->Colors[ImGuiCol_WindowBg]      = ImColor(23, 115, 5);
+    style->Colors[ImGuiCol_PopupBg]       = ImColor(23, 115, 5);
+    style->Colors[ImGuiCol_CheckMark]     = ImColor(0, 107, 145);
 
     style->Colors[ImGuiCol_Header]        = ImColor(0, 80, 0);
     style->Colors[ImGuiCol_HeaderHovered] = ImColor(98, 187, 17);
@@ -113,7 +114,7 @@ void appGui::DrawTopbar()
     {
         if (ImGui::BeginMenu("GeimBoy"))
         {
-            if (ImGui::MenuItem("Open Rom"))
+            if (ImGui::MenuItem("Open Rom..."))
             { 
                 OpenRomDialog();
             }
@@ -151,22 +152,22 @@ void appGui::DrawOptions()
 
     ImGui::Begin("Options", &mDrawOptions, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
     ImGui::SetWindowSize({ 618, 160 });
-    ImGui::Columns(2, nullptr, false);
-    ImGui::SetColumnOffset(1, 140);
 
+    const ImGuiStyle* style = &ImGui::GetStyle();
+
+    ImGui::Columns(2, nullptr, false);
     enum class Selection
     {
         Binds,
         Audio,
         Palette,
     };
-
     static Selection selection = Selection::Binds;
-    const ImGuiStyle* style = &ImGui::GetStyle();
-
     // Tabs
     {
-        const ImVec2 ButtonSize = { 140 - (style->WindowPadding.x * 2), 32 };
+        const int ColumnWidth = 140;
+        ImGui::SetColumnOffset(1, ColumnWidth);
+        const ImVec2 ButtonSize = { ColumnWidth - (style->WindowPadding.x * 2), 32 };
 
         ImGui::Spacing();
         if (ImGui::Button("Binds", ButtonSize))
@@ -251,32 +252,32 @@ void appGui::DrawOptions()
             static ImColor c4 = ImColor(0xff0f380f);
             auto update_palette = [&]()
             {
-                gbColor color1;
+                gbColor color1, color2, color3, color4;
                 color1.r = c1.Value.x * 255;
                 color1.g = c1.Value.y * 255;
                 color1.b = c1.Value.z * 255;
-                gbColor color2;
+
                 color2.r = c2.Value.x * 255;
                 color2.g = c2.Value.y * 255;
                 color2.b = c2.Value.z * 255;
-                gbColor color3;
+                
                 color3.r = c3.Value.x * 255;
                 color3.g = c3.Value.y * 255;
                 color3.b = c3.Value.z * 255;
-                gbColor color4;
+                
                 color4.r = c4.Value.x * 255;
                 color4.g = c4.Value.y * 255;
                 color4.b = c4.Value.z * 255;
                 mGameBoy->SetPalette(color1, color2, color3, color4);
             };
             
-            if (ImGui::ColorEdit3("1", (float*)&c1, ImGuiColorEditFlags_Uint8))
+            if (ImGui::ColorEdit3("1", reinterpret_cast<float*>(&c1), ImGuiColorEditFlags_Uint8))
                 update_palette();
-            if (ImGui::ColorEdit3("2", (float*)&c2, ImGuiColorEditFlags_Uint8))
+            if (ImGui::ColorEdit3("2", reinterpret_cast<float*>(&c2), ImGuiColorEditFlags_Uint8))
                 update_palette();
-            if (ImGui::ColorEdit3("3", (float*)&c3, ImGuiColorEditFlags_Uint8))
+            if (ImGui::ColorEdit3("3", reinterpret_cast<float*>(&c3), ImGuiColorEditFlags_Uint8))
                 update_palette();
-            if (ImGui::ColorEdit3("4", (float*)&c4, ImGuiColorEditFlags_Uint8))
+            if (ImGui::ColorEdit3("4", reinterpret_cast<float*>(&c4), ImGuiColorEditFlags_Uint8))
                 update_palette();
             
 
