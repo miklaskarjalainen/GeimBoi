@@ -262,7 +262,7 @@ void appWindow::DoEvents()
             case SDL_DROPFILE: // File gets dropped into the program
             {
                 std::string file_path = std::string(events.drop.file);
-                if (file_path.find(".gb") > 0) // works with .gb .gbc .gbc etc
+                if (file_path.find(".gb") > 0) // works with .gb .gbc etc
                 {
                     mGameBoy->Reset();
                     mGameBoy->LoadRom(file_path);
