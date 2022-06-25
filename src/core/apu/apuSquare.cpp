@@ -1,7 +1,7 @@
 #include <cassert>
 #include "apuSquare.hpp"
-#include "../gbGameBoy.hpp"
 #include "soundWaves.hpp"
+#include "../gbGameBoy.hpp"
 
 using namespace GeimBoi;
 

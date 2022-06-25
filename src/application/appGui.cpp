@@ -1,7 +1,9 @@
+#include <string>
 #include <sstream>
 #include <cassert>
 #include <SDL2/SDL.h>
 #include <FileDialogs/FileDialogs.hpp>
+
 #include "appGui.hpp"
 #include "appSettings.hpp"
 #include "gui/rebindButton.hpp"

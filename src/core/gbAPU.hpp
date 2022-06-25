@@ -1,7 +1,5 @@
 #pragma once
-#include <functional>
 #include <cstdint>
-#include <array>
 #include "apu/apuChannel1.hpp"
 #include "apu/apuChannel2.hpp"
 
@@ -27,7 +25,7 @@ namespace GeimBoi
         apuChannel1 channel1;
         apuChannel2 channel2;
     private:
-        uint32_t mSequenceCounter = 0; // goes to 512hz and resets
+        uint32_t mSequenceCounter = 0;
         double timeElapsed = 0.0;
         gbGameBoy* mGameBoy = nullptr;
     

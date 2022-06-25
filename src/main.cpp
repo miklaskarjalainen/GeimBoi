@@ -1,5 +1,3 @@
-#include <fstream>
-#include <iostream>
 #include "application/appWindow.hpp"
 
 using namespace GeimBoi;

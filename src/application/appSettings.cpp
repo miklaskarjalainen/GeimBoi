@@ -1,9 +1,3 @@
-#ifdef _WIN32
-    #include <direct.h>
-    #define get_current_dir_name() _getcwd(NULL,0)
-#elif __unix__
-    #include <unistd.h>
-#endif
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
@@ -27,9 +21,8 @@ void appSettings::Load(const std::string& path)
 
     // get fields
     master_volume = file.get<float>("general.master_volume", master_volume);
-    lastrom_path = file.get<std::string>("general.lastrom_path", lastrom_path);
+    lastrom_path  = file.get<std::string>("general.lastrom_path", lastrom_path);
 
-    // disallow sizes smaller than gameboyscreen
     window.width  = file.get<uint16_t>("window.width" , window.width);
     window.height = file.get<uint16_t>("window.height" , window.height);
 
