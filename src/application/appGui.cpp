@@ -48,6 +48,11 @@ appGui::appGui(SDL_Window* window, void* context, std::shared_ptr<gbGameBoy>& em
     style.Colors[ImGuiCol_SliderGrab]      = ImColor(98, 187, 17);
     style.Colors[ImGuiCol_SliderGrabActive]= ImColor(0, 107, 145);
 
+    style.Colors[ImGuiCol_ScrollbarBg]    = ImColor(98, 187, 17);
+    style.Colors[ImGuiCol_ScrollbarGrab]  = ImColor(0, 100, 0);
+    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImColor(98, 187, 17);
+    style.Colors[ImGuiCol_ScrollbarGrabActive]  = ImColor(0, 107, 145);
+
     // Config
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -158,28 +163,38 @@ void appGui::DrawOptions()
     const ImGuiStyle* style = &ImGui::GetStyle();
 
     ImGui::Columns(2, nullptr, false);
-    enum class Selection
+    enum class Tab
     {
         Binds,
         Audio,
         Palette,
+        COUNT
     };
-    static Selection selection = Selection::Binds;
+    static Tab current_tab = Tab::Binds;
     // Tabs
     {
         const int ColumnWidth = 140;
         ImGui::SetColumnOffset(1, ColumnWidth);
         const ImVec2 ButtonSize = { ColumnWidth - (style->WindowPadding.x * 2), 32 };
 
-        ImGui::Spacing();
-        if (ImGui::Button("Binds", ButtonSize))
-            selection = Selection::Binds;
-        ImGui::Spacing();
-        if (ImGui::Button("Audio", ButtonSize))
-            selection = Selection::Audio;
-        ImGui::Spacing();
-        if (ImGui::Button("Palette", ButtonSize))
-            selection = Selection::Palette;
+        static const ImColor ActivatedColor = style->Colors[ImGuiCol_ButtonHovered];
+        static const char* Buttons[] = {"Binds", "Audio", "Palette"};
+        for (int i = 0; i < static_cast<int>(Tab::COUNT); i++)
+        {
+            const Tab TabIdx = static_cast<Tab>(i);
+            
+            ImGui::Spacing();
+            // If this button is the same our current selection draw it with a different color
+            if (current_tab == TabIdx)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Button, ActivatedColor.Value);
+                ImGui::Button(Buttons[i], ButtonSize);
+                ImGui::PopStyleColor();
+                continue;
+            }
+            if (ImGui::Button(Buttons[i], ButtonSize))
+                current_tab = TabIdx;
+        }
 
         ImGui::SetCursorPosY(ImGui::GetWindowHeight() - 8);
     }
@@ -188,9 +203,9 @@ void appGui::DrawOptions()
 
     // Contents
     {
-        switch (selection)
+        switch (current_tab)
         {
-        case Selection::Binds:
+        case Tab::Binds:
         {
             static std::vector<rebindButton> buttons = {
             /* 0 */ rebindButton("Up", appSettings::controls.up),
@@ -236,7 +251,7 @@ void appGui::DrawOptions()
             buttons[7].Draw(ActionButtonSize);
             break;
         }
-        case Selection::Audio:
+        case Tab::Audio:
         {
             ImGui::Text("Volume: ");
             ImGui::SameLine();
@@ -246,7 +261,7 @@ void appGui::DrawOptions()
             }
             break;
         }
-        case Selection::Palette:
+        case Tab::Palette:
         {
             static ImColor c1 = ImColor(0xff0fbc9b);
             static ImColor c2 = ImColor(0xff0fac8b);
