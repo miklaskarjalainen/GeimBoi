@@ -65,8 +65,10 @@ void apuSquare::ClockEnvelope()
 
     if (mEnvelopeEnabled && --mEnvelopeTimer <= 0)
     {
-        uint8_t num_sweep = NR12 & 0b111;
-        mEnvelopeTimer = num_sweep ? num_sweep : 8;
+        const uint8_t SweepCount = NR12 & 0b111;
+        mEnvelopeTimer = SweepCount ? SweepCount : 8;
+        if (!SweepCount)
+            return;
 
         const bool Adds = (NR12 >> 3) & 0b1;
         uint8_t hold_volume = mVolume;
@@ -122,21 +124,34 @@ void apuSquare::WriteByte(uint16_t addr, uint8_t data)
     // Frequency high
     else if (addr == mFreqHiAddr)
     {
+        // higher 3 bits of freq
         mFreq &= ~((0b111) << 8);
-        mFreq |= (data & 0b111) << 8; 
+        mFreq |= (data & 0b111) << 8;
 
         // restarting current sound
-        mEnabled = (data & (1 << 7)) != 0;
-        mLengthEnable = (data & (1 << 6)) != 0;
-        mVolume = mGameBoy->mRom[mEnvelopeAddr] >> 4;
-        if (mEnabled && mLengthTimer == 0)
+        const bool Restart = data & (0b1 << 7);
+        
+        if (Restart)
         {
+            mEnabled = true;
+            mLengthEnable = data & (0b1 << 6);
+            mEnvelopeEnabled = true;
+            mSweepEnabled = true;
+            mVolume = mGameBoy->ReadByte(mEnvelopeAddr) >> 4;
+
             const uint8_t sound_length = (mGameBoy->ReadByte(mLengthAddr) & 0b00111111);
             mLengthTimer = 64 - sound_length;
+            if (!mLengthTimer)
+                mLengthTimer = 64;
+
+            mEnvelopeTimer = mGameBoy->ReadByte(mEnvelopeAddr) & 0b111;
+            if (!mEnvelopeTimer)
+                mEnvelopeTimer = 8;
+
+            mSweepTimer = (mGameBoy->ReadByte(0xFF10) & 0b01110000) >> 4;
+            if (!mSweepTimer)
+                mSweepTimer = 8;
         }
-        mEnvelopeEnabled = true;
-
-
         mGameBoy->mRom[addr] = data;
     }
 }

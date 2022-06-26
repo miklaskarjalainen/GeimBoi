@@ -31,6 +31,7 @@ namespace GeimBoi
         uint8_t mLengthTimer = 0;
         bool mLengthEnable = false;
         bool mEnvelopeEnabled = false;
+        bool mSweepEnabled = true;
 
         gbGameBoy* mGameBoy;
 
