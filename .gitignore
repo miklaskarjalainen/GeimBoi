@@ -43,6 +43,9 @@ bin_int/
 *.s
 
 # Roms
+roms/
+*.zip
+*.rar
 *.gb
 *.gbc
 *.gba
