@@ -14,8 +14,11 @@
 
 using namespace GeimBoi;
  
+static SDL_Window* sWindow = nullptr;
+
 appGui::appGui(SDL_Window* window, void* context, std::shared_ptr<gbGameBoy>& emulator, int widht, int height)
 {
+    sWindow = window;
     mGameBoy = emulator;
     ImGui::CreateContext();
 
@@ -45,29 +48,16 @@ appGui::appGui(SDL_Window* window, void* context, std::shared_ptr<gbGameBoy>& em
     style.Colors[ImGuiCol_SliderGrab]      = ImColor(98, 187, 17);
     style.Colors[ImGuiCol_SliderGrabActive]= ImColor(0, 107, 145);
 
-    // MAP KEYS
+    // Config
     ImGuiIO& io = ImGui::GetIO();
-    io.KeyMap[ImGuiKey_Tab] = SDL_SCANCODE_TAB;
-    io.KeyMap[ImGuiKey_LeftArrow] = SDL_SCANCODE_LEFT;
-    io.KeyMap[ImGuiKey_RightArrow] = SDL_SCANCODE_RIGHT;
-    io.KeyMap[ImGuiKey_UpArrow] = SDL_SCANCODE_UP;
-    io.KeyMap[ImGuiKey_DownArrow] = SDL_SCANCODE_DOWN;
-    io.KeyMap[ImGuiKey_PageUp] = SDL_SCANCODE_PAGEUP;
-    io.KeyMap[ImGuiKey_PageDown] = SDL_SCANCODE_PAGEDOWN;
-    io.KeyMap[ImGuiKey_Home] = SDL_SCANCODE_HOME;
-    io.KeyMap[ImGuiKey_End] = SDL_SCANCODE_END;
-    io.KeyMap[ImGuiKey_Insert] = SDL_SCANCODE_INSERT;
-    io.KeyMap[ImGuiKey_Delete] = SDL_SCANCODE_DELETE;
-    io.KeyMap[ImGuiKey_Backspace] = SDL_SCANCODE_BACKSPACE;
-    io.KeyMap[ImGuiKey_Space] = SDL_SCANCODE_SPACE;
-    io.KeyMap[ImGuiKey_Enter] = SDL_SCANCODE_RETURN;
-    io.KeyMap[ImGuiKey_Escape] = SDL_SCANCODE_ESCAPE;
-    io.KeyMap[ImGuiKey_A] = SDL_SCANCODE_A;
-    io.KeyMap[ImGuiKey_C] = SDL_SCANCODE_C;
-    io.KeyMap[ImGuiKey_V] = SDL_SCANCODE_V;
-    io.KeyMap[ImGuiKey_X] = SDL_SCANCODE_X;
-    io.KeyMap[ImGuiKey_Y] = SDL_SCANCODE_Y;
-    io.KeyMap[ImGuiKey_Z] = SDL_SCANCODE_Z;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
 
     ImGui_ImplSDL2_InitForOpenGL(window, context);
     ImGui_ImplOpenGL2_Init();
@@ -109,10 +99,19 @@ void appGui::DrawTopbar()
 {
     ImGuiIO& io = ImGui::GetIO();
     
-    ImGui::Begin("NavBar", 0, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
-    ImGui::SetWindowPos(ImVec2(-2, 0));
-    ImGui::SetWindowSize(ImVec2(io.DisplaySize.x + 4, 0));
+    ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
+    ImGui::Begin("NavBar", 0,
+        ImGuiWindowFlags_MenuBar |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoDecoration |
+        ImGuiWindowFlags_NoBackground |
+        ImGuiWindowFlags_NoSavedSettings);
     
+    int x, y;
+    SDL_GetWindowPosition(sWindow, &x, &y);
+    ImGui::SetWindowPos(ImVec2(x-2, y));
+    ImGui::SetWindowSize(ImVec2(io.DisplaySize.x + 4, 1));
+
     if (ImGui::BeginMenuBar())
     {
         if (ImGui::BeginMenu("GeimBoi"))
@@ -314,7 +313,7 @@ void appGui::DrawDebug()
     // Cpu
     {
         // Window
-        ImGui::Begin("CPU", nullptr, ImGuiWindowFlags_NoResize);
+        ImGui::Begin("CPU", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking);
         ImGui::SetWindowSize(ImVec2(180, 388));
 
         // Registers
@@ -350,7 +349,7 @@ void appGui::DrawDebug()
     // Cartridge
     {
         // Window
-        ImGui::Begin("Cartridge", nullptr, ImGuiWindowFlags_NoResize);
+        ImGui::Begin("Cartridge", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking);
         ImGui::SetWindowSize(ImVec2(160, 205));
         ImGui::Text("Game: %s", cart->GetGameName().c_str());
         ImGui::Text("Version: %u", cart->GetGameVersion());
@@ -369,7 +368,7 @@ void appGui::DrawDebug()
     // PPU
     {
         // Window
-        ImGui::Begin("PPU", nullptr, ImGuiWindowFlags_NoResize);
+        ImGui::Begin("PPU", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking);
         ImGui::SetWindowSize(ImVec2(120, 120));
         ImGui::Text("Enabled: %u", (mGameBoy->ReadByte(0xFF40) >> 7) & 1);
         ImGui::Text("LY:  %u", mGameBoy->ReadByte(0xFF44));
@@ -382,7 +381,7 @@ void appGui::DrawDebug()
     // Controlling
     {
         // Window
-        ImGui::Begin("Control", nullptr, ImGuiWindowFlags_NoResize);
+        ImGui::Begin("Control", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking);
         ImGui::SetWindowSize(ImVec2(140, 136));
 
 
@@ -400,7 +399,7 @@ void appGui::DrawDebug()
     // TODO: add breakpoints
     {
         // Window
-        ImGui::Begin("Debugger", nullptr, ImGuiWindowFlags_None);
+        ImGui::Begin("Debugger", nullptr, ImGuiWindowFlags_None | ImGuiWindowFlags_NoDocking);
 
         for (int16_t offset = 0; offset < 256;) {
             const uint16_t addr = cpu->mRegPC.val + offset;
@@ -433,7 +432,7 @@ void appGui::DrawAuthors()
     if (!mDrawAuthors)
         return;
 
-    ImGui::Begin("Authors", &mDrawAuthors, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("Authors", &mDrawAuthors, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
     ImGui::SetWindowSize(ImVec2(260, 120));
 
     ImGui::Text("Developers");
@@ -448,7 +447,7 @@ void appGui::DrawLicences()
     if (!mDrawLicences)
         return;
 
-    ImGui::Begin("Licences", &mDrawLicences, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("Licences", &mDrawLicences, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
     ImGui::SetWindowSize(ImVec2(480, 146));
 
     if (ImGui::CollapsingHeader("GeimBoi"))
@@ -574,7 +573,7 @@ void appGui::DrawInfo()
     };
     static const SDL_version SDLVersion = GetSDLVersion();
 
-    ImGui::Begin("Info", &mDrawInfo, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::Begin("Info", &mDrawInfo, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDocking);
     ImGui::SetWindowSize(ImVec2(190, 132));
     ImGui::TextWrapped("GeimBoi is developed and maintained by giffi-dev");
     ImGui::NewLine();

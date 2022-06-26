@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include "imgui/imgui.h"
+#include "imgui/imgui_impl_sdl.h"
 #include "appWindow.hpp"
 #include "appSettings.hpp"
 #include "gui/rebindButton.hpp"
@@ -70,8 +71,7 @@ appWindow::~appWindow()
 
 void appWindow::Run()
 {
-
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    const ImVec4 ClearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     while (!ShouldWindowClose())
     {
         DoEvents();
@@ -91,7 +91,7 @@ void appWindow::Run()
             // Clear Screen
             auto& io = ImGui::GetIO();
             glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-            glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+            glClearColor(ClearColor.x * ClearColor.w, ClearColor.y * ClearColor.w, ClearColor.z * ClearColor.w, ClearColor.w);
             glClear(GL_COLOR_BUFFER_BIT);
             
             // Render GeimBoi's screen buffer
@@ -101,6 +101,14 @@ void appWindow::Run()
             
             // Render Gui
             mGui->Render();
+            if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+            {
+                SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
+                SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+                ImGui::UpdatePlatformWindows();
+                ImGui::RenderPlatformWindowsDefault();
+                SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+            }
         }
 
         {
@@ -120,6 +128,8 @@ void appWindow::DoEvents()
 
     while (SDL_PollEvent(&events))
     {
+        ImGui_ImplSDL2_ProcessEvent(&events);
+
         switch (events.type)
         {
             case SDL_QUIT:
@@ -199,6 +209,7 @@ void appWindow::DoEvents()
             case SDL_KEYUP:
             {
                 uint16_t key = events.key.keysym.scancode;
+
                 io.KeysDown[key] = false;
                 io.KeyShift = ((SDL_GetModState() & KMOD_SHIFT) != 0);
                 io.KeyCtrl  = ((SDL_GetModState() & KMOD_CTRL) != 0);
@@ -245,11 +256,6 @@ void appWindow::DoEvents()
                 if (key == appSettings::controls.select) { mGameBoy->ReleaseButton(gbButton::SELECT);  break; }
                 break;
             }
-            case SDL_TEXTINPUT:
-            {
-                io.AddInputCharactersUTF8(events.text.text);
-                break;
-            }
             case SDL_DROPFILE: // File gets dropped into the program
             {
                 std::string file_path = std::string(events.drop.file);
@@ -260,22 +266,12 @@ void appWindow::DoEvents()
                 }
                 break;
             }
-            case SDL_MOUSEWHEEL:
-            {
-                io.MouseWheel = (float)(events.wheel.y);
-                break;
-            }
             case SDL_WINDOWEVENT:
             {
                 if (events.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
                 {
-                    const Sint16 new_width  = events.window.data1;
-                    const Sint16 new_height = events.window.data2;
-                    
-                    appSettings::window.width  = static_cast<uint16_t>(new_width);
-                    appSettings::window.height = static_cast<uint16_t>(new_height);
-                    io.DisplaySize.x = static_cast<float>(new_width);
-                    io.DisplaySize.y = static_cast<float>(new_height);
+                    appSettings::window.width  = static_cast<uint16_t>(events.window.data1);
+                    appSettings::window.height = static_cast<uint16_t>(events.window.data2);
                 }
                 break;
             }
@@ -286,10 +282,5 @@ void appWindow::DoEvents()
     }
 
     // Imgui stuff
-    int mouseX, mouseY;
-    const int buttons = SDL_GetMouseState(&mouseX, &mouseY);
     io.DeltaTime = 1.0f / 60.0f;
-    io.MousePos = ImVec2((float)mouseX, (float)mouseY);
-    io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT);
-    io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
 }
