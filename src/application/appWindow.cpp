@@ -25,7 +25,7 @@ appWindow::appWindow(const char* openRom)
     // fixes a screen flash when starting and closing the application on KDE
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0"); 
 
-    // Setup window
+    // Setup window & OpenGL context
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
@@ -94,8 +94,10 @@ void appWindow::Run()
             glClearColor(ClearColor.x * ClearColor.w, ClearColor.y * ClearColor.w, ClearColor.z * ClearColor.w, ClearColor.w);
             glClear(GL_COLOR_BUFFER_BIT);
             
-            // Render GeimBoi's screen buffer
-            glRasterPos2f(-1, 1);
+            // Render GeimBoi's screen buffer, also don't render under the MenuBar
+            constexpr int MenuBarHeight = 39;
+            const float MenuBarOffset = static_cast<float>(MenuBarHeight) / io.DisplaySize.y;
+            glRasterPos2f(-1, 1.0 - MenuBarOffset);
             glPixelZoom(io.DisplaySize.x / SCREEN_WIDTH, -io.DisplaySize.y / SCREEN_HEIGHT);
             glDrawPixels(160, 144, GL_RGB, GL_UNSIGNED_BYTE, mGameBoy->mPpu.frontBuffer);
             
