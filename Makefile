@@ -12,7 +12,6 @@ BIN     := bin/Release/gbBoy.o
 
 # Arguments
 build := debug
-
 ifeq ($(build), release)
 	ARGS += -O3
 endif
@@ -20,6 +19,13 @@ ifeq ($(build), debug)
 	ARGS += -g
 	BIN = bin/Debug/gbBoy.o
 endif
+
+major := 0
+minor := 0
+patch := 0
+status := dev
+ARGS += -DGEIMBOI_MAJOR=$(major) -DGEIMBOI_MINOR=$(minor) -DGEIMBOI_PATCH=$(patch) -DDGEIMBOI_STATUS=\"$(status)\"
+
 
 # Rules 
 all: program
