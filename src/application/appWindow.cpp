@@ -147,7 +147,6 @@ void appWindow::DoEvents()
                 uint16_t key = events.key.keysym.scancode;
                 rebindButton::LastKeyDown = key;
 
-                io.KeysDown[key] = true;
                 io.KeyShift = ((SDL_GetModState() & KMOD_SHIFT) != 0);
                 io.KeyCtrl  = ((SDL_GetModState() & KMOD_CTRL) != 0);
                 io.KeyAlt   = ((SDL_GetModState() & KMOD_ALT) != 0);
@@ -213,7 +212,6 @@ void appWindow::DoEvents()
             {
                 uint16_t key = events.key.keysym.scancode;
 
-                io.KeysDown[key] = false;
                 io.KeyShift = ((SDL_GetModState() & KMOD_SHIFT) != 0);
                 io.KeyCtrl  = ((SDL_GetModState() & KMOD_CTRL) != 0);
                 io.KeyAlt   = ((SDL_GetModState() & KMOD_ALT) != 0);
