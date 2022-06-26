@@ -24,7 +24,7 @@
 
 ## Screenshots:
 ![pokemonrb_ss](pictures/pokemonrb.png)
-![supermarioland_ss](pictures/supermarioland.png)
+![kirbysdreamland_ss](pictures/kirbysdreamland.png)
 
 ## Credits:
 ### Libraries Used:
