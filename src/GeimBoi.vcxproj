@@ -18,8 +18,8 @@
     <ClCompile Include="application\imgui\imgui.cpp" />
     <ClCompile Include="application\imgui\imgui_demo.cpp" />
     <ClCompile Include="application\imgui\imgui_draw.cpp" />
+    <ClCompile Include="application\imgui\imgui_impl_opengl2.cpp" />
     <ClCompile Include="application\imgui\imgui_impl_sdl.cpp" />
-    <ClCompile Include="application\imgui\imgui_impl_sdlrenderer.cpp" />
     <ClCompile Include="application\imgui\imgui_tables.cpp" />
     <ClCompile Include="application\imgui\imgui_widgets.cpp" />
     <ClCompile Include="core\apu\apuChannel1.cpp" />
@@ -48,8 +48,8 @@
     <ClInclude Include="application\gui\rebindButton.hpp" />
     <ClInclude Include="application\imgui\imconfig.h" />
     <ClInclude Include="application\imgui\imgui.h" />
+    <ClInclude Include="application\imgui\imgui_impl_opengl2.h" />
     <ClInclude Include="application\imgui\imgui_impl_sdl.h" />
-    <ClInclude Include="application\imgui\imgui_impl_sdlrenderer.h" />
     <ClInclude Include="application\imgui\imgui_internal.h" />
     <ClInclude Include="application\imgui\imstb_rectpack.h" />
     <ClInclude Include="application\imgui\imstb_textedit.h" />
@@ -134,7 +134,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)vendor\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -155,7 +155,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)vendor\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

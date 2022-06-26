@@ -4,46 +4,46 @@
 #include <SDL2/SDL.h>
 #include <FileDialogs/FileDialogs.hpp>
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_sdl.h"
+#include "imgui/imgui_impl_opengl2.h"
 #include "appGui.hpp"
 #include "appSettings.hpp"
 #include "gui/rebindButton.hpp"
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl.h"
-#include "imgui/imgui_impl_sdlrenderer.h"
 #include "../version.hpp"
 
 using namespace GeimBoi;
  
-appGui::appGui(SDL_Window* window, SDL_Renderer* renderer, std::shared_ptr<gbGameBoy>& emulator, int widht, int height)
+appGui::appGui(SDL_Window* window, void* context, std::shared_ptr<gbGameBoy>& emulator, int widht, int height)
 {
     mGameBoy = emulator;
     ImGui::CreateContext();
 
     // Color scheme
-    ImGuiStyle* style = &ImGui::GetStyle();
-    style->Colors[ImGuiCol_MenuBarBg]     = ImColor(23, 115, 5);
-    style->Colors[ImGuiCol_TitleBg]       = ImColor(98, 187, 17);
-    style->Colors[ImGuiCol_TitleBgActive] = ImColor(98, 187, 17);
-    style->Colors[ImGuiCol_Border]        = ImColor(110, 213, 19);
-    style->Colors[ImGuiCol_WindowBg]      = ImColor(23, 115, 5);
-    style->Colors[ImGuiCol_PopupBg]       = ImColor(23, 115, 5);
-    style->Colors[ImGuiCol_CheckMark]     = ImColor(0, 107, 145);
-
-    style->Colors[ImGuiCol_Header]        = ImColor(0, 80, 0);
-    style->Colors[ImGuiCol_HeaderHovered] = ImColor(98, 187, 17);
-    style->Colors[ImGuiCol_HeaderActive]  = ImColor(0, 107, 145);
-    style->Colors[ImGuiCol_Separator]     = ImColor(98, 187, 17);
-
-    style->Colors[ImGuiCol_FrameBg]         = ImColor(0, 60, 0);
-    style->Colors[ImGuiCol_FrameBgHovered]  = ImColor(0, 80, 0);
-    style->Colors[ImGuiCol_FrameBgActive]   = ImColor(0, 100, 0);
-
-    style->Colors[ImGuiCol_Button]        = ImColor(0, 80, 0); 
-    style->Colors[ImGuiCol_ButtonHovered] = ImColor(98, 187, 17);
-    style->Colors[ImGuiCol_ButtonActive]  = ImColor(0, 107, 145);
-
-    style->Colors[ImGuiCol_SliderGrab]      = ImColor(98, 187, 17);
-    style->Colors[ImGuiCol_SliderGrabActive]= ImColor(0, 107, 145);
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.Colors[ImGuiCol_MenuBarBg]     = ImColor(23, 115, 5);
+    style.Colors[ImGuiCol_TitleBg]       = ImColor(98, 187, 17);
+    style.Colors[ImGuiCol_TitleBgActive] = ImColor(98, 187, 17);
+    style.Colors[ImGuiCol_Border]        = ImColor(110, 213, 19);
+    style.Colors[ImGuiCol_WindowBg]      = ImColor(23, 115, 5);
+    style.Colors[ImGuiCol_PopupBg]       = ImColor(23, 115, 5);
+    style.Colors[ImGuiCol_CheckMark]     = ImColor(0, 107, 145);
+         
+    style.Colors[ImGuiCol_Header]        = ImColor(0, 80, 0);
+    style.Colors[ImGuiCol_HeaderHovered] = ImColor(98, 187, 17);
+    style.Colors[ImGuiCol_HeaderActive]  = ImColor(0, 107, 145);
+    style.Colors[ImGuiCol_Separator]     = ImColor(98, 187, 17);
+         
+    style.Colors[ImGuiCol_FrameBg]         = ImColor(0, 60, 0);
+    style.Colors[ImGuiCol_FrameBgHovered]  = ImColor(0, 80, 0);
+    style.Colors[ImGuiCol_FrameBgActive]   = ImColor(0, 100, 0);
+         
+    style.Colors[ImGuiCol_Button]        = ImColor(0, 80, 0); 
+    style.Colors[ImGuiCol_ButtonHovered] = ImColor(98, 187, 17);
+    style.Colors[ImGuiCol_ButtonActive]  = ImColor(0, 107, 145);
+         
+    style.Colors[ImGuiCol_SliderGrab]      = ImColor(98, 187, 17);
+    style.Colors[ImGuiCol_SliderGrabActive]= ImColor(0, 107, 145);
 
     // MAP KEYS
     ImGuiIO& io = ImGui::GetIO();
@@ -69,20 +69,20 @@ appGui::appGui(SDL_Window* window, SDL_Renderer* renderer, std::shared_ptr<gbGam
     io.KeyMap[ImGuiKey_Y] = SDL_SCANCODE_Y;
     io.KeyMap[ImGuiKey_Z] = SDL_SCANCODE_Z;
 
-    ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
-    ImGui_ImplSDLRenderer_Init(renderer);
+    ImGui_ImplSDL2_InitForOpenGL(window, context);
+    ImGui_ImplOpenGL2_Init();
 }
 
 appGui::~appGui()
 {
-    ImGui_ImplSDLRenderer_Shutdown();
+    ImGui_ImplOpenGL2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 }
 
 void appGui::Draw()
 {
-    ImGui_ImplSDLRenderer_NewFrame();
+    ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
@@ -97,7 +97,7 @@ void appGui::Draw()
 void appGui::Render()
 {
     ImGui::Render();
-    ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
+    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }
 
 bool appGui::IsPaused()

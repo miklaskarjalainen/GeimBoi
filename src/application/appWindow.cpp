@@ -1,3 +1,5 @@
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 #include "imgui/imgui.h"
 #include "appWindow.hpp"
 #include "appSettings.hpp"
@@ -22,20 +24,22 @@ appWindow::appWindow(const char* openRom)
     // fixes a screen flash when starting and closing the application on KDE
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0"); 
 
-    mWindow  = SDL_CreateWindow("GeimBoi", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE);
+    // Setup window
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    mWindow = SDL_CreateWindow("GeimBoi", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
     if (mWindow == NULL)
     {
         printf("Unable to create window: %s\n", SDL_GetError());
         exit(1);
     }
     SDL_SetWindowMinimumSize(mWindow, SCREEN_WIDTH, SCREEN_HEIGHT);
-    
-    mRenderer= SDL_CreateRenderer(mWindow, 0, SDL_RENDERER_ACCELERATED);
-    if (mRenderer == NULL)
-    {
-        printf("Unable to create renderer: %s\n", SDL_GetError());
-        exit(1);
-    }
+    mGLContext = SDL_GL_CreateContext(mWindow);
+    SDL_GL_MakeCurrent(mWindow, mGLContext);
+    SDL_GL_SetSwapInterval(0); 
 
     // GameBoy
     mGameBoy = std::make_shared<gbGameBoy>();
@@ -46,23 +50,28 @@ appWindow::appWindow(const char* openRom)
         mGameBoy->LoadRom(openRom);
     
     // Gui
-    mGui = std::make_unique<appGui>(mWindow, mRenderer, mGameBoy, width, height);
+    mGui = std::make_unique<appGui>(mWindow, mGLContext, mGameBoy, width, height);
+}
+
+appWindow::~appWindow()
+{
+    // Save Game on exit
+    if (mGameBoy->mCart.IsGameLoaded())
+    {
+        std::string file_name = mGameBoy->mCart.GetGameName() + ".sav";
+        mGameBoy->mCart.SaveBattery(file_name);
+    }
+    appSettings::Save(SettingsPath);
+
+    SDL_GL_DeleteContext(mGLContext);
+    SDL_DestroyWindow(mWindow);
+    SDL_Quit();
 }
 
 void appWindow::Run()
 {
-    // Create Surface out of raw pixel data.
-    constexpr int pitch = 3 * 160;
-    constexpr int depth = 24;
-    constexpr Uint32 rmask = 0x000000FF;
-    constexpr Uint32 gmask = 0x0000FF00;
-    constexpr Uint32 bmask = 0x00FF0000;
-    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(mGameBoy->mPpu.frontBuffer, 160, 144, depth, pitch, rmask, gmask, bmask, (uint32_t)NULL);
-    if (!surface) {
-        printf("Error creating a surface for screenbuffer! %s\n", SDL_GetError());
-        exit(-1);
-    }
 
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     while (!ShouldWindowClose())
     {
         DoEvents();
@@ -79,23 +88,19 @@ void appWindow::Run()
 
         // Rendering
         {
-            SDL_Texture* texture = SDL_CreateTextureFromSurface(mRenderer, surface);
-
-            // Clear Background
-            SDL_SetRenderDrawColor(mRenderer, 114, 144, 154, 255);
-            SDL_RenderClear(mRenderer);
-
-            // Render Emulator
-            SDL_Rect dst = { 0, 19, 0, 0 }; // Take in count window size, and top bar which takes 19px.
-            SDL_GetWindowSize(mWindow, &dst.w, &dst.h);
-            dst.h -= dst.y;
-        
-            SDL_RenderCopy(mRenderer, texture, NULL, &dst);
+            // Clear Screen
+            auto& io = ImGui::GetIO();
+            glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
+            glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+            glClear(GL_COLOR_BUFFER_BIT);
+            
+            // Render GeimBoi's screen buffer
+            glRasterPos2f(-1, 1);
+            glPixelZoom(io.DisplaySize.x / SCREEN_WIDTH, -io.DisplaySize.y / SCREEN_HEIGHT);
+            glDrawPixels(160, 144, GL_RGB, GL_UNSIGNED_BYTE, mGameBoy->mPpu.frontBuffer);
+            
+            // Render Gui
             mGui->Render();
-
-            // Render
-            SDL_RenderPresent(mRenderer);
-            SDL_DestroyTexture(texture);
         }
 
         {
@@ -104,22 +109,8 @@ void appWindow::Run()
             if (16 - (end_ticks - start_ticks) > 0)
                 SDL_Delay(16 - (end_ticks - start_ticks));
         }
-        
+        SDL_GL_SwapWindow(mWindow);
     }
-
-    SDL_FreeSurface(surface);
-}
-
-appWindow::~appWindow()
-{
-    // Save Game on exit
-    if (mGameBoy->mCart.IsGameLoaded())
-    {
-        std::string file_name = mGameBoy->mCart.GetGameName() + ".sav";
-        mGameBoy->mCart.SaveBattery(file_name);
-    }
-    SDL_Quit();
-    appSettings::Save(SettingsPath);    
 }
 
 void appWindow::DoEvents()

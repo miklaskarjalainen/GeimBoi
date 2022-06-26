@@ -1,8 +1,9 @@
 #pragma once
 #include <memory>
-#include <SDL2/SDL.h>
 #include "appGui.hpp"
 #include "../core/gbGameBoy.hpp"
+
+struct SDL_Window;
 
 namespace GeimBoi
 {
@@ -19,7 +20,7 @@ namespace GeimBoi
 		void DoEvents();
 
 	private:
-		SDL_Renderer * mRenderer = nullptr;
+		void* mGLContext;
 		SDL_Window* mWindow = nullptr;
 		
 		std::unique_ptr<appGui> mGui = nullptr;
