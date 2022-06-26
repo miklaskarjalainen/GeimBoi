@@ -6,48 +6,40 @@ using namespace GeimBoi;
 apuChannel1::apuChannel1(gbGameBoy* gb)
     : apuSquare(gb, 0xFF11, 0xFF12, 0xFF13, 0xFF14) 
 {
-    Restart();   
-}
-
-void apuChannel1::Restart()
-{
-    apuSquare::Restart();
-    mSweepTimer = 8;
+    
 }
 
 void apuChannel1::ClockSweep()
 {
     uint8_t NR10 = mGameBoy->ReadByte(0xFF10);
-    uint8_t SweepTime = (NR10 & 0b01110000) >> 4; 
+    uint8_t SweepPeriod = (NR10 & 0b01110000) >> 4; 
 
-    if (--mSweepTimer <= 0)
+    if (mSweepEnabled && --mSweepTimer <= 0)
     {
-        mSweepTimer = SweepTime;
-        if (!SweepTime)
-            mSweepTimer = 8;
+        const uint8_t SweepShift = (NR10 & 0b111);
+        mSweepTimer = SweepPeriod ? SweepPeriod : 8;
+        mSweepEnabled = SweepPeriod != 0 || SweepShift != 0;
 
-        const uint8_t SweepCount = (NR10 & 0b111);
-        if (SweepTime == 0 && SweepCount != 0)
+        if (SweepPeriod == 0 && SweepShift != 0)
         {
-            const bool Adds = !(NR10 >> 3) & 0b1;
+            const bool Adds = !((NR10 >> 3) & 0b1);
             uint16_t hold_freq = mFreq;
 
             if (Adds)
-                mFreq = mFreq + (mFreq / (uint16_t)(SweepCount * SweepCount));
+                mFreq = mFreq + (mFreq / (uint16_t)(SweepShift * SweepShift));
             else
-                mFreq = mFreq - (mFreq / (uint16_t)(SweepCount * SweepCount));
+                mFreq = mFreq - (mFreq / (uint16_t)(SweepShift * SweepShift));
 
-            if (mFreq > 0x7FF)
+            if (mFreq > 2047)
             {
                 mFreq = hold_freq;
                 mEnabled = false;
             }
         }
 
-        // store new sweep time
-        SweepTime <<= 4;
+        SweepPeriod <<= 4;
         NR10 &= ~(0b01110000);
-        NR10 |= SweepTime;
-        mGameBoy->WriteByte(0xFF10, NR10);
+        NR10 |= SweepPeriod;
+        mGameBoy->WriteByte(0xFF10, NR10); 
     }
 }
