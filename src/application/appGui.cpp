@@ -561,9 +561,10 @@ void appGui::DrawInfo()
     if (!mDrawInfo)
         return;
     
-    ImGui::Begin("Info", &mDrawInfo, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-    ImGui::SetWindowSize(ImVec2(190, 114));
+    ImGui::Begin("Info", &mDrawInfo, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::SetWindowSize(ImVec2(190, 132));
     ImGui::TextWrapped("GeimBoi is developed and maintained by giffi-dev");
+    ImGui::NewLine();
     ImGui::Text("GeimBoi Ver: %s", GEIMBOI_VERSION);
     ImGui::Text("SDL Ver: %u.%u.%u", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
     ImGui::Text("ImGui Ver: %s", IMGUI_VERSION);
