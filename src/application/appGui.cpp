@@ -560,13 +560,26 @@ void appGui::DrawInfo()
 {
     if (!mDrawInfo)
         return;
-    
+
+    /*
+        Get SDL version that's linked with the program.
+        Windows builds use SDL2.dll for dynamic linking, so an user might change it to for a newer/older one.
+        That's why using a function instead of SDL's preprocessor definitions which would give a compile time version.
+    */ 
+    static const auto GetSDLVersion = []() -> SDL_version
+    {
+        SDL_version v = { 0 };
+        SDL_GetVersion(&v);
+        return v;
+    };
+    static const SDL_version SDLVersion = GetSDLVersion();
+
     ImGui::Begin("Info", &mDrawInfo, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
     ImGui::SetWindowSize(ImVec2(190, 132));
     ImGui::TextWrapped("GeimBoi is developed and maintained by giffi-dev");
     ImGui::NewLine();
     ImGui::Text("GeimBoi Ver: %s", GEIMBOI_VERSION);
-    ImGui::Text("SDL Ver: %u.%u.%u", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
+    ImGui::Text("SDL Ver: %u.%u.%u", SDLVersion.major, SDLVersion.minor, SDLVersion.patch);
     ImGui::Text("ImGui Ver: %s", IMGUI_VERSION);
     ImGui::End();   
 }
