@@ -10,6 +10,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
 #include "imgui/imgui_impl_sdlrenderer.h"
+#include "../version.hpp"
 
 using namespace GeimBoi;
  
@@ -563,9 +564,9 @@ void appGui::DrawInfo()
     ImGui::Begin("Info", &mDrawInfo, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
     ImGui::SetWindowSize(ImVec2(190, 114));
     ImGui::TextWrapped("GeimBoi is developed and maintained by giffi-dev");
+    ImGui::Text("GeimBoi Ver: %s", GEIMBOI_VERSION);
     ImGui::Text("SDL Ver: %u.%u.%u", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
     ImGui::Text("ImGui Ver: %s", IMGUI_VERSION);
-    ImGui::Text("Licence: %s", "MIT");
     ImGui::End();   
 }
 

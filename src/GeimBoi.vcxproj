@@ -71,6 +71,7 @@
     <ClInclude Include="core\mbc\gbMBC1.hpp" />
     <ClInclude Include="core\mbc\gbMBC3.hpp" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="version.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GeimBoi.rc" />

@@ -1,0 +1,21 @@
+#pragma once
+
+#ifndef GEIMBOI_MAJOR
+#define GEIMBOI_MAJOR 0
+#endif
+
+#ifndef GEIMBOI_MINOR
+#define GEIMBOI_MINOR 0
+#endif
+
+#ifndef GEIMBOI_PATCH
+#define GEIMBOI_PATCH 0
+#endif
+
+#ifndef GEIMBOI_STATUS
+#define GEIMBOI_STATUS "dev"
+#endif
+
+#define GEIMBOI_STR(a) #a
+#define GEIMBOI_XSTR(a) GEIMBOI_STR(a)
+#define GEIMBOI_VERSION GEIMBOI_XSTR(GEIMBOI_MAJOR) "." GEIMBOI_XSTR(GEIMBOI_MINOR) "." GEIMBOI_XSTR(GEIMBOI_PATCH) GEIMBOI_STATUS
