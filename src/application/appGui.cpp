@@ -107,10 +107,12 @@ void appGui::DrawTopbar()
     ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
     ImGui::Begin("NavBar", 0,
         ImGuiWindowFlags_MenuBar |
-        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoMove  |
         ImGuiWindowFlags_NoDecoration |
         ImGuiWindowFlags_NoBackground |
-        ImGuiWindowFlags_NoSavedSettings);
+        ImGuiWindowFlags_NoDocking |
+        ImGuiWindowFlags_NoSavedSettings
+    );
     
     int x, y;
     SDL_GetWindowPosition(sWindow, &x, &y);
@@ -157,7 +159,12 @@ void appGui::DrawOptions()
     if (!mDrawOptions)
         return;
 
-    ImGui::Begin("Options", &mDrawOptions, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+    ImGui::Begin("Options", &mDrawOptions, 
+        ImGuiWindowFlags_NoCollapse | 
+        ImGuiWindowFlags_NoDocking  |
+        ImGuiWindowFlags_NoResize   |
+        ImGuiWindowFlags_NoSavedSettings
+    );
     ImGui::SetWindowSize({ 618, 160 });
 
     const ImGuiStyle* style = &ImGui::GetStyle();
@@ -328,7 +335,10 @@ void appGui::DrawDebug()
     // Cpu
     {
         // Window
-        ImGui::Begin("CPU", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking);
+        ImGui::Begin("CPU", nullptr, 
+            ImGuiWindowFlags_NoResize | 
+            ImGuiWindowFlags_NoDocking
+        );
         ImGui::SetWindowSize(ImVec2(180, 388));
 
         // Registers
@@ -364,7 +374,10 @@ void appGui::DrawDebug()
     // Cartridge
     {
         // Window
-        ImGui::Begin("Cartridge", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking);
+        ImGui::Begin("Cartridge", nullptr, 
+            ImGuiWindowFlags_NoResize | 
+            ImGuiWindowFlags_NoDocking
+        );
         ImGui::SetWindowSize(ImVec2(160, 205));
         ImGui::Text("Game: %s", cart->GetGameName().c_str());
         ImGui::Text("Version: %u", cart->GetGameVersion());
@@ -383,7 +396,10 @@ void appGui::DrawDebug()
     // PPU
     {
         // Window
-        ImGui::Begin("PPU", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking);
+        ImGui::Begin("PPU", nullptr, 
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoDocking
+        );
         ImGui::SetWindowSize(ImVec2(120, 120));
         ImGui::Text("Enabled: %u", (mGameBoy->ReadByte(0xFF40) >> 7) & 1);
         ImGui::Text("LY:  %u", mGameBoy->ReadByte(0xFF44));
@@ -396,7 +412,10 @@ void appGui::DrawDebug()
     // Controlling
     {
         // Window
-        ImGui::Begin("Control", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking);
+        ImGui::Begin("Control", nullptr, 
+            ImGuiWindowFlags_NoResize | 
+            ImGuiWindowFlags_NoDocking
+        );
         ImGui::SetWindowSize(ImVec2(140, 136));
 
 
@@ -414,7 +433,10 @@ void appGui::DrawDebug()
     // TODO: add breakpoints
     {
         // Window
-        ImGui::Begin("Debugger", nullptr, ImGuiWindowFlags_None | ImGuiWindowFlags_NoDocking);
+        ImGui::Begin("Debugger", nullptr, 
+            ImGuiWindowFlags_None | 
+            ImGuiWindowFlags_NoDocking
+        );
 
         for (int16_t offset = 0; offset < 256;) {
             const uint16_t addr = cpu->mRegPC.val + offset;
@@ -447,7 +469,12 @@ void appGui::DrawAuthors()
     if (!mDrawAuthors)
         return;
 
-    ImGui::Begin("Authors", &mDrawAuthors, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
+    ImGui::Begin("Authors", &mDrawAuthors, 
+        ImGuiWindowFlags_NoResize   | 
+        ImGuiWindowFlags_NoCollapse | 
+        ImGuiWindowFlags_NoDocking  |
+        ImGuiWindowFlags_NoSavedSettings
+    );
     ImGui::SetWindowSize(ImVec2(260, 120));
 
     ImGui::Text("Developers");
@@ -462,7 +489,12 @@ void appGui::DrawLicences()
     if (!mDrawLicences)
         return;
 
-    ImGui::Begin("Licences", &mDrawLicences, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
+    ImGui::Begin("Licences", &mDrawLicences, 
+        ImGuiWindowFlags_NoResize   | 
+        ImGuiWindowFlags_NoCollapse | 
+        ImGuiWindowFlags_NoDocking  |
+        ImGuiWindowFlags_NoSavedSettings
+    );
     ImGui::SetWindowSize(ImVec2(480, 146));
 
     if (ImGui::CollapsingHeader("GeimBoi"))
