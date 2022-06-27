@@ -12,7 +12,7 @@
 ## Features:
 - **MBC1:** support (passes Mooneye's mbc1 tests)
 - **MBC2:** support (passes Mooneye's mbc2 tests)
-- **MBC3:** only rom/ram banking. (no working realtime clock)
+- **MBC3:** support (both banking and realtime clock)
 - **Saving:** roms with a battery gets it's ram dumbed into a *.sav file on exit and loaded on game power on.
 
 ## Todo:
