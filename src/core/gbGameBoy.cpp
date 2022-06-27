@@ -160,7 +160,7 @@ uint16_t gbGameBoy::ReadWord(uint16_t addr) const
 
 void gbGameBoy::WriteByte(uint16_t addr, uint8_t data)
 {
-    if (addr < 0x8000) // Cartridge is read only, writing here can be detect by on board hardware mostly for rom banking.
+    if (addr < 0x8000) // Cartridge is read only, writing here can be detect by on board hardware for rom banking.
     {
         mCart.WriteByte(addr, data);
     } 
@@ -174,7 +174,7 @@ void gbGameBoy::WriteByte(uint16_t addr, uint8_t data)
         WriteByte(addr-0x2000, data);
     } 
     else if ( ( addr >= 0xFEA0 ) && (addr < 0xFEFF) ) {}                         // this area is restricted
-    else if ( addr == 0xFF04 ) { mRom[0xFF04] = 0x00; mCpu.mDividerCounter = 0; } // Writing to Divier   counter resets it
+    else if ( addr == 0xFF04 ) { mRom[0xFF04] = 0x00; mCpu.mDividerCounter = 0; } // Writing to Divider  counter resets it
     else if ( addr == 0xFF44 ) { mRom[0xFF44] = 0x00; }                           // Writing to Scanline counter resets it
     else if ( addr == 0xFF07) // Set new counter frequency
     {
