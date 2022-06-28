@@ -16,7 +16,7 @@ ifeq ($(build), release)
 	ARGS += -O3
 endif
 ifeq ($(build), debug)
-	ARGS += -g
+	ARGS += -g -Wall -Wextra -Wunused
 	BIN = bin/Debug/gbBoy.o
 endif
 
