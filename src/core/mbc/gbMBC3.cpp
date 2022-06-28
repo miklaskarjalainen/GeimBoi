@@ -207,7 +207,7 @@ void gbMBC3::LatchRTC()
         mRtc.Day += static_cast<uint16_t>(difference);
         /*
         ! After 511 days the daycarry should be set, the problem now is that upon startup the emulator resets mRtc.LastLatch to 0
-        ! and the difference is years so the flag is always set on startup.
+        ! so the difference is going to be the years so the flag is always set.
         if (mRtc.Day > 511) 
         {
             mRtc.Day %= 512;
