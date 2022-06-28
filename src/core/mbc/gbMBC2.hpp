@@ -11,11 +11,11 @@ namespace GeimBoi
 
 		uint16_t GetCurRomBank() const override;
 
-		bool SaveBattery(const std::string& _path) override;
-		bool LoadBattery(const std::string& _path) override;
+		bool SaveBattery(const std::string& path) override;
+		bool LoadBattery(const std::string& path) override;
 
-		uint8_t ReadByte(uint16_t _addr) const        override;
-		void    WriteByte(uint16_t _addr, uint8_t _data) override;
+		uint8_t ReadByte(uint16_t addr) const        override;
+		void    WriteByte(uint16_t addr, uint8_t data) override;
 		void    Reset() override;
 	private:
 		bool mRamEnable = false; // aka 'RAMG'
@@ -23,7 +23,7 @@ namespace GeimBoi
 		uint8_t mRam[0x200];     // Interal ram, only 4 lower bits used.
 
 	protected:
-		gbMBC2(gbCart* _cart);
+		gbMBC2(gbCart* cart);
 		friend gbMBC;
 	};
 

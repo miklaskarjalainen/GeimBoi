@@ -4,8 +4,8 @@
 
 using namespace GeimBoi;
 
-gbMBC2::gbMBC2(gbCart* _cart)
-    : gbMBC(_cart)
+gbMBC2::gbMBC2(gbCart* cart)
+    : gbMBC(cart)
 {
     Reset();
     printf("MBC2 Created\n");
@@ -16,7 +16,7 @@ gbMBC2::~gbMBC2()
     printf("MBC2 Destroyed\n");
 }
 
-bool gbMBC2::SaveBattery(const std::string& _path)
+bool gbMBC2::SaveBattery(const std::string& path)
 {
     if (mCart->HasBattery())
     {
@@ -25,7 +25,7 @@ bool gbMBC2::SaveBattery(const std::string& _path)
     return false;
 }
 
-bool gbMBC2::LoadBattery(const std::string& _path)
+bool gbMBC2::LoadBattery(const std::string& path)
 {
     if (mCart->HasBattery())
     {
@@ -34,46 +34,46 @@ bool gbMBC2::LoadBattery(const std::string& _path)
     return false;
 }
 
-uint8_t gbMBC2::ReadByte(uint16_t _addr) const      
+uint8_t gbMBC2::ReadByte(uint16_t addr) const      
 {
-    if      (_addr < 0x4000) // Static Rom
+    if      (addr < 0x4000) // Static Rom
     {
-        return mCart->mCart[_addr];
+        return mCart->mCart[addr];
     }
-    else if (_addr < 0x8000) // Banked Rom
+    else if (addr < 0x8000) // Banked Rom
     {
-        uint32_t new_addr = (_addr - 0x4000) + (mCurBank * 0x4000);
+        uint32_t new_addr = (addr - 0x4000) + (mCurBank * 0x4000);
         return mCart->mCart[new_addr];
     }
-    else if (_addr >= 0xA000 && _addr < 0xC000 && mRamEnable) // RAM
+    else if (addr >= 0xA000 && addr < 0xC000 && mRamEnable) // RAM
     {
-        return mRam[_addr % 0x200];
+        return mRam[addr % 0x200];
     }
 
     return 0xFF;
 }
 
-void gbMBC2::WriteByte(uint16_t _addr, uint8_t _data)
+void gbMBC2::WriteByte(uint16_t addr, uint8_t data)
 {
-    if (_addr < 0x4000) // ROM Change
+    if (addr < 0x4000) // ROM Change
     {
-        _data &= 0xF;
+        data &= 0xF;
         
-        if (((_addr >>  8) & 1)) // ROMB
+        if (((addr >>  8) & 1)) // ROMB
         {
-            if (_data == 0x00) { _data++; } // can't be 0
-            mCurBank = _data;
+            if (data == 0x00) { data++; } // can't be 0
+            mCurBank = data;
             mCurBank &= mCart->GetRomBankCount() - 1;
         }
         else                    // RAMG
         {
-            mRamEnable = _data == 0b1010;
+            mRamEnable = data == 0b1010;
         }
     }
-    else if ((_addr >= 0xA000) && (_addr < 0xC000)) // Ram
+    else if ((addr >= 0xA000) && (addr < 0xC000)) // Ram
     {
         if (!mRamEnable) { return; }
-        mRam[_addr % 0x200] = 0xF0 | (_data & 0xF); // Unused bits are high (bits: 7-4)
+        mRam[addr % 0x200] = 0xF0 | (data & 0xF); // Unused bits are high (bits: 7-4)
     }
 }
 

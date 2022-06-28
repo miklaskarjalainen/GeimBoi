@@ -28,25 +28,25 @@ namespace GeimBoi
 		virtual uint16_t GetCurRomBank() const { return 0; }
 		virtual uint16_t GetCurRamBank() const { return 0; }
 
-		virtual bool SaveBattery(const std::string& _path) { printf("No MBC\n"); return false; }
-		virtual bool LoadBattery(const std::string& _path) { printf("No MBC\n"); return false; }
+		virtual bool SaveBattery(const std::string& path) { printf("No MBC\n"); return false; }
+		virtual bool LoadBattery(const std::string& path) { printf("No MBC\n"); return false; }
 
-		virtual uint8_t ReadByte(uint16_t _addr) const;
-		virtual void WriteByte(uint16_t _addr, uint8_t _data);
+		virtual uint8_t ReadByte(uint16_t addr) const;
+		virtual void WriteByte(uint16_t addr, uint8_t data);
 		virtual void Reset() {}
 
 		/*
 			Gets the correct "mapper" for the cartridge.
 		*/
-		static std::unique_ptr<gbMBC> CreateMBC(gbCart* _cart);
+		static std::unique_ptr<gbMBC> CreateMBC(gbCart* cart);
 	protected:
 		gbCart* mCart = nullptr;
 		
-		bool SaveBatteryImpl(const std::string& _path, uint8_t* src, size_t size);
-		bool LoadBatteryImpl(const std::string& _path, uint8_t* dst, size_t size);
+		bool SaveBatteryImpl(const std::string& path, uint8_t* src, size_t size);
+		bool LoadBatteryImpl(const std::string& path, uint8_t* dst, size_t size);
 
-		gbMBC(gbCart* _cart)
-			:mCart(_cart) {};
+		gbMBC(gbCart* cart)
+			:mCart(cart) {};
 	};
 }
 

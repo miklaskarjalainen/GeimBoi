@@ -11,11 +11,11 @@ namespace GeimBoi
 		uint16_t GetCurRomBank() const override;
 		uint16_t GetCurRamBank() const override;
 
-		bool SaveBattery(const std::string& _path) override;
-		bool LoadBattery(const std::string& _path) override;
+		bool SaveBattery(const std::string& path) override;
+		bool LoadBattery(const std::string& path) override;
 
-		uint8_t ReadByte(uint16_t _addr) const        override;
-		void    WriteByte(uint16_t _addr, uint8_t _data) override;
+		uint8_t ReadByte(uint16_t addr) const        override;
+		void    WriteByte(uint16_t addr, uint8_t data) override;
 		void    Reset() override;
 	private:
 		bool mMode      = false; // false = Rom Mode, true = "Ram Mode".
@@ -24,7 +24,7 @@ namespace GeimBoi
 		uint8_t mCurBank = 0x01; // lower 5 bits (Bank1 for rombanking) after 2bits for (Bank2 for ram / rom -banking)
 
 	protected:
-		gbMBC1(gbCart* _cart);
+		gbMBC1(gbCart* cart);
 		friend gbMBC;
 	};
 

@@ -6,8 +6,8 @@
 
 using namespace GeimBoi;
 
-gbMBC3::gbMBC3(gbCart* _cart)
-    : gbMBC(_cart)
+gbMBC3::gbMBC3(gbCart* cart)
+    : gbMBC(cart)
 {
     Reset();
     printf("MBC3 Created\n");
@@ -18,7 +18,7 @@ gbMBC3::~gbMBC3()
     printf("MBC3 Destroyed\n"); 
 }
 
-bool gbMBC3::SaveBattery(const std::string& _path)
+bool gbMBC3::SaveBattery(const std::string& path)
 {
     if (mCart->HasBattery())
     {
@@ -27,7 +27,7 @@ bool gbMBC3::SaveBattery(const std::string& _path)
     return false;
 }
 
-bool gbMBC3::LoadBattery(const std::string& _path)
+bool gbMBC3::LoadBattery(const std::string& path)
 {
     if (mCart->HasBattery())
     {
@@ -36,24 +36,24 @@ bool gbMBC3::LoadBattery(const std::string& _path)
     return false;
 }
 
-uint8_t gbMBC3::ReadByte(uint16_t _addr) const
+uint8_t gbMBC3::ReadByte(uint16_t addr) const
 {
-    if (_addr < 0x4000) // Cartridge
+    if (addr < 0x4000) // Cartridge
     {
-        return mCart->mCart[_addr];
+        return mCart->mCart[addr];
     }
-    else if (_addr < 0x8000)   // Rom bank
+    else if (addr < 0x8000)   // Rom bank
     {
         uint8_t bank = mRomBank;
         bank &= mCart->GetRomBankCount() - 1;
-        uint32_t new_addr = (_addr - 0x4000) + (bank * 0x4000);
+        uint32_t new_addr = (addr - 0x4000) + (bank * 0x4000);
         return mCart->mCart[new_addr];
     }
-    else if ((_addr >= 0xA000) && (_addr < 0xC000) && mRamEnable) // Ram banks
+    else if ((addr >= 0xA000) && (addr < 0xC000) && mRamEnable) // Ram banks
     {
         if (mRamBank <= 0b11)
         {
-            uint16_t new_addr = _addr - 0xA000;
+            uint16_t new_addr = addr - 0xA000;
             uint16_t bank = mRamBank;
             bank &= mCart->GetRamBankCount() - 1;
             return mRam[new_addr + (bank * 0x2000)];
@@ -90,66 +90,66 @@ uint8_t gbMBC3::ReadByte(uint16_t _addr) const
     }
 }
 
-void gbMBC3::WriteByte(uint16_t _addr, uint8_t _data)
+void gbMBC3::WriteByte(uint16_t addr, uint8_t data)
 {
-    if (_addr < 0x2000)     // Ram Enable
+    if (addr < 0x2000)     // Ram Enable
     {
-        mRamEnable = (_data & 0xF) == 0b1010;
+        mRamEnable = (data & 0xF) == 0b1010;
     }
-    else if (_addr < 0x4000) // ROM Change
+    else if (addr < 0x4000) // ROM Change
     {
-        mRomBank = _data & 0b01111111;
+        mRomBank = data & 0b01111111;
         if (mRomBank == 0) { mRomBank++; }
     }
-    else if (_addr < 0x6000) // RAM / RTS Reg change
+    else if (addr < 0x6000) // RAM / RTS Reg change
     {
-        if (_data <= 0b1111)
-            mRamBank = _data;
+        if (data <= 0b1111)
+            mRamBank = data;
     }
-    else if (_addr < 0x8000) // Latch Clock Data
+    else if (addr < 0x8000) // Latch Clock Data
     {
         // Latch if 0 and 1 were written back to back to this memory address..
-        if (_data == 1 && mRtc.LatchData == 0)
+        if (data == 1 && mRtc.LatchData == 0)
         {
             LatchRTC();
         }
-        mRtc.LatchData = _data;
+        mRtc.LatchData = data;
     }
-    else if ((_addr >= 0xA000) && (_addr < 0xC000)) // Ram Bank & RTC
+    else if ((addr >= 0xA000) && (addr < 0xC000)) // Ram Bank & RTC
     {
         if (!mRamEnable) { return; }
 
         if (mRamBank <= 0b11) // RAM
         {
-            uint16_t new_addr = _addr - 0xA000;
+            uint16_t new_addr = addr - 0xA000;
             uint16_t bank = mRamBank;
             bank &= mCart->GetRamBankCount() - 1;
-            mRam[new_addr + (bank * 0x2000)] = _data;
+            mRam[new_addr + (bank * 0x2000)] = data;
         }
         else if (mRtc.Halt)// RTC
         {
             switch(mRamBank & 0b1111)
             {
                 case 0x8:
-                    mRtc.Sec = _data;
+                    mRtc.Sec = data;
                     break;
                 case 0x9:
-                    mRtc.Min = _data;
+                    mRtc.Min = data;
                     break;
                 case 0xA:
-                    mRtc.Hour = _data;
+                    mRtc.Hour = data;
                     break;
                 case 0xB:
-                    mRtc.Day = (mRtc.Day & (0b1 << 8)) | _data;
+                    mRtc.Day = (mRtc.Day & (0b1 << 8)) | data;
                     break;
                 case 0xC:
                 {
                     // Most significant bit of Day Counter
                     mRtc.Day &= ~(0x100);
-                    mRtc.Day |= ((_data & 0b1) << 8);
+                    mRtc.Day |= ((data & 0b1) << 8);
 
-                    mRtc.Halt = _data & (0b1 << 6);
-                    mRtc.DayCarry = _data & (0b1 << 7);
+                    mRtc.Halt = data & (0b1 << 6);
+                    mRtc.DayCarry = data & (0b1 << 7);
                     break;
                 }
                 default:

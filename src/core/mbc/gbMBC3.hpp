@@ -12,11 +12,11 @@ namespace GeimBoi
 		uint16_t GetCurRomBank() const override;
 		uint16_t GetCurRamBank() const override;
 
-		bool SaveBattery(const std::string& _path) override;
-		bool LoadBattery(const std::string& _path) override;
+		bool SaveBattery(const std::string& path) override;
+		bool LoadBattery(const std::string& path) override;
 
-		uint8_t ReadByte(uint16_t _addr) const           override;
-		void    WriteByte(uint16_t _addr, uint8_t _data) override;
+		uint8_t ReadByte(uint16_t addr) const           override;
+		void    WriteByte(uint16_t addr, uint8_t data) override;
 		void    Reset() override;
 	private:
 		bool mRamEnable = false; // If false, no ram can be read or written.
@@ -38,7 +38,7 @@ namespace GeimBoi
 			bool DayCarry = false;
 		} mRtc;
 	protected:
-		gbMBC3(gbCart* _cart);
+		gbMBC3(gbCart* cart);
 		friend gbMBC;
 	};
 
