@@ -4,6 +4,26 @@
 
 using namespace GeimBoi;
 
+gbPPU::gbPPU(gbGameBoy* _gameboy)
+        : mGameBoy(_gameboy)
+{
+    frontBuffer = reinterpret_cast<gbBuffer*>(new gbBuffer);
+    if (frontBuffer == nullptr) {
+        printf("could not allocate memory for frontBuffer! (malloc returned nullptr)\n");
+        exit(-1);
+    }
+    memset(frontBuffer, 0, sizeof(gbBuffer));
+
+    dmgPalette[0] = { 217,217,217 };
+    dmgPalette[1] = { 128,128,128 };
+    dmgPalette[2] = {  97, 97, 97 };
+    dmgPalette[3] = {  12, 12, 12 };
+};
+gbPPU::~gbPPU()
+{
+    delete[] frontBuffer;
+}
+
 gbPPU::gbColorId gbPPU::GetPixelColor(uint8_t col, uint16_t addr)
 {
     uint8_t palette = mGameBoy->ReadByte(addr);
@@ -45,6 +65,26 @@ void gbPPU::UpdateGraphics(uint16_t cycles)
         mScanlineCounter = 456;   
         RenderScanline();
     }
+}
+
+gbPPU::OamEntry gbPPU::GetOamForSprite(int sprite_idx) const
+{
+    const uint16_t BaseAddr = 0xFE00 + (sprite_idx * 4);
+    const uint8_t YPos = mGameBoy->ReadByte(BaseAddr + 0) - 16;
+    const uint8_t XPos = mGameBoy->ReadByte(BaseAddr + 1) - 8;
+    const uint8_t Tile = mGameBoy->ReadByte(BaseAddr + 2);
+    const uint8_t Flags = mGameBoy->ReadByte(BaseAddr + 3);
+
+    OamEntry entry;
+    entry.pos_y = YPos;
+    entry.pos_x = XPos;
+    entry.tile_index = Tile;
+    entry.flags.bg_priority = Flags & (0b1 << 7);
+    entry.flags.y_flip = Flags & (0b1 << 6);
+    entry.flags.x_flip = Flags & (0b1 << 5);
+    entry.flags.dmg_palette = Flags & (0b1 << 4);
+
+    return entry;
 }
 
 void gbPPU::SetLCDStatus()
@@ -105,10 +145,10 @@ void gbPPU::SetLCDStatus()
 void gbPPU::RenderScanline()
 {
     if (!LCD_Enable()) { return; }
-    
-    uint8_t& curScanline = mGameBoy->mRom[0xFF44]; // 0-153
+
+    uint8_t& curScanline = GetLY(); // 0-153
     curScanline++;
-    
+
     if ( curScanline == 144U )     // VBLANK
     {
         mGameBoy->mCpu.RequestInterrupt(gbInterrupt::VBlank);
@@ -119,11 +159,11 @@ void gbPPU::RenderScanline()
     }
     CheckCoinsidenceFlag();
 
-    if ( curScanline < 144U) // 0-144 is visible to the viewport
+    if ( curScanline < 144U ) // 0-144 is visible to the viewport
     {
         RenderBackground();
         RenderSprites();
-    }    
+    }
 }
 
 void gbPPU::RenderBackground()
@@ -215,9 +255,10 @@ void gbPPU::RenderSprites()
 {
     if ( !LCD_ObjEnable() ) { return; }
 
-    uint8_t lcdControl = mGameBoy->mRom[0xFF40];
+    const uint8_t LcdControl = GetLCDC();
+    const uint8_t Ly = GetLY();
+    const int SpriteHeight = (LcdControl >> 2) & 1 ? 16 : 8;
     uint8_t spritesPerScanline = 10;
-    int ySize = (lcdControl >> 2) & 1 ? 16 : 8;
 
     // Loop through all the available sprites
     for (int sprite = 0; sprite < 40; sprite++)
@@ -225,74 +266,65 @@ void gbPPU::RenderSprites()
         // 10 sprites per scanline
         if (!spritesPerScanline) { break; }
 
-        uint8_t index = sprite*4;
-        uint8_t yPos = mGameBoy->ReadByte(0xFE00+index)   - 16;
-        uint8_t xPos = mGameBoy->ReadByte(0xFE00+index+1) - 8;
-        uint8_t tileLocation = mGameBoy->ReadByte(0xFE00 + index + 2);
-        if (ySize == 16)
-            tileLocation &= ~(0b1);
-        uint8_t attributes   = mGameBoy->ReadByte(0xFE00+index+3);
+        OamEntry oam = GetOamForSprite(sprite);
+        if (SpriteHeight == 16)
+            oam.tile_index &= ~(0b1);
 
-        bool yFlip = (attributes >> 6) & 1;
-        bool xFlip = (attributes >> 5) & 1;
-
-        int scanline = mGameBoy->ReadByte(0xFF44);
+        
         // Is in the current scanline?.
-        if ((scanline >= yPos) && (scanline < ( yPos + ySize)))
+        if (!((Ly >= oam.pos_y) && (Ly < ( oam.pos_y + SpriteHeight))))
+            continue;
+
+        spritesPerScanline--;
+
+        int line = Ly - oam.pos_y;
+        if (oam.flags.y_flip)
         {
-            spritesPerScanline--;
+            line -= SpriteHeight ;
+            line *= -1 ;
+        }
+        line *= 2;
+        
+        /*
+            Uses 2 bit per color, Color1 contains the first bits of each pixel's color. 
+            Color2 has the second bit for each pixel. So 1 spriteline(8 pixels) uses 2 bytes.
+        */
+        const uint16_t TileLineAddress = (0x8000 + (oam.tile_index * 16)) + line;
+        const uint8_t  Color1 = mGameBoy->ReadByte( TileLineAddress );
+        const uint8_t  Color2 = mGameBoy->ReadByte( TileLineAddress+1 );
+        const uint16_t PaletteAddress = oam.flags.dmg_palette ? 0xFF49 : 0xFF48;
 
-            int line = scanline - yPos ;
-            if (yFlip)
+        // Loop through a row of pixels in the sprite (for 1 scanline)
+        for (int tilePixel = 7; tilePixel >= 0; tilePixel--)
+        {
+            int colourbit = tilePixel ;
+            if (oam.flags.x_flip)
             {
-                line -= ySize ;
-                line *= -1 ;
+                colourbit -= 7 ;
+                colourbit *= -1 ;
             }
 
-            line *= 2;
-            uint16_t dataAddress = (0x8000 + (tileLocation * 16)) + line;
-            uint8_t data1 = mGameBoy->ReadByte( dataAddress );
-            uint8_t data2 = mGameBoy->ReadByte( dataAddress+1 );
+            // Color Index with in a palette
+            int ColorIdx = ((Color2 >> colourbit) & 0b1);
+            ColorIdx <<= 1;
+            ColorIdx |= ((Color1 >> colourbit) & 0b1);
+            // Index 0 is transparent 
+            if (ColorIdx == 0b00) { continue; }
 
-            // Loop through a row of pixels in the sprite (for 1 scanline)
-            for (int tilePixel = 7; tilePixel >= 0; tilePixel--)
+            const gbColorId ColorId = GetPixelColor(ColorIdx, PaletteAddress);
+            const gbColor Color = dmgPalette[ColorId];
+            const int OnScreenX = oam.pos_x + (0 - tilePixel + 7);
+
+            if ((Ly < 0) || (Ly > 143) || (OnScreenX < 0) || (OnScreenX > 159))
             {
-                int colourbit = tilePixel ;
-                if (xFlip)
-                {
-                    colourbit -= 7 ;
-                    colourbit *= -1 ;
-                }
-
-                // Color Index with in a palette
-                int ColorIdx = ((data2 >> colourbit) & 0b1);
-                ColorIdx <<= 1;
-                ColorIdx |= ((data1 >> colourbit) & 0b1);
-                // Index 0 is transparent 
-                if (ColorIdx == 0b00) { continue; }
-                // Color palette address
-                uint16_t ColorAddress = (attributes >> 4 ) & 1 ? 0xFF49 : 0xFF48;
-
-                gbColorId col = GetPixelColor(ColorIdx, ColorAddress);
-                gbColor color = dmgPalette[col];
-
-                int xPix = 0 - tilePixel;
-                xPix += 7;
-
-                int pixel = xPos+xPix;
-
-                if ((scanline < 0) || (scanline > 143) || (pixel < 0) || (pixel > 159))
-                {
-                    continue ;
-                }
-
-                (*frontBuffer)[SCREEN_WIDTH * scanline + pixel] = color;
+                continue ;
             }
+
+            (*frontBuffer)[SCREEN_WIDTH * Ly + OnScreenX] = Color;
         }
     }
 }
 
-// Aka LY=LYC
 void gbPPU::CheckCoinsidenceFlag()
 {
     uint8_t& lcdStatus = mGameBoy->mRom[0xFF41]; 
@@ -311,22 +343,22 @@ void gbPPU::CheckCoinsidenceFlag()
     }
 }
 
-inline uint8_t gbPPU::GetLY() const 
+inline uint8_t& gbPPU::GetLY() const 
 {
     return mGameBoy->mRom[0xFF44];
 }
 
-inline uint8_t gbPPU::GetLYC() const
+inline uint8_t& gbPPU::GetLYC() const
 {
     return mGameBoy->mRom[0xFF45];
 }
 
-inline uint8_t gbPPU::GetSTAT() const 
+inline uint8_t& gbPPU::GetSTAT() const 
 {
     return mGameBoy->mRom[0xFF41]; 
 };
 
-inline uint8_t gbPPU::GetLCDC() const 
+inline uint8_t& gbPPU::GetLCDC() const 
 {
     return mGameBoy->mRom[0xFF40];
 };

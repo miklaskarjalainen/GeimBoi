@@ -27,32 +27,16 @@ struct gbColor
 class gbPPU
 {
 public:
-    gbPPU(gbGameBoy* _gameboy)
-        : mGameBoy(_gameboy)
-    {
-        frontBuffer = reinterpret_cast<gbBuffer*>(new gbBuffer);
-        if (frontBuffer == nullptr) {
-            printf("could not allocate memory for frontBuffer! (malloc returned nullptr)\n");
-            exit(-1);
-        }
-        memset(frontBuffer, 0, sizeof(gbBuffer));
+    gbPPU(gbGameBoy* _gameboy);
+    ~gbPPU();
+    void Reset();
 
-        dmgPalette[0] = { 217,217,217 };
-        dmgPalette[1] = { 128,128,128 };
-        dmgPalette[2] = {  97, 97, 97 };
-        dmgPalette[3] = {  12, 12, 12 };
-    };
-    ~gbPPU()
-    {
-        delete[] frontBuffer;
-    }
-public:
     using gbBuffer = gbColor[SCREEN_HEIGHT * SCREEN_WIDTH];
-
+    
+public:
     std::array<gbColor, 4> dmgPalette;
     gbBuffer* frontBuffer = nullptr;
 
-    void Reset();
     void CheckCoinsidenceFlag(); // Aka LY=LYC
 
     enum ppuMode : uint8_t {
@@ -62,10 +46,10 @@ public:
         TRANSFERRING_DATA = 0b11,
     };
 
-    uint8_t GetLY()   const;
-    uint8_t GetLYC()  const;
-    uint8_t GetSTAT() const;
-    uint8_t GetLCDC() const;
+    uint8_t& GetLY()   const;
+    uint8_t& GetLYC()  const;
+    uint8_t& GetSTAT() const;
+    uint8_t& GetLCDC() const;
     ppuMode GetMode() const;
     
     bool LCD_Enable()         const;
@@ -74,7 +58,6 @@ public:
     bool LCD_BgWindowEnable() const;
 
 private:
-    // Color ids used by the gameboy.
     enum gbColorId 
     {
         WHITE = 0b00,
@@ -84,6 +67,18 @@ private:
     };
 
     gbColorId GetPixelColor(uint8_t col, uint16_t addr);
+    struct OamEntry {
+        uint8_t pos_y;
+        uint8_t pos_x;
+        uint8_t tile_index;
+        struct {
+            bool bg_priority;
+            bool y_flip;
+            bool x_flip;
+            bool dmg_palette;
+        } flags;
+    };
+    OamEntry GetOamForSprite(int sprite_idx) const;
 
     void UpdateGraphics(uint16_t cycles);
     void SetLCDStatus    ();
