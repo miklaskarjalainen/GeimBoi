@@ -51,7 +51,7 @@ appWindow::appWindow(const char* openRom)
         mGameBoy->LoadRom(openRom);
     
     // Gui
-    mGui = std::make_unique<appGui>(mWindow, mGLContext, mGameBoy, width, height);
+    mGui = std::make_unique<appGui>(mWindow, mGLContext, mGameBoy);
 }
 
 appWindow::~appWindow()

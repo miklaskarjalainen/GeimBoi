@@ -15,13 +15,21 @@ class gbZ80;
 
 struct gbColor
 {
-    gbColor(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0)
-        :r(r), g(g), b(b) {}
     gbColor(const gbColor& other)
         :r(other.r), g(other.g), b(other.b) {}
+    //constexpr gbColor(const gbColor& other)
+    //    :r(other.r), g(other.g), b(other.b) {}
+    gbColor(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0)
+        :r(r), g(g), b(b) {}
     gbColor(const int hex_code)
         :r((hex_code >> 16) & 0xFF), g((hex_code >> 8) & 0xFF), b(hex_code & 0xFF) {}
     uint8_t r, g, b;
+
+    constexpr gbColor& operator=(const gbColor& other)
+    {
+        r = other.r; g = other.g; b = other.b;
+        return *this;
+    }
 };
 
 class gbPPU

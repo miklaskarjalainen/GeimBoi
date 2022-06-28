@@ -13,7 +13,7 @@ uint8_t gbMBC::ReadByte(uint16_t addr) const
 	return mCart->mCart[addr];
 }
 
-void gbMBC::WriteByte(uint16_t addr, uint8_t data)
+void gbMBC::WriteByte(uint16_t, uint8_t)
 {
 	// Don't write to ROM lmfao
 }

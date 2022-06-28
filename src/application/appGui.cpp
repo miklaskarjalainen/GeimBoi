@@ -16,7 +16,7 @@ using namespace GeimBoi;
  
 static SDL_Window* sWindow = nullptr;
 
-appGui::appGui(SDL_Window* window, void* context, std::shared_ptr<gbGameBoy>& emulator, int widht, int height)
+appGui::appGui(SDL_Window* window, void* context, std::shared_ptr<gbGameBoy>& emulator)
 {
     sWindow = window;
     mGameBoy = emulator;
@@ -440,9 +440,6 @@ void appGui::DrawDebug()
 
         for (int16_t offset = 0; offset < 256;) {
             const uint16_t addr = cpu->mRegPC.val + offset;
-            if (addr < 0)
-                continue;
-
             std::stringstream assembly;
             uint16_t opcode = cpu->ReadWord(addr);
             assembly << GetAssembly(opcode) << std::hex;
@@ -614,7 +611,7 @@ void appGui::DrawInfo()
     */ 
     static const auto GetSDLVersion = []() -> SDL_version
     {
-        SDL_version v = { 0 };
+        SDL_version v;
         SDL_GetVersion(&v);
         return v;
     };

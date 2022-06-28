@@ -20,7 +20,7 @@ bool gbMBC1::SaveBattery(const std::string& path)
 {
     if (mCart->HasBattery())
     {
-        return SaveBatteryImpl(mCart->GetGameName() + ".sav", (uint8_t*)&mRam, sizeof(mRam));
+        return SaveBatteryImpl(path, (uint8_t*)&mRam, sizeof(mRam));
     }
     return false;
 }
@@ -29,7 +29,7 @@ bool gbMBC1::LoadBattery(const std::string& path)
 {
     if (mCart->HasBattery())
     {
-        return LoadBatteryImpl(mCart->GetGameName() + ".sav", (uint8_t*)&mRam, sizeof(mRam));
+        return LoadBatteryImpl(path, (uint8_t*)&mRam, sizeof(mRam));
     }
     return false;
 }
@@ -112,7 +112,7 @@ void gbMBC1::Reset()
 
 uint16_t gbMBC1::GetCurRomBank() const
 {
-    return mCurBank & mCart->GetRomBankCount() - 1;
+    return mCurBank & (mCart->GetRomBankCount() - 1);
 }
 
 uint16_t gbMBC1::GetCurRamBank() const

@@ -28,8 +28,8 @@ namespace GeimBoi
 		virtual uint16_t GetCurRomBank() const { return 0; }
 		virtual uint16_t GetCurRamBank() const { return 0; }
 
-		virtual bool SaveBattery(const std::string& path) { printf("No MBC\n"); return false; }
-		virtual bool LoadBattery(const std::string& path) { printf("No MBC\n"); return false; }
+		virtual bool SaveBattery(const std::string&) { printf("No MBC\n"); return false; }
+		virtual bool LoadBattery(const std::string&) { printf("No MBC\n"); return false; }
 
 		virtual uint8_t ReadByte(uint16_t addr) const;
 		virtual void WriteByte(uint16_t addr, uint8_t data);

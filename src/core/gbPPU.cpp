@@ -89,7 +89,6 @@ gbPPU::OamEntry gbPPU::GetOamForSprite(int sprite_idx) const
 
 void gbPPU::SetLCDStatus()
 {
-    uint8_t LCD_CONTROL = GetLCDC();
     uint8_t LCD_STATUS  = GetSTAT();
     uint8_t LY  = mGameBoy->mRom[0xFF44]; // Current scanline
 
@@ -243,7 +242,7 @@ void gbPPU::RenderBackground()
         gbColorId col   = GetPixelColor(colourNum, 0xFF47);
         gbColor color   = dmgPalette[col];
 
-        if ((LY < 0) || (LY > 143) || (pixel < 0) || (pixel > 159))
+        if ((pixel < 0) || (pixel > 159))
         {
             continue;
         }
@@ -315,7 +314,7 @@ void gbPPU::RenderSprites()
             const gbColor Color = dmgPalette[ColorId];
             const int OnScreenX = oam.pos_x + (0 - tilePixel + 7);
 
-            if ((Ly < 0) || (Ly > 143) || (OnScreenX < 0) || (OnScreenX > 159))
+            if ((OnScreenX < 0) || (OnScreenX > 159))
             {
                 continue ;
             }

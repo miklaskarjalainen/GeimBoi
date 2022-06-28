@@ -6,7 +6,7 @@
 using namespace GeimBoi;
 
 gbGameBoy::gbGameBoy()
-    : mApu(this), mCpu(this), mPpu(this), mCart(this)
+    : mApu(this), mCart(this), mCpu(this), mPpu(this)
 {
     Reset();
 }

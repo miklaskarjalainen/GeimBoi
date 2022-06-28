@@ -8,7 +8,7 @@ namespace GeimBoi
 class appGui
 {
 public:
-	appGui(struct SDL_Window* window, void* context, std::shared_ptr<gbGameBoy>& emulator, int width, int height);
+	appGui(struct SDL_Window* window, void* context, std::shared_ptr<gbGameBoy>& emulator);
 	~appGui();
 
 	void Draw();

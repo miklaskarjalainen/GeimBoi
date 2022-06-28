@@ -59,10 +59,10 @@ namespace GeimBoi
 
     public:
         gbAPU  mApu;
-        gbPPU  mPpu;
-        gbZ80  mCpu;
-        gbCart mCart;
         gbBootRom mBootRom;
+        gbCart mCart;
+        gbZ80  mCpu;
+        gbPPU  mPpu;
 
         // TODO: make private, for the time being here.
         void WriteByte(uint16_t addr, uint8_t data);
