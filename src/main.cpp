@@ -1,5 +1,5 @@
+#include <SDL2/SDL.h> //! gives a linking error if not included in visual studio, and only in "release" configuration.
 #include "application/appWindow.hpp"
-
 using namespace GeimBoi;
 
 int main(int argc, char* argv[])
