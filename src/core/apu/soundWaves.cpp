@@ -26,18 +26,18 @@ double SquareWave(double freq, double dTime)
 
 double HarmonicSquareWave(double freq, double dutycycle, double harmonics, double time)
 {
-    double a = .0, b = .0;
-    double p = freq * PI2;
+    double a = .0;
+    double b = .0;
+    double p = dutycycle * PI2;
 
     for (double n = 1; n < harmonics; n++)
     {
         double c = n * freq * PI2 * time;
-        a += sin(c) / n;
-        b += sin(c - p * n) / n;
+        a += -sin(c) / n;
+        b += -sin(c - p * n) / n;
     }
     return (2.0/PI) * (a-b);
 }
-
 
 double TriangleWave(double freq, double dTime)
 {
