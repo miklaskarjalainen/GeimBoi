@@ -73,6 +73,7 @@ private:
         DARKGRAY = 0b10,
         BLACK = 0b11,
     };
+    gbColorId mFifo[SCREEN_WIDTH]; // FIXME: kinda hackky, resolves bg and sprite priority.
 
     gbColorId GetPixelColor(uint8_t col, uint16_t addr);
     struct OamEntry {
@@ -92,6 +93,7 @@ private:
     void SetLCDStatus    ();
     void RenderScanline  ();
     void RenderBackground();
+    void RenderWindow    ();
     void RenderSprites	 ();
     
 private:

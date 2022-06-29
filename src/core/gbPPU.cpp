@@ -62,9 +62,11 @@ void gbPPU::UpdateGraphics(uint16_t cycles)
 
     if (mScanlineCounter <= 0)
     {
-        mScanlineCounter = 456;   
+        mScanlineCounter += 456;   
         RenderScanline();
+        CheckCoinsidenceFlag();
     }
+    
 }
 
 gbPPU::OamEntry gbPPU::GetOamForSprite(int sprite_idx) const
@@ -117,6 +119,7 @@ void gbPPU::SetLCDStatus()
 
         if (mScanlineCounter >= mode2Bounds)            // Searching Oam (0b10)
         {
+            
             LCD_STATUS &= ~(0b11);
             LCD_STATUS |= 0b10;
             modeInterrupt = (LCD_STATUS >> 5) & 1;      // Oam interrupt enable
@@ -135,9 +138,10 @@ void gbPPU::SetLCDStatus()
     uint8_t newMode = LCD_STATUS & 0b11;
     mGameBoy->mRom[0xFF41] = LCD_STATUS;
 
-    if (modeInterrupt && (oldMode != newMode))
+    if (oldMode != newMode)
     {
-        mGameBoy->mCpu.RequestInterrupt(gbInterrupt::LCD);
+        if (modeInterrupt)
+            mGameBoy->mCpu.RequestInterrupt(gbInterrupt::LCD);
     }
 }
 
@@ -156,11 +160,13 @@ void gbPPU::RenderScanline()
     {
         curScanline = 0;
     }
-    CheckCoinsidenceFlag();
+    
 
     if ( curScanline < 144U ) // 0-144 is visible to the viewport
     {
+        memset((void*)&mFifo, 0, sizeof(mFifo));
         RenderBackground();
+        RenderWindow();
         RenderSprites();
     }
 }
@@ -177,41 +183,17 @@ void gbPPU::RenderBackground()
     uint16_t tileData = (LCDControl >> 4) & 1 ? 0x8000 : 0x8800;
     bool     unsig    = (LCDControl >> 4) & 1;  // Use signed with 0x8800
     
-    // Using Window
-    uint8_t windowY = mGameBoy->ReadByte(0xFF4A);
-    uint8_t windowX = mGameBoy->ReadByte(0xFF4B) - 7;
-    bool windowEnable = ((LCDControl >> 5) & 1) &&  windowY <= LY;
-    
     // Background Memory
-    uint16_t backgroundMemory;
-    if (windowEnable)
-        backgroundMemory = (LCDControl >> 6) & 1 ? 0x9C00 : 0x9800;
-    else
-        backgroundMemory = (LCDControl >> 3) & 1 ? 0x9C00 : 0x9800;
+    uint16_t backgroundMemory  = (LCDControl >> 3) & 1 ? 0x9C00 : 0x9800;
 
     uint8_t scrollY = mGameBoy->ReadByte(0xFF42);
     uint8_t scrollX = mGameBoy->ReadByte(0xFF43);
         
-    uint8_t yPos = 0; 
-    if (!windowEnable)
-		yPos = scrollY + LY;
-	else
-		yPos = LY - windowY;
-
-
+    uint8_t yPos = scrollY + LY;
     uint16_t tileRow = (((uint8_t)(yPos/8))*32);
     for (int pixel = 0; pixel < 160; pixel++)
     {
         uint8_t xPos = pixel + scrollX;
-
-        if (windowEnable)
-        {
-            if (pixel >= windowX)
-            {
-                xPos = pixel - windowX;
-            }
-        }
-
         uint16_t tileCol = (xPos / 8);
         int16_t tileNum;
 
@@ -246,8 +228,76 @@ void gbPPU::RenderBackground()
         {
             continue;
         }
-        (*frontBuffer)[SCREEN_WIDTH * LY +pixel] = color;
+
+        mFifo[pixel] = col;
+        (*frontBuffer)[SCREEN_WIDTH * LY + pixel] = color;
     }
+}
+
+void gbPPU::RenderWindow()
+{
+    const uint8_t LCDControl = mGameBoy->mRom[0xFF40];
+    const uint8_t Ly = GetLY();
+
+    if (!LCD_BgWindowEnable()) // Background enable
+        return;
+
+    // Using Window
+    const uint8_t windowY = mGameBoy->ReadByte(0xFF4A);
+    const uint8_t windowX = mGameBoy->ReadByte(0xFF4B) - 7;
+    bool windowEnable = ((LCDControl >> 5) & 1) &&  windowY <= Ly;
+    if (!windowEnable)
+        return;
+
+    // Background Memory
+    uint16_t tileData = (LCDControl >> 4) & 1 ? 0x8000 : 0x8800;
+    bool     unsig    = (LCDControl >> 4) & 1;  // Use signed with 0x8800
+    uint16_t backgroundMemory = (LCDControl >> 6) & 1 ? 0x9C00 : 0x9800;
+    uint8_t yPos = Ly - windowY;
+
+    uint16_t tileRow = (((uint8_t)(yPos/8))*32);
+
+    for (int pixel = windowX; pixel < 160; pixel++)
+    {
+        uint8_t xPos = pixel - windowX;
+        uint16_t tileCol = (xPos / 8);
+        int16_t tileNum;
+
+        uint16_t tileLocation = tileData;
+        if (unsig)
+        {
+            tileNum = (uint8_t)mGameBoy->ReadByte(backgroundMemory + tileRow + tileCol);
+            tileLocation += (tileNum * 16);
+        }
+        else
+        {
+            tileNum = (int8_t)mGameBoy->ReadByte(backgroundMemory + tileRow + tileCol);
+            tileLocation += ((tileNum + 128) * 16);
+        }
+
+        uint8_t line = yPos % 8;
+        uint8_t data1 = mGameBoy->ReadByte(tileLocation + (line * 2));
+        uint8_t data2 = mGameBoy->ReadByte(tileLocation + (line * 2) + 1);
+
+        int colourBit = xPos % 8;
+        colourBit -= 7;
+        colourBit *= -1;
+
+        int colourNum = ((data2 >> colourBit) & 0b1);
+        colourNum <<= 1;
+        colourNum |= ((data1 >> colourBit) & 0b1);
+
+        gbColorId col   = GetPixelColor(colourNum, 0xFF47);
+        gbColor color   = dmgPalette[col];
+
+        if ((pixel < 0) || (pixel > 159))
+        {
+            continue;
+        }
+
+        mFifo[pixel] = col;
+        (*frontBuffer)[SCREEN_WIDTH * Ly + pixel] = color;
+    }    
 }
 
 void gbPPU::RenderSprites()
@@ -266,9 +316,9 @@ void gbPPU::RenderSprites()
         if (!spritesPerScanline) { break; }
 
         OamEntry oam = GetOamForSprite(sprite);
+        
         if (SpriteHeight == 16)
             oam.tile_index &= ~(0b1);
-
         
         // Is in the current scanline?.
         if (!((Ly >= oam.pos_y) && (Ly < ( oam.pos_y + SpriteHeight))))
@@ -315,9 +365,10 @@ void gbPPU::RenderSprites()
             const int OnScreenX = oam.pos_x + (0 - tilePixel + 7);
 
             if ((OnScreenX < 0) || (OnScreenX > 159))
-            {
-                continue ;
-            }
+                continue;
+
+            if (oam.flags.bg_priority && mFifo[OnScreenX] != gbColorId::WHITE)
+                continue;
 
             (*frontBuffer)[SCREEN_WIDTH * Ly + OnScreenX] = Color;
         }
@@ -386,4 +437,3 @@ inline bool gbPPU::LCD_BgWindowEnable() const
 {
     return (mGameBoy->mRom[0xFF40] >> 0) & 0b1;
 }
-
