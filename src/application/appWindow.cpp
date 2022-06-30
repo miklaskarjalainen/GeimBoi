@@ -81,8 +81,7 @@ void appWindow::Run()
         {
             // Emulator gets updated in the gui, because of "pause"
             mGui->Draw();
-            if (!mGui->IsPaused())
-                mGameBoy->FrameAdvance();
+            mGameBoy->FrameAdvance();
         }
 
 

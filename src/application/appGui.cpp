@@ -95,11 +95,6 @@ void appGui::Render()
     ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 }
 
-bool appGui::IsPaused()
-{
-    return mEmuPaused;
-}
-
 void appGui::DrawTopbar()
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -134,7 +129,7 @@ void appGui::DrawTopbar()
         {
             if (ImGui::MenuItem("Options"))
                 mDrawOptions = !mDrawOptions;
-            ImGui::Checkbox("Pause", &mEmuPaused);
+            ImGui::Checkbox("Pause", &mGameBoy->Paused);
             ImGui::Checkbox("Show Debug", &mDrawDebug);
             
             ImGui::EndMenu();
@@ -422,8 +417,8 @@ void appGui::DrawDebug()
         ImGui::Text("LastOp: %s", GetAssembly(cpu->mLastExecutedOpcode));
         ImGui::Text("NextOp: %s", GetAssembly(cpu->ReadByte(cpu->mRegPC.val)));
 
-        if (ImGui::Button("FrameAdvance")) { mGameBoy->FrameAdvance(); mEmuPaused = true; }
-        if (ImGui::Button("ExecuteOpcode")) { mGameBoy->Clock(); mEmuPaused = true; }
+        if (ImGui::Button("FrameAdvance"))  { mGameBoy->FrameAdvance(); mGameBoy->Paused = true; }
+        if (ImGui::Button("ExecuteOpcode")) { mGameBoy->Clock()       ; mGameBoy->Paused = true; }
         ImGui::ProgressBar((float)cpu->mCyclesDone / 70221.0f);
         
         ImGui::End();

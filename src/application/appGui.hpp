@@ -14,7 +14,6 @@ public:
 	void Draw();
 	void Render();   
 
-	bool IsPaused();
 private:
 	void OpenRomDialog();
 
@@ -32,7 +31,6 @@ private:
 	bool mDrawAuthors = false;
 	bool mDrawLicences = false;
 	bool mDrawInfo = false;
-	bool mEmuPaused = false;
 };
 
 } // Namespace

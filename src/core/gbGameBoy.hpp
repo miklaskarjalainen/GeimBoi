@@ -31,6 +31,7 @@ namespace GeimBoi
     public:
         gbGameBoy();
         ~gbGameBoy() = default;
+        bool Paused = false;
 
         void Clock();
         void FrameAdvance();
