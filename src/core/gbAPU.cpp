@@ -75,6 +75,8 @@ void gbAPU::sdl2_callback(void* userdata, uint8_t *stream, int len)
     // User data is our gbApu class
     gbAPU* audio = reinterpret_cast<gbAPU*>(userdata);
     memset(stream, 0, len); // from heap so can be random data 
+    if (audio->mGameBoy->Paused)
+        return;
     const float Volume = audio->masterVolume * 0.50f;
     
     // buffer used for mixing channels.
