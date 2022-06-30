@@ -79,7 +79,6 @@ void appWindow::Run()
 
         // Update
         {
-            // Emulator gets updated in the gui, because of "pause"
             mGui->Draw();
             mGameBoy->FrameAdvance();
         }
@@ -201,8 +200,6 @@ void appWindow::DoEvents()
                 if (key == appSettings::controls.b)      { mGameBoy->PressButton(gbButton::B);      break; }
                 if (key == appSettings::controls.start)  { mGameBoy->PressButton(gbButton::START); break; }
                 if (key == appSettings::controls.select) { mGameBoy->PressButton(gbButton::SELECT);  break; }
-                
-                if (key == SDL_SCANCODE_ESCAPE) { mClosing = true; break; }
                 if (io.KeyShift && key == SDL_SCANCODE_R) { mGameBoy->Reset(); break; }
                 
                 break;
@@ -273,6 +270,9 @@ void appWindow::DoEvents()
                     appSettings::window.width  = static_cast<uint16_t>(events.window.data1);
                     appSettings::window.height = static_cast<uint16_t>(events.window.data2);
                 }
+                // Window closing when multiple viewports are active
+                if (events.window.event == SDL_WINDOWEVENT_CLOSE && events.window.windowID == SDL_GetWindowID(mWindow))
+                    mClosing = true;
                 break;
             }
             default:
