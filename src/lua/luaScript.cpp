@@ -1,0 +1,66 @@
+#include <cassert>
+#include <boost/filesystem.hpp>
+#include <lua.hpp>
+#include "api/luaApi.hpp"
+#include "luaScript.hpp"
+
+using namespace GeimBoi;
+
+struct lua_State;
+namespace GeimBoi
+{
+    luaScript::luaScript(const char* filePath)
+        : mState(luaL_newstate())
+    {
+        assert(boost::filesystem::exists(filePath));
+
+        luaL_openlibs(mState);    // open lua's libs
+        LuaApi::OpenLibs(this);   // open geimboi's libs
+
+        CheckResult(luaL_dofile(mState, filePath));
+    }
+
+    luaScript::luaScript(const luaScript& other)
+        : mState(other.mState) {}
+
+    luaScript::~luaScript()
+    {
+        lua_close(mState);
+    }
+
+    void luaScript::Update()
+    {
+        if (mStopped)
+            return;
+        lua_getglobal(mState, "on_update");
+        CheckResult(lua_pcall(mState, 0, 0, 0));
+    }
+
+    void luaScript::AddFunction(lua_CFunction func, const char* name, const char* table)
+    {
+        if (table == nullptr)
+        {
+            lua_pushcfunction(mState, func);
+            lua_setglobal(mState, name);
+        }
+        else
+        {
+            if (!lua_getglobal(mState, table))
+                lua_newtable(mState);
+            lua_pushstring(mState, name);
+            lua_pushcfunction(mState, func);
+            lua_settable(mState, -3);
+            lua_setglobal(mState, table);
+        }
+    }
+
+    void luaScript::CheckResult(bool r)
+    {
+        if (r)
+        {
+            mStopped = true;
+            const char* msg = lua_gettop(mState) > 0 ? lua_tostring(mState, -1) : "an error occurred";
+            printf("\033[0;31m[Lua] %s\n\033[0m", msg);
+        }
+    }
+}

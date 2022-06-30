@@ -15,11 +15,13 @@
 using namespace GeimBoi;
  
 static SDL_Window* sWindow = nullptr;
+std::shared_ptr<gbGameBoy> gGameBoy = nullptr;
 
 appGui::appGui(SDL_Window* window, void* context, std::shared_ptr<gbGameBoy>& emulator)
 {
     sWindow = window;
     mGameBoy = emulator;
+    gGameBoy = mGameBoy;
     ImGui::CreateContext();
 
     // Color scheme
@@ -66,6 +68,11 @@ appGui::appGui(SDL_Window* window, void* context, std::shared_ptr<gbGameBoy>& em
 
     ImGui_ImplSDL2_InitForOpenGL(window, context);
     ImGui_ImplOpenGL2_Init();
+
+    // Init lua script
+#ifdef LUA_SCRIPTING
+    mLuaScripts.emplace_back("./lua/component.lua");
+#endif
 }
 
 appGui::~appGui()
@@ -87,6 +94,13 @@ void appGui::Draw()
     DrawAuthors();
     DrawLicences();
     DrawInfo();
+
+#ifdef LUA_SCRIPTING
+    for (auto& l : mLuaScripts)
+    {
+        l.Update();
+    }
+#endif
 }
 
 void appGui::Render()
