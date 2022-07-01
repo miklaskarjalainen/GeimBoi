@@ -1,5 +1,5 @@
 #include <cassert>
-#include <lua.hpp>
+#include <lua/lua.hpp>
 #include "api/luaApi.hpp"
 #include "luaScript.hpp"
 
@@ -8,22 +8,26 @@ using namespace GeimBoi;
 struct lua_State;
 namespace GeimBoi
 {
-    luaScript::luaScript(const boost::filesystem::path& filePath)
+    luaScript::luaScript(const std::string& filePath)
         : FilePath(filePath), mState(luaL_newstate())
     {
         assert(boost::filesystem::exists(filePath));
 
         luaL_openlibs(mState);    // open lua's libs
         LuaApi::OpenLibs(this);   // open geimboi's libs
-        CheckResult(luaL_dofile(mState, FilePath.c_str()));
+        CheckResult(luaL_dofile(mState, filePath.c_str()));
     }
 
-    luaScript::luaScript(const luaScript& other)
-        : FilePath(other.FilePath), mState(other.mState) {}
+    luaScript::luaScript(luaScript&& o)
+        : FilePath(std::move(o.FilePath)), mState(std::move(o.mState))
+    {
+        o.mState = nullptr; 
+    }
 
     luaScript::~luaScript()
     {
-        lua_close(mState);
+        if (mState)
+            lua_close(mState);
     }
 
     void luaScript::Update()

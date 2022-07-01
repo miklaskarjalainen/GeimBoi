@@ -1,6 +1,6 @@
 #include <cstdio>
 #include <memory>
-#include <lua.hpp>
+#include <lua/lua.hpp>
 #include "apiEmu.hpp"
 #include "../../core/gbGameBoy.hpp"
 

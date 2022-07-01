@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <boost/filesystem.hpp>
 
 struct lua_State;
@@ -10,9 +11,9 @@ namespace GeimBoi
     {
     public:
         luaScript() = default;
-        luaScript(const boost::filesystem::path& filepath);
-        luaScript(const luaScript&);
-        luaScript(luaScript&&) = default;
+        luaScript(const std::string& filepath);
+        luaScript(luaScript&&);
+        luaScript(const luaScript&) = delete;
         ~luaScript();
 
         void Update();
@@ -20,7 +21,7 @@ namespace GeimBoi
         // if table is nullptr then the function will be in global scope, table is used like a namespace.
         void AddFunction(lua_CFunction func, const char* name, const char* table = nullptr);
 
-        boost::filesystem::path FilePath;
+        std::string FilePath;
     private:
         void CheckResult(bool r);
 

@@ -94,9 +94,9 @@ void appGui::Draw()
     DrawAuthors();
     DrawLicences();
     DrawInfo();
-    DrawScripts();
 
 #ifdef LUA_SCRIPTING
+    DrawScripts();
     for (size_t i = 0; i < mLuaScripts.size(); i++)
     {
         mLuaScripts[i].Update();
@@ -659,7 +659,7 @@ void appGui::DrawScripts()
 
     for (const auto& i : mLuaScripts)
     {
-        ImGui::Button(i.FilePath.filename().c_str());
+        ImGui::Button(i.FilePath.c_str());
     }
 
     ImGui::End();
@@ -682,7 +682,7 @@ void appGui::ReloadScripts()
 
     for(auto& entry : boost::make_iterator_range(directory_iterator("./lua"), {}))
     {
-        mLuaScripts.emplace_back(entry.path());
+        mLuaScripts.emplace_back(entry.path().string());
     }
 }
 #endif

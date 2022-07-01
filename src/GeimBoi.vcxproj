@@ -39,6 +39,11 @@
     <ClCompile Include="core\opcode\opcode.cpp" />
     <ClCompile Include="core\mbc\gbMBC1.cpp" />
     <ClCompile Include="core\mbc\gbMBC3.cpp" />
+    <ClCompile Include="lua\api\apiEmu.cpp" />
+    <ClCompile Include="lua\api\apiGui.cpp" />
+    <ClCompile Include="lua\api\apiStd.cpp" />
+    <ClCompile Include="lua\api\luaApi.cpp" />
+    <ClCompile Include="lua\luaScript.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -70,6 +75,11 @@
     <ClInclude Include="core\reg.hpp" />
     <ClInclude Include="core\mbc\gbMBC1.hpp" />
     <ClInclude Include="core\mbc\gbMBC3.hpp" />
+    <ClInclude Include="lua\api\apiEmu.hpp" />
+    <ClInclude Include="lua\api\apiGui.hpp" />
+    <ClInclude Include="lua\api\apiStd.hpp" />
+    <ClInclude Include="lua\api\luaApi.hpp" />
+    <ClInclude Include="lua\luaScript.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="version.hpp" />
   </ItemGroup>
@@ -126,15 +136,15 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DO_PROFILING</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;LUA_SCRIPTING;DO_PROFILING</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)vendor\include\WindowsOnly;$(SolutionDir)vendor\include</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;opengl32.lib;lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)vendor\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -144,10 +154,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;LUA_SCRIPTING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)vendor\include\WindowsOnly;$(SolutionDir)vendor\include</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -155,7 +165,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)vendor\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2test.lib;opengl32.lib;lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
