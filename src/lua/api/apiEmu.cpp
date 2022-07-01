@@ -63,7 +63,7 @@ int apiEmu::set_button(lua_State* state)
 
 int apiEmu::get_button(lua_State* state)
 {
-    int btn = luaL_checkinteger(state, -2);
+    int btn = luaL_checkinteger(state, -1);
     bool btn_state = gGameBoy->IsButtonPressed((gbButton)btn);
     lua_pushboolean(state, btn_state);
     return 1;

@@ -38,6 +38,9 @@ private:
 	bool mDrawInfo = false;
 
 #ifdef LUA_SCRIPTING
+	void DrawScripts();
+	void ReloadScripts();
+	bool mDrawScripts = false;
 	std::vector<luaScript> mLuaScripts = {};
 #endif
 };

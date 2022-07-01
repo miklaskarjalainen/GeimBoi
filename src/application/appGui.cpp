@@ -71,7 +71,7 @@ appGui::appGui(SDL_Window* window, void* context, std::shared_ptr<gbGameBoy>& em
 
     // Init lua script
 #ifdef LUA_SCRIPTING
-    mLuaScripts.emplace_back("./lua/component.lua");
+    ReloadScripts();
 #endif
 }
 
@@ -94,11 +94,12 @@ void appGui::Draw()
     DrawAuthors();
     DrawLicences();
     DrawInfo();
+    DrawScripts();
 
 #ifdef LUA_SCRIPTING
-    for (auto& l : mLuaScripts)
+    for (size_t i = 0; i < mLuaScripts.size(); i++)
     {
-        l.Update();
+        mLuaScripts[i].Update();
     }
 #endif
 }
@@ -143,6 +144,10 @@ void appGui::DrawTopbar()
         {
             if (ImGui::MenuItem("Options"))
                 mDrawOptions = !mDrawOptions;
+        #ifdef LUA_SCRIPTING
+            if (ImGui::MenuItem("Scripts"))
+                mDrawScripts = !mDrawScripts;
+        #endif
             ImGui::Checkbox("Pause", &mGameBoy->Paused);
             ImGui::Checkbox("Show Debug", &mDrawDebug);
             
@@ -635,6 +640,52 @@ void appGui::DrawInfo()
     ImGui::Text("ImGui Ver: %s", IMGUI_VERSION);
     ImGui::End();   
 }
+
+#ifdef LUA_SCRIPTING
+#include <boost/filesystem.hpp>
+#include <boost/range/iterator_range.hpp>
+
+void appGui::DrawScripts()
+{
+    if (!mDrawScripts)
+        return;
+    ImGui::Begin("Lua Scripts", &mDrawScripts,
+        ImGuiWindowFlags_NoCollapse | 
+        ImGuiWindowFlags_NoDocking  |
+        ImGuiWindowFlags_NoResize   |
+        ImGuiWindowFlags_NoSavedSettings
+    );
+    ImGui::SetWindowSize(ImVec2(320, 420));
+
+    for (const auto& i : mLuaScripts)
+    {
+        ImGui::Button(i.FilePath.filename().c_str());
+    }
+
+    ImGui::End();
+}
+
+void appGui::ReloadScripts()
+{
+    mLuaScripts.clear();
+
+    using namespace boost::filesystem;
+    if (!is_directory("./lua"))
+    {
+        if (!create_directory("./lua/"))
+        {
+            printf("Couldn't create ./lua directory!");
+            exit(-1);
+        }
+        printf("Directory ./lua created!\n");
+    }
+
+    for(auto& entry : boost::make_iterator_range(directory_iterator("./lua"), {}))
+    {
+        mLuaScripts.emplace_back(entry.path());
+    }
+}
+#endif
 
 void appGui::OpenRomDialog()
 {

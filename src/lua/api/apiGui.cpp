@@ -13,7 +13,7 @@ int apiGui::begin(lua_State* state)
     return 1;
 }
 
-int apiGui::end(lua_State* state)
+int apiGui::end(lua_State*)
 {
     ImGui::End();
     return 0;
