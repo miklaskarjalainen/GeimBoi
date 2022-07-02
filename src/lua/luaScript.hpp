@@ -11,21 +11,23 @@ namespace GeimBoi
     {
     public:
         luaScript() = default;
-        luaScript(const std::string& filepath);
-        luaScript(luaScript&&);
+        luaScript(const boost::filesystem::path& filepath);
+        luaScript(luaScript&&) noexcept;
         luaScript(const luaScript&) = delete;
         ~luaScript();
 
+        void Start();
+        void Stop();
         void Update();
-        bool IsStopped() const;
         // if table is nullptr then the function will be in global scope, table is used like a namespace.
         void AddFunction(lua_CFunction func, const char* name, const char* table = nullptr);
 
+        std::string FileName;
         std::string FilePath;
+        bool Stopped = true;
     private:
         void CheckResult(bool r);
 
         lua_State* mState = nullptr;
-        bool mStopped = false;
     };
 }

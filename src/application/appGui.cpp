@@ -657,9 +657,29 @@ void appGui::DrawScripts()
     );
     ImGui::SetWindowSize(ImVec2(320, 420));
 
-    for (const auto& i : mLuaScripts)
+    const ImVec2 BtnSize = ImVec2(48, 19);
+    for (auto& i : mLuaScripts)
     {
-        ImGui::Button(i.FilePath.c_str());
+        if (ImGui::CollapsingHeader(i.FileName.c_str()))
+        {
+            // Start / Stop button
+            std::string btnName = i.Stopped ? "Start" : "Stop";
+            btnName += "##" + i.FileName;
+            if (ImGui::Button(btnName.c_str(), BtnSize))
+            {
+                i.Stopped ? i.Start() : i.Stop();
+            }
+            
+
+            ImGui::SameLine();
+            if (ImGui::Button((std::string("Edit##")+i.FileName).c_str(), BtnSize))
+            {
+                //TODO: find a crossplatform solution this only works on  linux atm.
+                system((std::string("xdg-open ") + i.FilePath).c_str());
+            }
+            
+            //TODO: Make a console which is in the ui.
+        }
     }
 
     ImGui::End();
@@ -682,7 +702,7 @@ void appGui::ReloadScripts()
 
     for(auto& entry : boost::make_iterator_range(directory_iterator("./lua"), {}))
     {
-        mLuaScripts.emplace_back(entry.path().string());
+        mLuaScripts.emplace_back(entry.path());
     }
 }
 #endif
