@@ -2,7 +2,10 @@
 
 struct lua_State;
 
-namespace GeimBoi::LuaApi
+namespace GeimBoi
 {
-    int print(lua_State* state);
+    namespace apiStd
+    {
+        int print(lua_State* state);
+    }
 }
