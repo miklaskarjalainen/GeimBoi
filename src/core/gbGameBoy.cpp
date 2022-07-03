@@ -1,6 +1,5 @@
 #include <cstring>
 #include <string>
-#include <filesystem>
 #include "gbGameBoy.hpp"
 
 using namespace GeimBoi;
