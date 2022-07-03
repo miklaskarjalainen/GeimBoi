@@ -202,6 +202,10 @@ void gbGameBoy::WriteByte(uint16_t addr, uint8_t data)
     {
         mApu.WriteByte(addr, data);
     }
+    else if (addr == 0xFF1A || addr == 0xFF1B || addr == 0xFF1C || addr == 0xFF1D || addr == 0xFF1E) // Api (channel3)
+    {
+        mApu.WriteByte(addr, data);
+    }
     else if ( addr == 0xFF40 ) // Control
     {
         bool lcd_enabled  = (mRom[0xFF40] >> 7) & 1;
