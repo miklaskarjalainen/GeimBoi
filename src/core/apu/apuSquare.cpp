@@ -156,12 +156,12 @@ void apuSquare::WriteByte(uint16_t addr, uint8_t data)
     }
 }
 
-double apuSquare::GetAmplitude(double dt)
+double apuSquare::GetAmplitude(double dt) const
 {
     if (!mEnabled)
         return 0.0;
 
-    double v = mVolume == 0 ? 0.0 : (double)mVolume / 15.0;
-    double f = 131072.0/(2048.0-(double)mFreq);
+    const double v = mVolume == 0 ? 0.0 : (double)mVolume / 15.0;
+    const double f = 131072.0/(2048.0-(double)mFreq);
     return HarmonicSquareWave(f, mCycleDuty, 25.0, dt) * v;
 }
