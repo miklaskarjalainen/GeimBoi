@@ -257,7 +257,7 @@ void appGui::DrawOptions()
         {
             ImGui::Text("Volume: ");
             ImGui::SameLine();
-            if (ImGui::SliderFloat("##", &appSettings::master_volume, 0.0f, 1.0f, "%.1f", ImGuiSliderFlags_NoRoundToFormat))
+            if (ImGui::SliderFloat("##", &appSettings::master_volume, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_NoRoundToFormat))
             {
                 mGameBoy->mApu.masterVolume = appSettings::master_volume;
             }
