@@ -1,5 +1,6 @@
 #include <cstring>
 #include <string>
+#include <fstream>
 #include "gbGameBoy.hpp"
 
 using namespace GeimBoi;
@@ -233,4 +234,33 @@ void gbGameBoy::WriteByte(uint16_t addr, uint8_t data)
     {
         mRom[addr] = data;
     }
+}
+
+void gbGameBoy::SaveState(const std::string& filePath)
+{
+    std::ofstream file(filePath, std::ios::binary);
+    State state(*this);
+    file.write((char*)&state, sizeof(State));
+    file.close();
+}
+
+void gbGameBoy::LoadState(const std::string& filePath)
+{
+    std::ifstream file(filePath, std::ios::binary);
+    State state;
+    file.read((char*)&state, sizeof(State));
+    state.Load(*this);
+    file.close();
+}
+
+gbGameBoy::State::State(const gbGameBoy& g)
+    : CpuState(g.mCpu) 
+{
+    memcpy(&Memory, &g.mRom, sizeof(Memory));
+}
+
+void gbGameBoy::State::Load(gbGameBoy& g)
+{
+    memcpy(&g.mRom, &Memory, sizeof(Memory));
+    CpuState.Load(g.mCpu);
 }

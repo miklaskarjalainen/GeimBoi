@@ -58,6 +58,20 @@ namespace GeimBoi
         uint16_t mLastExecutedOpcode = 0x00;
 
     private:
+        struct State
+        {
+            State() = default;
+            State(const gbZ80& c);
+            State(const State&) = default;
+            ~State() = default;
+            void Load(gbZ80& c);
+
+            Reg16 RegAF, RegBC, RegDE, RegHL, RegSP, RegPC;
+            bool IsHalted, EnableInterrupts;
+            unsigned int CounterFreq, DividerCounter, TimerCounter, CyclesDone;
+        };
+
+    private:
         gbGameBoy* mGameBoy = nullptr;
 
         void UpdateTimers(uint16_t cycles);

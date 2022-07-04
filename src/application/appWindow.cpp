@@ -201,7 +201,20 @@ void appWindow::DoEvents()
                 if (key == appSettings::controls.start)  { mGameBoy->PressButton(gbButton::START); break; }
                 if (key == appSettings::controls.select) { mGameBoy->PressButton(gbButton::SELECT);  break; }
                 if (io.KeyShift && key == SDL_SCANCODE_R) { mGameBoy->Reset(); break; }
-                
+
+                if (key == SDL_SCANCODE_1)
+                {
+                    if (io.KeyShift)
+                    {
+                        printf("Save State!\n");
+                        mGameBoy->SaveState("./state.st"); break;
+                    }
+                    else
+                    {
+                        printf("Load State!\n");
+                        mGameBoy->LoadState("./state.st"); break;
+                    }
+                }
                 break;
             }
             case SDL_KEYUP:
