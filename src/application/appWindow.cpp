@@ -1,3 +1,4 @@
+#include <boost/filesystem.hpp>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include "imgui/imgui.h"
@@ -204,15 +205,22 @@ void appWindow::DoEvents()
 
                 if (key == SDL_SCANCODE_1)
                 {
+                    if (!boost::filesystem::is_directory("./states"))
+                        if (!boost::filesystem::create_directory("./states"))
+                        {
+                            printf("Couldn't create a ./states/ folder :-(\n");
+                            break;
+                        }
+
                     if (io.KeyShift)
                     {
                         printf("Save State!\n");
-                        mGameBoy->SaveState("./state.st"); break;
+                        mGameBoy->SaveState("./states/state.st"); break;
                     }
                     else
                     {
                         printf("Load State!\n");
-                        mGameBoy->LoadState("./state.st"); break;
+                        mGameBoy->LoadState("./states/state.st"); break;
                     }
                 }
                 break;
