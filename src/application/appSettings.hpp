@@ -26,6 +26,30 @@ namespace GeimBoi
             uint16_t a = SDL_SCANCODE_K;
         } controls;
 
+        static struct Hotkeys {
+            // Load States
+            uint16_t load_state1 = SDL_SCANCODE_1;
+            uint16_t load_state2 = SDL_SCANCODE_2;
+            uint16_t load_state3 = SDL_SCANCODE_3;
+            uint16_t load_state4 = SDL_SCANCODE_4;
+            uint16_t load_state5 = SDL_SCANCODE_5;
+            uint16_t load_state6 = SDL_SCANCODE_6;
+            uint16_t load_state7 = SDL_SCANCODE_7;
+            uint16_t load_state8 = SDL_SCANCODE_8;
+            uint16_t load_state9 = SDL_SCANCODE_9;
+
+            // Save States
+            uint16_t save_state1 = SDL_SCANCODE_F1;
+            uint16_t save_state2 = SDL_SCANCODE_F2;
+            uint16_t save_state3 = SDL_SCANCODE_F3;
+            uint16_t save_state4 = SDL_SCANCODE_F4;
+            uint16_t save_state5 = SDL_SCANCODE_F5;
+            uint16_t save_state6 = SDL_SCANCODE_F6;
+            uint16_t save_state7 = SDL_SCANCODE_F7;
+            uint16_t save_state8 = SDL_SCANCODE_F8;
+            uint16_t save_state9 = SDL_SCANCODE_F9;
+        } hotkeys;
+
         static void Load(const std::string& path);
         static void Save(const std::string& path);
     

@@ -203,26 +203,26 @@ void appWindow::DoEvents()
                 if (key == appSettings::controls.select) { mGameBoy->PressButton(gbButton::SELECT);  break; }
                 if (io.KeyShift && key == SDL_SCANCODE_R) { mGameBoy->Reset(); break; }
 
-                if (key == SDL_SCANCODE_1)
-                {
-                    if (!boost::filesystem::is_directory("./states"))
-                        if (!boost::filesystem::create_directory("./states"))
-                        {
-                            printf("Couldn't create a ./states/ folder :-(\n");
-                            break;
-                        }
+                // Loading states
+                if (key == appSettings::hotkeys.load_state1) { mGameBoy->LoadState("./states/state1.st"); break; }
+                if (key == appSettings::hotkeys.load_state2) { mGameBoy->LoadState("./states/state2.st"); break; }
+                if (key == appSettings::hotkeys.load_state3) { mGameBoy->LoadState("./states/state3.st"); break; }
+                if (key == appSettings::hotkeys.load_state4) { mGameBoy->LoadState("./states/state4.st"); break; }
+                if (key == appSettings::hotkeys.load_state5) { mGameBoy->LoadState("./states/state5.st"); break; }
+                if (key == appSettings::hotkeys.load_state6) { mGameBoy->LoadState("./states/state6.st"); break; }
+                if (key == appSettings::hotkeys.load_state7) { mGameBoy->LoadState("./states/state7.st"); break; }
+                if (key == appSettings::hotkeys.load_state8) { mGameBoy->LoadState("./states/state8.st"); break; }
+                if (key == appSettings::hotkeys.load_state9) { mGameBoy->LoadState("./states/state9.st"); break; }
+                if (key == appSettings::hotkeys.save_state1) { mGameBoy->SaveState("./states/state1.st"); break; }
+                if (key == appSettings::hotkeys.save_state2) { mGameBoy->SaveState("./states/state2.st"); break; }
+                if (key == appSettings::hotkeys.save_state3) { mGameBoy->SaveState("./states/state3.st"); break; }
+                if (key == appSettings::hotkeys.save_state4) { mGameBoy->SaveState("./states/state4.st"); break; }
+                if (key == appSettings::hotkeys.save_state5) { mGameBoy->SaveState("./states/state5.st"); break; }
+                if (key == appSettings::hotkeys.save_state6) { mGameBoy->SaveState("./states/state6.st"); break; }
+                if (key == appSettings::hotkeys.save_state7) { mGameBoy->SaveState("./states/state7.st"); break; }
+                if (key == appSettings::hotkeys.save_state8) { mGameBoy->SaveState("./states/state8.st"); break; }
+                if (key == appSettings::hotkeys.save_state9) { mGameBoy->SaveState("./states/state9.st"); break; }
 
-                    if (io.KeyShift)
-                    {
-                        printf("Save State!\n");
-                        mGameBoy->SaveState("./states/state.st"); break;
-                    }
-                    else
-                    {
-                        printf("Load State!\n");
-                        mGameBoy->LoadState("./states/state.st"); break;
-                    }
-                }
                 break;
             }
             case SDL_KEYUP:

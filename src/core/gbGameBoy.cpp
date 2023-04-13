@@ -1,6 +1,7 @@
 #include <cstring>
 #include <string>
 #include <fstream>
+#include <boost/filesystem.hpp>
 #include "gbGameBoy.hpp"
 
 using namespace GeimBoi;
@@ -238,19 +239,32 @@ void gbGameBoy::WriteByte(uint16_t addr, uint8_t data)
 
 void gbGameBoy::SaveState(const std::string& filePath)
 {
+    // TODO: check if gameboy is running.
+    auto fileDirectory = boost::filesystem::path(filePath).parent_path();
+    boost::filesystem::create_directories(fileDirectory);
+
     std::ofstream file(filePath, std::ios::binary);
     State state(*this);
     file.write((char*)&state, sizeof(State));
     file.close();
+
+    printf("Savestate saved to '%s'\n", filePath.c_str());
 }
 
 void gbGameBoy::LoadState(const std::string& filePath)
 {
+    if (!boost::filesystem::exists(filePath)) {
+        printf("No savestate exists at '%s'\n", filePath.c_str());
+        return;
+    }
+
     std::ifstream file(filePath, std::ios::binary);
     State state;
     file.read((char*)&state, sizeof(State));
     state.Load(*this);
     file.close();
+    
+    printf("Savestate loaded from '%s'\n", filePath.c_str());
 }
 
 gbGameBoy::State::State(const gbGameBoy& g)

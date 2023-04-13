@@ -10,6 +10,7 @@ float appSettings::master_volume = 0.30f;
 std::string appSettings::lastrom_path = "";
 appSettings::Window appSettings::window = {};
 appSettings::Controls appSettings::controls = {};
+appSettings::Hotkeys appSettings::hotkeys = {};
 
 void appSettings::Load(const std::string& path)
 {
@@ -26,6 +27,7 @@ void appSettings::Load(const std::string& path)
     window.width  = file.get<uint16_t>("window.width" , window.width);
     window.height = file.get<uint16_t>("window.height" , window.height);
 
+    // controls
     controls.up    = file.get<uint16_t>("controls.up"   , controls.up); 
     controls.down  = file.get<uint16_t>("controls.down" , controls.down); 
     controls.right = file.get<uint16_t>("controls.right", controls.right); 
@@ -35,6 +37,26 @@ void appSettings::Load(const std::string& path)
     controls.a  = file.get<uint16_t>("controls.a" , controls.a); 
     controls.b  = file.get<uint16_t>("controls.b" , controls.b); 
     
+    // hotkeys
+    hotkeys.load_state1 = file.get<uint16_t>("hotkeys.load_state1", hotkeys.load_state1);
+    hotkeys.load_state2 = file.get<uint16_t>("hotkeys.load_state2", hotkeys.load_state2);
+    hotkeys.load_state3 = file.get<uint16_t>("hotkeys.load_state3", hotkeys.load_state3);
+    hotkeys.load_state4 = file.get<uint16_t>("hotkeys.load_state4", hotkeys.load_state4);
+    hotkeys.load_state5 = file.get<uint16_t>("hotkeys.load_state5", hotkeys.load_state5);
+    hotkeys.load_state6 = file.get<uint16_t>("hotkeys.load_state6", hotkeys.load_state6);
+    hotkeys.load_state7 = file.get<uint16_t>("hotkeys.load_state7", hotkeys.load_state7);
+    hotkeys.load_state8 = file.get<uint16_t>("hotkeys.load_state8", hotkeys.load_state8);
+    hotkeys.load_state9 = file.get<uint16_t>("hotkeys.load_state9", hotkeys.load_state9);
+    hotkeys.save_state1 = file.get<uint16_t>("hotkeys.save_state1", hotkeys.save_state1);
+    hotkeys.save_state2 = file.get<uint16_t>("hotkeys.save_state2", hotkeys.save_state2);
+    hotkeys.save_state3 = file.get<uint16_t>("hotkeys.save_state3", hotkeys.save_state3);
+    hotkeys.save_state4 = file.get<uint16_t>("hotkeys.save_state4", hotkeys.save_state4);
+    hotkeys.save_state5 = file.get<uint16_t>("hotkeys.save_state5", hotkeys.save_state5);
+    hotkeys.save_state6 = file.get<uint16_t>("hotkeys.save_state6", hotkeys.save_state6);
+    hotkeys.save_state7 = file.get<uint16_t>("hotkeys.save_state7", hotkeys.save_state7);
+    hotkeys.save_state8 = file.get<uint16_t>("hotkeys.save_state8", hotkeys.save_state8);
+    hotkeys.save_state9 = file.get<uint16_t>("hotkeys.save_state9", hotkeys.save_state9);
+
     printf("%s loaded succesfully!\n", path.c_str());
 }
 
@@ -49,6 +71,7 @@ void appSettings::Save(const std::string& path)
     iniFile.add("window.width" , window.width);
     iniFile.add("window.height", window.height);
 
+    // controls
     iniFile.add("controls.up"   , controls.up);
     iniFile.add("controls.down" , controls.down);
     iniFile.add("controls.right", controls.right);
@@ -57,6 +80,26 @@ void appSettings::Save(const std::string& path)
     iniFile.add("controls.select", controls.select);
     iniFile.add("controls.a" , controls.a);
     iniFile.add("controls.b" , controls.b);
+    
+    // hotkeys
+    iniFile.add("hotkeys.load_state1", hotkeys.load_state1);
+    iniFile.add("hotkeys.load_state2", hotkeys.load_state2);
+    iniFile.add("hotkeys.load_state3", hotkeys.load_state3);
+    iniFile.add("hotkeys.load_state4", hotkeys.load_state4);
+    iniFile.add("hotkeys.load_state5", hotkeys.load_state5);
+    iniFile.add("hotkeys.load_state6", hotkeys.load_state6);
+    iniFile.add("hotkeys.load_state7", hotkeys.load_state7);
+    iniFile.add("hotkeys.load_state8", hotkeys.load_state8);
+    iniFile.add("hotkeys.load_state9", hotkeys.load_state9);
+    iniFile.add("hotkeys.save_state1", hotkeys.save_state1);
+    iniFile.add("hotkeys.save_state2", hotkeys.save_state2);
+    iniFile.add("hotkeys.save_state3", hotkeys.save_state3);
+    iniFile.add("hotkeys.save_state4", hotkeys.save_state4);
+    iniFile.add("hotkeys.save_state5", hotkeys.save_state5);
+    iniFile.add("hotkeys.save_state6", hotkeys.save_state6);
+    iniFile.add("hotkeys.save_state7", hotkeys.save_state7);
+    iniFile.add("hotkeys.save_state8", hotkeys.save_state8);
+    iniFile.add("hotkeys.save_state9", hotkeys.save_state9);
     
     // save file
     write_ini(path, iniFile);    
