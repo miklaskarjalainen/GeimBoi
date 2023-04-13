@@ -24,6 +24,7 @@
     <ClCompile Include="application\imgui\imgui_widgets.cpp" />
     <ClCompile Include="core\apu\apuChannel1.cpp" />
     <ClCompile Include="core\apu\apuChannel2.cpp" />
+    <ClCompile Include="core\apu\apuChannel3.cpp" />
     <ClCompile Include="core\apu\apuSquare.cpp" />
     <ClCompile Include="core\apu\soundWaves.cpp" />
     <ClCompile Include="core\gbAPU.cpp" />
@@ -56,6 +57,7 @@
     <ClInclude Include="application\imgui\imstb_truetype.h" />
     <ClInclude Include="core\apu\apuChannel1.hpp" />
     <ClInclude Include="core\apu\apuChannel2.hpp" />
+    <ClInclude Include="core\apu\apuChannel3.hpp" />
     <ClInclude Include="core\apu\apuSquare.hpp" />
     <ClInclude Include="core\apu\soundWaves.hpp" />
     <ClInclude Include="core\gbAPU.hpp" />
