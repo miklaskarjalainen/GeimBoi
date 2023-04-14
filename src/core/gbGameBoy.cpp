@@ -237,7 +237,7 @@ void gbGameBoy::WriteByte(uint16_t addr, uint8_t data)
     }
 }
 
-void gbGameBoy::SaveState(const std::string& filePath)
+bool gbGameBoy::SaveState(const std::string& filePath)
 {
     // TODO: check if gameboy is running.
     auto fileDirectory = boost::filesystem::path(filePath).parent_path();
@@ -249,13 +249,14 @@ void gbGameBoy::SaveState(const std::string& filePath)
     file.close();
 
     printf("Savestate saved to '%s'\n", filePath.c_str());
+    return true;
 }
 
-void gbGameBoy::LoadState(const std::string& filePath)
+bool gbGameBoy::LoadState(const std::string& filePath)
 {
     if (!boost::filesystem::exists(filePath)) {
         printf("No savestate exists at '%s'\n", filePath.c_str());
-        return;
+        return false;
     }
 
     std::ifstream file(filePath, std::ios::binary);
@@ -265,6 +266,7 @@ void gbGameBoy::LoadState(const std::string& filePath)
     file.close();
     
     printf("Savestate loaded from '%s'\n", filePath.c_str());
+    return true;
 }
 
 gbGameBoy::State::State(const gbGameBoy& g)

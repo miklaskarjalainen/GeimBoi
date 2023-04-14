@@ -71,8 +71,8 @@ namespace GeimBoi
             gbZ80::State CpuState;
         };
 
-        void SaveState(const std::string& filePath);
-        void LoadState(const std::string& filePath);
+        bool SaveState(const std::string& filePath);
+        bool LoadState(const std::string& filePath);
 
     public:
         gbAPU  mApu;
