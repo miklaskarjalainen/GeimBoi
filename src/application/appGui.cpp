@@ -295,9 +295,9 @@ void appGui::DrawOptions()
         {
             ImGui::Text("Volume: ");
             ImGui::SameLine();
-            if (ImGui::SliderFloat("##", &appSettings::master_volume, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_NoRoundToFormat))
+            if (ImGui::SliderFloat("##", &appSettings::general.master_volume, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_NoRoundToFormat))
             {
-                mGameBoy->mApu.masterVolume = appSettings::master_volume;
+                mGameBoy->mApu.masterVolume = appSettings::general.master_volume;
             }
             break;
         }
@@ -663,7 +663,7 @@ void appGui::DrawInfo()
 void appGui::OpenRomDialog()
 {
     // File open
-    std::string path = appSettings::lastrom_path;
+    std::string path = appSettings::general.lastrom_path;
     auto f = pfd::open_file("Open rom", path,
                             { "GB(C) Roms", "*.gb *.gbc",
                             "All Files", "*" },
@@ -677,7 +677,7 @@ void appGui::OpenRomDialog()
         {
             const std::string file_name = mGameBoy->mCart.GetGameName() + ".sav";
             mGameBoy->mCart.LoadBattery(file_name);
-            appSettings::lastrom_path = f.result()[0];
+            appSettings::general.lastrom_path = f.result()[0];
         }
     }
 }

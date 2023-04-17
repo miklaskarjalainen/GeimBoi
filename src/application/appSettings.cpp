@@ -6,8 +6,7 @@
 using namespace GeimBoi;
 using namespace boost::property_tree;
 
-float appSettings::master_volume = 0.30f;
-std::string appSettings::lastrom_path = "";
+appSettings::General appSettings::general = {};
 appSettings::Window appSettings::window = {};
 appSettings::Controls appSettings::controls = {};
 appSettings::Hotkeys appSettings::hotkeys = {};
@@ -20,89 +19,95 @@ void appSettings::Load(const std::string& path)
     ptree file;
     ini_parser::read_ini(path, file);
 
-    // get fields
-    master_volume = file.get<float>("general.master_volume", master_volume);
-    lastrom_path  = file.get<std::string>("general.lastrom_path", lastrom_path);
+#define LOAD_FROM_INI(type, setting) \
+    setting = file.get<type>(#setting, setting)
 
-    window.width  = file.get<uint16_t>("window.width" , window.width);
-    window.height = file.get<uint16_t>("window.height" , window.height);
+    // get fields
+    LOAD_FROM_INI(float      , general.master_volume);
+    LOAD_FROM_INI(std::string, general.lastrom_path);
+
+    LOAD_FROM_INI(uint16_t, window.width);
+    LOAD_FROM_INI(uint16_t, window.height);
 
     // controls
-    controls.up    = file.get<uint16_t>("controls.up"   , controls.up); 
-    controls.down  = file.get<uint16_t>("controls.down" , controls.down); 
-    controls.right = file.get<uint16_t>("controls.right", controls.right); 
-    controls.left  = file.get<uint16_t>("controls.left" , controls.left); 
-    controls.start = file.get<uint16_t>("controls.start" , controls.start); 
-    controls.select= file.get<uint16_t>("controls.select", controls.select); 
-    controls.a  = file.get<uint16_t>("controls.a" , controls.a); 
-    controls.b  = file.get<uint16_t>("controls.b" , controls.b); 
+    LOAD_FROM_INI(uint16_t, controls.up);
+    LOAD_FROM_INI(uint16_t, controls.down);
+    LOAD_FROM_INI(uint16_t, controls.left);
+    LOAD_FROM_INI(uint16_t, controls.right);
+    LOAD_FROM_INI(uint16_t, controls.start);
+    LOAD_FROM_INI(uint16_t, controls.select);
+    LOAD_FROM_INI(uint16_t, controls.a);
+    LOAD_FROM_INI(uint16_t, controls.b);
     
     // hotkeys
-    hotkeys.load_state1 = file.get<uint16_t>("hotkeys.load_state1", hotkeys.load_state1);
-    hotkeys.load_state2 = file.get<uint16_t>("hotkeys.load_state2", hotkeys.load_state2);
-    hotkeys.load_state3 = file.get<uint16_t>("hotkeys.load_state3", hotkeys.load_state3);
-    hotkeys.load_state4 = file.get<uint16_t>("hotkeys.load_state4", hotkeys.load_state4);
-    hotkeys.load_state5 = file.get<uint16_t>("hotkeys.load_state5", hotkeys.load_state5);
-    hotkeys.load_state6 = file.get<uint16_t>("hotkeys.load_state6", hotkeys.load_state6);
-    hotkeys.load_state7 = file.get<uint16_t>("hotkeys.load_state7", hotkeys.load_state7);
-    hotkeys.load_state8 = file.get<uint16_t>("hotkeys.load_state8", hotkeys.load_state8);
-    hotkeys.load_state9 = file.get<uint16_t>("hotkeys.load_state9", hotkeys.load_state9);
-    hotkeys.save_state1 = file.get<uint16_t>("hotkeys.save_state1", hotkeys.save_state1);
-    hotkeys.save_state2 = file.get<uint16_t>("hotkeys.save_state2", hotkeys.save_state2);
-    hotkeys.save_state3 = file.get<uint16_t>("hotkeys.save_state3", hotkeys.save_state3);
-    hotkeys.save_state4 = file.get<uint16_t>("hotkeys.save_state4", hotkeys.save_state4);
-    hotkeys.save_state5 = file.get<uint16_t>("hotkeys.save_state5", hotkeys.save_state5);
-    hotkeys.save_state6 = file.get<uint16_t>("hotkeys.save_state6", hotkeys.save_state6);
-    hotkeys.save_state7 = file.get<uint16_t>("hotkeys.save_state7", hotkeys.save_state7);
-    hotkeys.save_state8 = file.get<uint16_t>("hotkeys.save_state8", hotkeys.save_state8);
-    hotkeys.save_state9 = file.get<uint16_t>("hotkeys.save_state9", hotkeys.save_state9);
+    LOAD_FROM_INI(uint16_t, hotkeys.load_state1);
+    LOAD_FROM_INI(uint16_t, hotkeys.load_state2);
+    LOAD_FROM_INI(uint16_t, hotkeys.load_state3);
+    LOAD_FROM_INI(uint16_t, hotkeys.load_state4);
+    LOAD_FROM_INI(uint16_t, hotkeys.load_state5);
+    LOAD_FROM_INI(uint16_t, hotkeys.load_state6);
+    LOAD_FROM_INI(uint16_t, hotkeys.load_state7);
+    LOAD_FROM_INI(uint16_t, hotkeys.load_state8);
+    LOAD_FROM_INI(uint16_t, hotkeys.load_state9);
+    LOAD_FROM_INI(uint16_t, hotkeys.save_state1);
+    LOAD_FROM_INI(uint16_t, hotkeys.save_state2);
+    LOAD_FROM_INI(uint16_t, hotkeys.save_state3);
+    LOAD_FROM_INI(uint16_t, hotkeys.save_state4);
+    LOAD_FROM_INI(uint16_t, hotkeys.save_state5);
+    LOAD_FROM_INI(uint16_t, hotkeys.save_state6);
+    LOAD_FROM_INI(uint16_t, hotkeys.save_state7);
+    LOAD_FROM_INI(uint16_t, hotkeys.save_state8);
+    LOAD_FROM_INI(uint16_t, hotkeys.save_state9);
 
     printf("%s loaded succesfully!\n", path.c_str());
 }
 
 void appSettings::Save(const std::string& path)
 {
-    ptree iniFile;
+    ptree file;
     
-    // set fields
-    iniFile.add("general.master_volume", master_volume);
-    iniFile.add("general.lastrom_path", lastrom_path);
+#define SAVE_TO_INI(setting) \
+    file.add(#setting, setting)
 
-    iniFile.add("window.width" , window.width);
-    iniFile.add("window.height", window.height);
+    // set fields
+    SAVE_TO_INI(general.master_volume);
+    SAVE_TO_INI(general.lastrom_path);
+
+    SAVE_TO_INI(window.width);
+    SAVE_TO_INI(window.height);
 
     // controls
-    iniFile.add("controls.up"   , controls.up);
-    iniFile.add("controls.down" , controls.down);
-    iniFile.add("controls.right", controls.right);
-    iniFile.add("controls.left" , controls.left);
-    iniFile.add("controls.start" , controls.start);
-    iniFile.add("controls.select", controls.select);
-    iniFile.add("controls.a" , controls.a);
-    iniFile.add("controls.b" , controls.b);
+    SAVE_TO_INI(controls.up);
+    SAVE_TO_INI(controls.down);
+    SAVE_TO_INI(controls.right);
+    SAVE_TO_INI(controls.left);
+    SAVE_TO_INI(controls.start);
+    SAVE_TO_INI(controls.select);
+    SAVE_TO_INI(controls.a);
+    SAVE_TO_INI(controls.b);
     
     // hotkeys
-    iniFile.add("hotkeys.load_state1", hotkeys.load_state1);
-    iniFile.add("hotkeys.load_state2", hotkeys.load_state2);
-    iniFile.add("hotkeys.load_state3", hotkeys.load_state3);
-    iniFile.add("hotkeys.load_state4", hotkeys.load_state4);
-    iniFile.add("hotkeys.load_state5", hotkeys.load_state5);
-    iniFile.add("hotkeys.load_state6", hotkeys.load_state6);
-    iniFile.add("hotkeys.load_state7", hotkeys.load_state7);
-    iniFile.add("hotkeys.load_state8", hotkeys.load_state8);
-    iniFile.add("hotkeys.load_state9", hotkeys.load_state9);
-    iniFile.add("hotkeys.save_state1", hotkeys.save_state1);
-    iniFile.add("hotkeys.save_state2", hotkeys.save_state2);
-    iniFile.add("hotkeys.save_state3", hotkeys.save_state3);
-    iniFile.add("hotkeys.save_state4", hotkeys.save_state4);
-    iniFile.add("hotkeys.save_state5", hotkeys.save_state5);
-    iniFile.add("hotkeys.save_state6", hotkeys.save_state6);
-    iniFile.add("hotkeys.save_state7", hotkeys.save_state7);
-    iniFile.add("hotkeys.save_state8", hotkeys.save_state8);
-    iniFile.add("hotkeys.save_state9", hotkeys.save_state9);
+    SAVE_TO_INI(hotkeys.load_state1);
+    SAVE_TO_INI(hotkeys.load_state2);
+    SAVE_TO_INI(hotkeys.load_state3);
+    SAVE_TO_INI(hotkeys.load_state4);
+    SAVE_TO_INI(hotkeys.load_state5);
+    SAVE_TO_INI(hotkeys.load_state6);
+    SAVE_TO_INI(hotkeys.load_state7);
+    SAVE_TO_INI(hotkeys.load_state8);
+    SAVE_TO_INI(hotkeys.load_state9);
+    SAVE_TO_INI(hotkeys.save_state1);
+    SAVE_TO_INI(hotkeys.save_state2);
+    SAVE_TO_INI(hotkeys.save_state3);
+    SAVE_TO_INI(hotkeys.save_state4);
+    SAVE_TO_INI(hotkeys.save_state5);
+    SAVE_TO_INI(hotkeys.save_state6);
+    SAVE_TO_INI(hotkeys.save_state7);
+    SAVE_TO_INI(hotkeys.save_state8);
+    SAVE_TO_INI(hotkeys.save_state9);
     
     // save file
-    write_ini(path, iniFile);    
+    write_ini(path, file);    
 
     printf("%s was saved succesfully!\n", path.c_str());
 }

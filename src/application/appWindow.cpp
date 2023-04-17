@@ -47,7 +47,7 @@ appWindow::appWindow(const char* openRom)
     mGameBoy = std::make_shared<gbGameBoy>();
     mGameBoy->SetPalette(0x9bbc0f, 0x8bac0f, 0x306230, 0x0f380f);
     mGameBoy->LoadBios("gb_bios.bin");
-    mGameBoy->mApu.masterVolume = appSettings::master_volume;
+    mGameBoy->mApu.masterVolume = appSettings::general.master_volume;
     if (openRom)
         mGameBoy->LoadRom(openRom);
     

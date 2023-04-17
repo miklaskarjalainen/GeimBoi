@@ -7,8 +7,10 @@ namespace GeimBoi
 {
     class appSettings {
     public:
-        static std::string lastrom_path;
-        static float master_volume;
+        static struct General {
+            std::string lastrom_path = "";
+            float master_volume = 0.3f;
+        } general;
 
         static struct Window {
             uint16_t width = SCREEN_WIDTH*2;
