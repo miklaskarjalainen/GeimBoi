@@ -9,6 +9,8 @@ using namespace GeimBoi;
 void LuaApi::OpenLibs(luaScript* script)
 {
     script->AddFunction(LuaApi::print, "print");
+    script->AddFunction(LuaApi::push_error, "push_error");
+    script->AddFunction(LuaApi::push_warning, "push_warning");
     
     // emu
     script->AddFunction(apiEmu::reset, "reset", "emu");

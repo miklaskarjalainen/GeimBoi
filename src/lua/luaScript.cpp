@@ -48,6 +48,14 @@ namespace GeimBoi
         if (mState == nullptr)
             return;
         lua_getglobal(mState, "on_update");
+        if (!lua_isfunction(mState, -1)) {
+            lua_pop(mState, 1);
+            lua_getglobal(mState, "push_warning");
+            lua_pushstring(mState, "There's is no 'on_update' function! Stopping...");
+            lua_pcall(mState, 1, 0, 0);
+            Stop();
+            return;
+        }
         CheckResult(lua_pcall(mState, 0, 0, 0));
     }
 
@@ -75,7 +83,10 @@ namespace GeimBoi
         if (r)
         {
             const char* msg = lua_gettop(mState) > 0 ? lua_tostring(mState, -1) : "an error occurred";
-            printf("\033[0;31m[Lua] %s\n\033[0m", msg);
+            lua_pop(mState, 1);
+            lua_getglobal(mState, "push_error");
+            lua_pushstring(mState, msg);
+            lua_pcall(mState, 1, 0, 0);
             Stop();
         }
     }
