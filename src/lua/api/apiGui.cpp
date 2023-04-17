@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <lua/lua.hpp>
+#include <lua.hpp>
 #include "apiGui.hpp"
 #include "../../application/imgui/imgui.h"
 

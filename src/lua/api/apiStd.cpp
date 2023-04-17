@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <lua/lua.hpp>
+#include <lua.hpp>
 #include "apiStd.hpp"
 
 using namespace GeimBoi;
