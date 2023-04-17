@@ -151,8 +151,6 @@ void appGui::DrawTopbar()
 
 void appGui::DrawOptions()
 {
-    ImGui::ShowDemoWindow(nullptr);
-
     if (!mDrawOptions)
         return;
 
