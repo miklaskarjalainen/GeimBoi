@@ -97,9 +97,8 @@ void appGui::Draw()
 
 #ifdef LUA_SCRIPTING
     DrawScripts();
-    for (size_t i = 0; i < mLuaScripts.size(); i++)
-    {
-        mLuaScripts[i].Update();
+    for (auto& luaScript : mLuaScripts) {
+        luaScript.Update();
     }
 #endif
 }
@@ -702,11 +701,11 @@ void appGui::DrawScripts()
         if (ImGui::CollapsingHeader(i.FileName.c_str()))
         {
             // Start / Stop button
-            std::string btnName = i.Stopped ? "Start" : "Stop";
+            std::string btnName = i.IsStopped() ? "Start" : "Stop";
             btnName += "##" + i.FileName;
             if (ImGui::Button(btnName.c_str(), BtnSize))
             {
-                i.Stopped ? i.Start() : i.Stop();
+                i.IsStopped() ? i.Start() : i.Stop();
             }
             
 

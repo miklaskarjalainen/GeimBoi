@@ -21,10 +21,10 @@ namespace GeimBoi
         void Update();
         // if table is nullptr then the function will be in global scope, table is used like a namespace.
         void AddFunction(lua_CFunction func, const char* name, const char* table = nullptr);
+        inline bool IsStopped() const { return mState == nullptr; }
 
         std::string FileName;
         std::string FilePath;
-        bool Stopped = true;
     private:
         void CheckResult(bool r);
 
