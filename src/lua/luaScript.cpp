@@ -23,8 +23,9 @@ namespace GeimBoi
 
     luaScript::~luaScript()
     {
-        if (mState)
+        if (mState) {
             lua_close(mState);
+        }
     }
 
     void luaScript::Start()
@@ -41,8 +42,10 @@ namespace GeimBoi
     void luaScript::Stop()
     {
         assert(Stopped == false);
-        if (mState)
+        if (mState) {
             lua_close(mState);
+            mState = nullptr;
+        }
         Stopped = true;
     }
 
