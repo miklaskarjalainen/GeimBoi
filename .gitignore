@@ -52,7 +52,4 @@ roms/
 *.bin
 *.inc
 *.sav
-
-# Lua
-./lua/
-*.lua
+*.st

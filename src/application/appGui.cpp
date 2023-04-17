@@ -15,13 +15,11 @@
 using namespace GeimBoi;
  
 static SDL_Window* sWindow = nullptr;
-std::shared_ptr<gbGameBoy> gGameBoy = nullptr;
 
 appGui::appGui(SDL_Window* window, void* context, std::shared_ptr<gbGameBoy>& emulator)
 {
     sWindow = window;
     mGameBoy = emulator;
-    gGameBoy = mGameBoy;
     ImGui::CreateContext();
 
     // Color scheme
@@ -68,11 +66,6 @@ appGui::appGui(SDL_Window* window, void* context, std::shared_ptr<gbGameBoy>& em
 
     ImGui_ImplSDL2_InitForOpenGL(window, context);
     ImGui_ImplOpenGL2_Init();
-
-    // Init lua script
-#ifdef LUA_SCRIPTING
-    ReloadScripts();
-#endif
 }
 
 appGui::~appGui()
@@ -94,14 +87,6 @@ void appGui::Draw()
     DrawAuthors();
     DrawLicences();
     DrawInfo();
-
-#ifdef LUA_SCRIPTING
-    DrawScripts();
-    for (size_t i = 0; i < mLuaScripts.size(); i++)
-    {
-        mLuaScripts[i].Update();
-    }
-#endif
 }
 
 void appGui::Render()
@@ -144,10 +129,6 @@ void appGui::DrawTopbar()
         {
             if (ImGui::MenuItem("Options"))
                 mDrawOptions = !mDrawOptions;
-        #ifdef LUA_SCRIPTING
-            if (ImGui::MenuItem("Scripts"))
-                mDrawScripts = !mDrawScripts;
-        #endif
             ImGui::Checkbox("Pause", &mGameBoy->Paused);
             ImGui::Checkbox("Show Debug", &mDrawDebug);
             
@@ -679,72 +660,6 @@ void appGui::DrawInfo()
     ImGui::Text("ImGui Ver: %s", IMGUI_VERSION);
     ImGui::End();   
 }
-
-#ifdef LUA_SCRIPTING
-#include <boost/filesystem.hpp>
-#include <boost/range/iterator_range.hpp>
-
-void appGui::DrawScripts()
-{
-    if (!mDrawScripts)
-        return;
-    ImGui::Begin("Lua Scripts", &mDrawScripts,
-        ImGuiWindowFlags_NoCollapse | 
-        ImGuiWindowFlags_NoDocking  |
-        ImGuiWindowFlags_NoResize   |
-        ImGuiWindowFlags_NoSavedSettings
-    );
-    ImGui::SetWindowSize(ImVec2(320, 420));
-
-    const ImVec2 BtnSize = ImVec2(48, 19);
-    for (auto& i : mLuaScripts)
-    {
-        if (ImGui::CollapsingHeader(i.FileName.c_str()))
-        {
-            // Start / Stop button
-            std::string btnName = i.Stopped ? "Start" : "Stop";
-            btnName += "##" + i.FileName;
-            if (ImGui::Button(btnName.c_str(), BtnSize))
-            {
-                i.Stopped ? i.Start() : i.Stop();
-            }
-            
-
-            ImGui::SameLine();
-            if (ImGui::Button((std::string("Edit##")+i.FileName).c_str(), BtnSize))
-            {
-                //TODO: find a crossplatform solution this only works on  linux atm.
-                system((std::string("xdg-open ") + i.FilePath).c_str());
-            }
-            
-            //TODO: Make a console which is in the ui.
-        }
-    }
-
-    ImGui::End();
-}
-
-void appGui::ReloadScripts()
-{
-    mLuaScripts.clear();
-
-    using namespace boost::filesystem;
-    if (!is_directory("./lua"))
-    {
-        if (!create_directory("./lua/"))
-        {
-            printf("Couldn't create ./lua directory!");
-            exit(-1);
-        }
-        printf("Directory ./lua created!\n");
-    }
-
-    for(auto& entry : boost::make_iterator_range(directory_iterator("./lua"), {}))
-    {
-        mLuaScripts.emplace_back(entry.path());
-    }
-}
-#endif
 
 void appGui::OpenRomDialog()
 {
