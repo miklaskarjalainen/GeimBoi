@@ -276,6 +276,7 @@ void appGui::DrawOptions()
                 rebindButton("SaveState7", appSettings::hotkeys.save_state7),
                 rebindButton("SaveState8", appSettings::hotkeys.save_state8),
                 rebindButton("SaveState9", appSettings::hotkeys.save_state9),
+                rebindButton("Hard Reset", appSettings::hotkeys.hard_reset),
             };
 
             ImGui::NewLine();

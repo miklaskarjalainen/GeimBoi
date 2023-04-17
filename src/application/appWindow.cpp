@@ -201,7 +201,7 @@ void appWindow::DoEvents()
                 if (key == appSettings::controls.b)      { mGameBoy->PressButton(gbButton::B);      break; }
                 if (key == appSettings::controls.start)  { mGameBoy->PressButton(gbButton::START); break; }
                 if (key == appSettings::controls.select) { mGameBoy->PressButton(gbButton::SELECT);  break; }
-                if (io.KeyShift && key == SDL_SCANCODE_R) { mGameBoy->Reset(); break; }
+                if (key == appSettings::hotkeys.hard_reset) { mGameBoy->Reset(); break; }
 
                 // Loading states
                 if (key == appSettings::hotkeys.load_state1) { mGameBoy->LoadState("./states/state1.st"); break; }
