@@ -2,6 +2,11 @@
 #include <memory>
 #include "../core/gbGameBoy.hpp"
 
+#ifdef LUA_SCRIPTING
+	#include <vector>
+	#include "../lua/luaScript.hpp"
+#endif
+
 namespace GeimBoi
 {
 
@@ -31,6 +36,13 @@ private:
 	bool mDrawAuthors = false;
 	bool mDrawLicences = false;
 	bool mDrawInfo = false;
+
+#ifdef LUA_SCRIPTING
+	void DrawScripts();
+	void ReloadScripts();
+	bool mDrawScripts = false;
+	std::vector<luaScript> mLuaScripts = {};
+#endif
 };
 
 } // Namespace
