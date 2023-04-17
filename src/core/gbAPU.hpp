@@ -2,6 +2,7 @@
 #include <cstdint>
 #include "apu/apuChannel1.hpp"
 #include "apu/apuChannel2.hpp"
+#include "apu/apuChannel3.hpp"
 
 #define CPU_CYCLES_PER_FRAME 70221
 
@@ -24,6 +25,7 @@ namespace GeimBoi
         float masterVolume = 1.0f;
         apuChannel1 channel1;
         apuChannel2 channel2;
+        apuChannel3 channel3;
     private:
         uint32_t mSequenceCounter = 0;
         double timeElapsed = 0.0;

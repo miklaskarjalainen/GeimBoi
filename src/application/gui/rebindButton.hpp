@@ -5,6 +5,7 @@
 
 namespace GeimBoi
 {
+    // TODO: modifiers
     class rebindButton {
     public:
         rebindButton(const char* button_text, uint16_t& button_setting);

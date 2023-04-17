@@ -9,7 +9,7 @@ static const uint16_t samples = 256;
 static SDL_AudioSpec spec;
 
 gbAPU::gbAPU(gbGameBoy* emu)
-    : channel1(emu), channel2(emu),  mGameBoy(emu)
+    : channel1(emu), channel2(emu), channel3(emu),  mGameBoy(emu)
 {
     SDL_InitSubSystem(SDL_INIT_AUDIO);
 
@@ -41,6 +41,7 @@ void gbAPU::Reset()
 {
     channel1.Restart();
     channel2.Restart();
+    channel3.Restart();
 }
 
 void gbAPU::UpdateTimers(uint16_t cycles) 
@@ -49,12 +50,14 @@ void gbAPU::UpdateTimers(uint16_t cycles)
     const uint32_t end_time = mSequenceCounter + cycles;
     while (mSequenceCounter != end_time)
     {
+        channel3.Clock();
         mSequenceCounter++;
         // 256hz
         if ((mSequenceCounter % 16458) == 0)
         {
             channel1.ClockLength();
             channel2.ClockLength();
+            channel3.ClockLength();
         }
         // 128hz
         if ((mSequenceCounter % 32916) == 0)
@@ -100,6 +103,15 @@ void gbAPU::sdl2_callback(void* userdata, uint8_t *stream, int len)
     }
     SDL_MixAudio(stream, reinterpret_cast<uint8_t*>(buffer), len, SDL_MIX_MAXVOLUME);
 
+    // Channel 3
+    memset(&buffer, 0, sizeof(buffer));
+    for(int i = 0; i < samples; i++)
+    {
+        const double dt = audio->timeElapsed + ((1.0f / 44100.0)*i);
+        buffer[i] = (float)audio->channel3.GetAmplitude(dt) * Volume;
+    }
+    //SDL_MixAudio(stream, reinterpret_cast<uint8_t*>(buffer), len, SDL_MIX_MAXVOLUME);
+
     audio->timeElapsed += (1.0f / 44100.0) * samples;
 }
 
@@ -112,6 +124,10 @@ void gbAPU::WriteByte(uint16_t addr, uint8_t data)
     else if (addr == 0xFF16 || addr == 0xFF17 || addr == 0xFF18 || addr == 0xFF19)
     {
         channel2.WriteByte(addr, data);
+    }
+    else if (addr == 0xFF1A || addr == 0xFF1B || addr == 0xFF1C || addr == 0xFF1D || addr == 0xFF1E)
+    {
+        channel3.WriteByte(addr, data);
     }
 }
 

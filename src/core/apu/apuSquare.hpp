@@ -19,7 +19,7 @@ namespace GeimBoi
         void WriteByte(uint16_t addr, uint8_t data);
         void ClockEnvelope();
         void ClockLength();
-        double GetAmplitude(double time);
+        double GetAmplitude(double time) const;
     
     protected:
         bool mEnabled = true;

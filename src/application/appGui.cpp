@@ -187,6 +187,7 @@ void appGui::DrawOptions()
     enum class Tab
     {
         Binds,
+        Hotkeys,
         Audio,
         Palette,
         COUNT
@@ -196,10 +197,10 @@ void appGui::DrawOptions()
     {
         const int ColumnWidth = 140;
         ImGui::SetColumnOffset(1, ColumnWidth);
-        const ImVec2 ButtonSize = { ColumnWidth - (style->WindowPadding.x * 2), 32 };
+        const ImVec2 ButtonSize = { ColumnWidth - (style->WindowPadding.x * 2), 24 };
 
         static const ImColor ActivatedColor = style->Colors[ImGuiCol_ButtonHovered];
-        static const char* Buttons[] = {"Binds", "Audio", "Palette"};
+        static const char* Buttons[] = {"Binds", "Hotkeys", "Audio", "Palette"};
         for (int i = 0; i < static_cast<int>(Tab::COUNT); i++)
         {
             const Tab TabIdx = static_cast<Tab>(i);
@@ -272,13 +273,51 @@ void appGui::DrawOptions()
             buttons[7].Draw(ActionButtonSize);
             break;
         }
+        case Tab::Hotkeys:
+        {
+            static std::vector<rebindButton> buttons = {
+                // states
+                rebindButton("LoadState1", appSettings::hotkeys.load_state1),
+                rebindButton("LoadState2", appSettings::hotkeys.load_state2),
+                rebindButton("LoadState3", appSettings::hotkeys.load_state3),
+                rebindButton("LoadState4", appSettings::hotkeys.load_state4),
+                rebindButton("LoadState5", appSettings::hotkeys.load_state5),
+                rebindButton("LoadState6", appSettings::hotkeys.load_state6),
+                rebindButton("LoadState7", appSettings::hotkeys.load_state7),
+                rebindButton("LoadState8", appSettings::hotkeys.load_state8),
+                rebindButton("LoadState9", appSettings::hotkeys.load_state9),
+                rebindButton("SaveState1", appSettings::hotkeys.save_state1),
+                rebindButton("SaveState2", appSettings::hotkeys.save_state2),
+                rebindButton("SaveState3", appSettings::hotkeys.save_state3),
+                rebindButton("SaveState4", appSettings::hotkeys.save_state4),
+                rebindButton("SaveState5", appSettings::hotkeys.save_state5),
+                rebindButton("SaveState6", appSettings::hotkeys.save_state6),
+                rebindButton("SaveState7", appSettings::hotkeys.save_state7),
+                rebindButton("SaveState8", appSettings::hotkeys.save_state8),
+                rebindButton("SaveState9", appSettings::hotkeys.save_state9),
+                rebindButton("Hard Reset", appSettings::hotkeys.hard_reset),
+            };
+
+            ImGui::NewLine();
+
+            ImGui::SetCursorPosY(24);
+            const ImVec2 ListBoxSize = ImGui::GetContentRegionAvail();
+            const ImVec2 ButtonSize = ImVec2(ListBoxSize.x, 18);
+
+            ImGui::BeginListBox("##hotkeylist", ListBoxSize);
+            for (int i = 0; i < buttons.size(); i++) {
+                buttons[i].Draw(ButtonSize);
+            }
+            ImGui::EndListBox();
+            break;
+        }
         case Tab::Audio:
         {
             ImGui::Text("Volume: ");
             ImGui::SameLine();
-            if (ImGui::SliderFloat("##", &appSettings::master_volume, 0.0f, 1.0f, "%.1f", ImGuiSliderFlags_NoRoundToFormat))
+            if (ImGui::SliderFloat("##", &appSettings::general.master_volume, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_NoRoundToFormat))
             {
-                mGameBoy->mApu.masterVolume = appSettings::master_volume;
+                mGameBoy->mApu.masterVolume = appSettings::general.master_volume;
             }
             break;
         }
@@ -710,7 +749,7 @@ void appGui::ReloadScripts()
 void appGui::OpenRomDialog()
 {
     // File open
-    std::string path = appSettings::lastrom_path;
+    std::string path = appSettings::general.lastrom_path;
     auto f = pfd::open_file("Open rom", path,
                             { "GB(C) Roms", "*.gb *.gbc",
                             "All Files", "*" },
@@ -724,7 +763,7 @@ void appGui::OpenRomDialog()
         {
             const std::string file_name = mGameBoy->mCart.GetGameName() + ".sav";
             mGameBoy->mCart.LoadBattery(file_name);
-            appSettings::lastrom_path = f.result()[0];
+            appSettings::general.lastrom_path = f.result()[0];
         }
     }
 }

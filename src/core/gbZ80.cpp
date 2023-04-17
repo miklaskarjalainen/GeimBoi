@@ -158,3 +158,27 @@ void gbZ80::Reset()
     mRegPC.val = mGameBoy->mBootRom.IsBiosLoaded() ? 0x0000 : 0x0100;
     mRegSP.val = 0xFFFE;
 }
+
+gbZ80::State::State(const gbZ80& c)
+    : RegAF(c.mRegAF), RegBC(c.mRegBC), RegDE(c.mRegDE), RegHL(c.mRegHL), RegSP(c.mRegSP), RegPC(c.mRegPC),
+    IsHalted(c.mIsHalted), EnableInterrupts(c.mEnableInterrupts), 
+    CounterFreq(c.mCounterFreq), DividerCounter(c.mDividerCounter), TimerCounter(c.mTimerCounter), CyclesDone(c.mCyclesDone)
+{}
+
+void gbZ80::State::Load(gbZ80& c)
+{
+    c.mRegAF = RegAF;
+    c.mRegBC = RegBC;
+    c.mRegDE = RegDE;
+    c.mRegHL = RegHL;
+    c.mRegSP = RegSP;
+    c.mRegPC = RegPC;
+
+    c.mIsHalted = IsHalted; 
+    c.mEnableInterrupts = EnableInterrupts; 
+
+    c.mCounterFreq = CounterFreq; 
+    c.mDividerCounter = DividerCounter; 
+    c.mTimerCounter = TimerCounter; 
+    c.mCyclesDone = CyclesDone; 
+}

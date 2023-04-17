@@ -1,6 +1,7 @@
 #include <cstring>
 #include <string>
-#include <filesystem>
+#include <fstream>
+#include <boost/filesystem.hpp>
 #include "gbGameBoy.hpp"
 
 using namespace GeimBoi;
@@ -203,6 +204,10 @@ void gbGameBoy::WriteByte(uint16_t addr, uint8_t data)
     {
         mApu.WriteByte(addr, data);
     }
+    else if (addr == 0xFF1A || addr == 0xFF1B || addr == 0xFF1C || addr == 0xFF1D || addr == 0xFF1E) // Api (channel3)
+    {
+        mApu.WriteByte(addr, data);
+    }
     else if ( addr == 0xFF40 ) // Control
     {
         bool lcd_enabled  = (mRom[0xFF40] >> 7) & 1;
@@ -230,4 +235,48 @@ void gbGameBoy::WriteByte(uint16_t addr, uint8_t data)
     {
         mRom[addr] = data;
     }
+}
+
+bool gbGameBoy::SaveState(const std::string& filePath)
+{
+    // TODO: check if gameboy is running.
+    auto fileDirectory = boost::filesystem::path(filePath).parent_path();
+    boost::filesystem::create_directories(fileDirectory);
+
+    std::ofstream file(filePath, std::ios::binary);
+    State state(*this);
+    file.write((char*)&state, sizeof(State));
+    file.close();
+
+    printf("Savestate saved to '%s'\n", filePath.c_str());
+    return true;
+}
+
+bool gbGameBoy::LoadState(const std::string& filePath)
+{
+    if (!boost::filesystem::exists(filePath)) {
+        printf("No savestate exists at '%s'\n", filePath.c_str());
+        return false;
+    }
+
+    std::ifstream file(filePath, std::ios::binary);
+    State state;
+    file.read((char*)&state, sizeof(State));
+    state.Load(*this);
+    file.close();
+    
+    printf("Savestate loaded from '%s'\n", filePath.c_str());
+    return true;
+}
+
+gbGameBoy::State::State(const gbGameBoy& g)
+    : CpuState(g.mCpu) 
+{
+    memcpy(&Memory, &g.mRom, sizeof(Memory));
+}
+
+void gbGameBoy::State::Load(gbGameBoy& g)
+{
+    memcpy(&g.mRom, &Memory, sizeof(Memory));
+    CpuState.Load(g.mCpu);
 }

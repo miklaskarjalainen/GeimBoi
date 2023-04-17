@@ -58,6 +58,22 @@ namespace GeimBoi
             return mBootRom.IsBiosLoaded();
         }
 
+        struct State
+        {
+            State() = default;
+            State(const gbGameBoy&);
+            State(const State&) = default;
+            State(State&&) = default;
+            ~State() = default;
+            void Load(gbGameBoy&);
+
+            uint8_t Memory[0x10000] = {};
+            gbZ80::State CpuState;
+        };
+
+        bool SaveState(const std::string& filePath);
+        bool LoadState(const std::string& filePath);
+
     public:
         gbAPU  mApu;
         gbBootRom mBootRom;
@@ -67,7 +83,7 @@ namespace GeimBoi
 
         // TODO: make private, for the time being here.
         void WriteByte(uint16_t addr, uint8_t data);
-        uint8_t mRom[0x10000];
+        uint8_t mRom[0x10000]; //! bad name, this is the whole accessible memory of the gameboy
     private:
         uint8_t mBtsPressed = 0x00; // 0 = pressed
 
