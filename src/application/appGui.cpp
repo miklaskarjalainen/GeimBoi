@@ -683,6 +683,12 @@ void appGui::DrawInfo()
 #include <boost/filesystem.hpp>
 #include <boost/range/iterator_range.hpp>
 
+#ifdef _WIN32
+    #include <iostream>
+    #include <windows.h>
+    #include <shellapi.h>
+#endif
+
 void appGui::DrawScripts()
 {
     if (!mDrawScripts)
@@ -712,8 +718,23 @@ void appGui::DrawScripts()
             ImGui::SameLine();
             if (ImGui::Button((std::string("Edit##")+i.FileName).c_str(), BtnSize))
             {
-                //TODO: find a crossplatform solution this only works on  linux atm.
-                system((std::string("xdg-open ") + i.FilePath).c_str());
+                // If edit button was pressed open the file in the default text editor assigned.
+                #ifdef __linux__
+                    system((std::string("xdg-open ") + i.FilePath).c_str());
+                #elif _WIN32
+                    HINSTANCE result = ShellExecute(
+                        NULL,
+                        "open",
+                        i.FilePath.c_str(),   
+                        NULL,
+                        NULL,
+                        SW_SHOW
+                    );
+                #elif __APPLE || __MACH__
+                    #error L_APPLE_USER
+                #else
+                    #error PLATFORM_NOT_SUPPORTED
+                #endif
             }
             
             //TODO: Make a console which is in the ui.
