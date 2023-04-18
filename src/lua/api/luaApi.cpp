@@ -14,6 +14,7 @@ void LuaApi::OpenLibs(luaScript* script)
     
     // emu
     script->AddFunction(apiEmu::reset, "reset", "emu");
+    script->AddFunction(apiEmu::frameadvance, "frameadvance", "emu");
     script->AddFunction(apiEmu::set_pause, "set_pause", "emu");
     script->AddFunction(apiEmu::is_paused, "is_paused", "emu");
     script->AddFunction(apiEmu::read_byte, "read_byte", "emu");

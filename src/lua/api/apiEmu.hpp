@@ -7,6 +7,7 @@ namespace GeimBoi
     namespace apiEmu
     {
         int reset(lua_State* state);     // () -> void
+        int frameadvance(lua_State*);    // () -> void
         int set_pause(lua_State* state); // (state: bool) -> void
         int is_paused(lua_State* state); // () -> bool
         int read_byte(lua_State* state); // (addr: u16) -> u8

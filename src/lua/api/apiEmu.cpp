@@ -14,6 +14,12 @@ int apiEmu::reset(lua_State*)
     return 0;
 }
 
+int apiEmu::frameadvance(lua_State*)
+{
+    gGameBoy->FrameAdvance();
+    return 0;
+}
+
 int apiEmu::set_pause(lua_State* state)
 {
     bool s = lua_toboolean(state, -1);
