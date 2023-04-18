@@ -81,7 +81,8 @@ void appWindow::Run()
         // Update
         {
             mGui->Draw();
-            mGameBoy->FrameAdvance();
+            if (!mGameBoy->Paused)
+                mGameBoy->FrameAdvance();
         }
 
 

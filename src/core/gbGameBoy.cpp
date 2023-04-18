@@ -22,7 +22,7 @@ void gbGameBoy::Clock()
 
 void gbGameBoy::FrameAdvance()
 {
-    if (mCart.IsGameLoaded() && !Paused)
+    if (mCart.IsGameLoaded())
     {
         mCpu.FrameAdvance();
     }
