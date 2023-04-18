@@ -3,6 +3,9 @@
 #include <cassert>
 #include <SDL2/SDL.h>
 #include <FileDialogs/FileDialogs.hpp>
+#ifdef LUA_SCRIPTING
+    #include <lua.hpp>
+#endif
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
@@ -539,12 +542,11 @@ void appGui::DrawLicences()
         return;
 
     ImGui::Begin("Licences", &mDrawLicences, 
-        ImGuiWindowFlags_NoResize   | 
         ImGuiWindowFlags_NoCollapse | 
         ImGuiWindowFlags_NoDocking  |
         ImGuiWindowFlags_NoSavedSettings
     );
-    ImGui::SetWindowSize(ImVec2(480, 146));
+    ImGui::SetWindowSize(ImVec2(480, 146), ImGuiCond_Once);
 
     if (ImGui::CollapsingHeader("GeimBoi"))
     {
@@ -647,6 +649,31 @@ void appGui::DrawLicences()
         "ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER"
         "DEALINGS IN THE SOFTWARE.");
     }
+    if (ImGui::CollapsingHeader("LUA"))
+    {
+        ImGui::TextWrapped("Copyright © 1994–2023 Lua.org, PUC-Rio. \n\n"
+
+        "Permission is hereby granted, free of charge, to any person obtaining "
+        "a copy of this software and associated documentation files (the "
+        "\"Software\"), to deal in the Software without restriction, including "
+        "without limitation the rights to use, copy, modify, merge, publish, "
+        "distribute, sublicense, and/or sell copies of the Software, and to permit "
+        "persons to whom the Software is furnished to do so, subject to the "
+        "following conditions: \n\n"
+
+        "The above copyright notice and this permission notice shall be included in all"
+        "copies or substantial portions of the Software. \n\n"
+        
+        "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF "
+        "ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED "
+        "TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A "
+        "PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT"
+        "SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE"
+        "FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN "
+        "AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING "
+        "FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR "
+        "THE USE OR OTHER DEALINGS IN THE SOFTWARE.");
+    }
 
     ImGui::End();   
 }
@@ -670,12 +697,18 @@ void appGui::DrawInfo()
     static const SDL_version SDLVersion = GetSDLVersion();
 
     ImGui::Begin("Info", &mDrawInfo, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoDocking);
-    ImGui::SetWindowSize(ImVec2(190, 132));
+    ImGui::SetWindowSize(ImVec2(190, 145));
     ImGui::TextWrapped("GeimBoi is developed and maintained by giffi-dev");
     ImGui::NewLine();
     ImGui::Text("GeimBoi Ver: %s", GEIMBOI_VERSION);
     ImGui::Text("SDL Ver: %u.%u.%u", SDLVersion.major, SDLVersion.minor, SDLVersion.patch);
     ImGui::Text("ImGui Ver: %s", IMGUI_VERSION);
+#ifdef LUA_SCRIPTING
+    ImGui::Text("LUA Ver: %s", LUA_RELEASE);
+#else
+    ImGui::Text("LUA Ver: %s", "NO LUA SUPPORT");
+#endif
+    
     ImGui::End();   
 }
 
