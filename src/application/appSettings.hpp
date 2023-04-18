@@ -51,6 +51,7 @@ namespace GeimBoi
             uint16_t save_state9 = SDL_SCANCODE_F9;
             // machine
             uint16_t hard_reset = SDL_SCANCODE_R;
+            uint16_t speedup = SDL_SCANCODE_SPACE;
         } hotkeys;
 
         static void Load(const std::string& path);

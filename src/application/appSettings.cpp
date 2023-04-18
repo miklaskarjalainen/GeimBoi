@@ -60,6 +60,7 @@ void appSettings::Load(const std::string& path)
     LOAD_FROM_INI(uint16_t, hotkeys.save_state9);
 
     LOAD_FROM_INI(uint16_t, hotkeys.hard_reset);
+    LOAD_FROM_INI(uint16_t, hotkeys.speedup);
 
     printf("%s loaded succesfully!\n", path.c_str());
 }
@@ -109,6 +110,7 @@ void appSettings::Save(const std::string& path)
     SAVE_TO_INI(hotkeys.save_state9);
     
     SAVE_TO_INI(hotkeys.hard_reset);
+    SAVE_TO_INI(hotkeys.speedup);
 
     // save file
     write_ini(path, file);    

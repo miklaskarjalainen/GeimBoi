@@ -117,8 +117,10 @@ void appWindow::Run()
         {
             // Using delay to target 60fps
             int end_ticks = SDL_GetTicks();
-            if (16 - (end_ticks - start_ticks) > 0)
-                SDL_Delay(16 - (end_ticks - start_ticks));
+            if (!SDL_GetKeyboardState(nullptr)[appSettings::hotkeys.speedup]) {
+                if (16 - (end_ticks - start_ticks) > 0)
+                    SDL_Delay(16 - (end_ticks - start_ticks));
+            }
         }
         SDL_GL_SwapWindow(mWindow);
     }
