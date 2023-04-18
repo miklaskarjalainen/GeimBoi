@@ -74,3 +74,15 @@ int apiEmu::get_button(lua_State* state)
     lua_pushboolean(state, btn_state);
     return 1;
 }
+
+int apiEmu::savestate(lua_State* state) {
+    const char* FilePath = luaL_checkstring(state, -1);
+    gGameBoy->SaveState(FilePath);
+    return 0;
+}
+
+int apiEmu::loadstate(lua_State* state) {
+    const char* FilePath = luaL_checkstring(state, -1);
+    gGameBoy->LoadState(FilePath);
+    return 0;
+}

@@ -16,5 +16,7 @@ namespace GeimBoi
 
         int set_button(lua_State* state); // (btn: int, state: bool)
         int get_button(lua_State* state); // (btn: int) -> bool
+        int savestate(lua_State* state); // (filepath: string) -> void
+        int loadstate(lua_State* state); // (filepath: string) -> void
     }
 }

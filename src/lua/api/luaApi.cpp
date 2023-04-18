@@ -22,6 +22,8 @@ void LuaApi::OpenLibs(luaScript* script)
     script->AddFunction(apiEmu::load_rom, "load_rom", "emu");
     script->AddFunction(apiEmu::set_button, "set_button", "emu");
     script->AddFunction(apiEmu::get_button, "get_button", "emu");
+    script->AddFunction(apiEmu::savestate, "savestate", "emu");
+    script->AddFunction(apiEmu::loadstate, "loadstate", "emu");
 
     // ImGui
     script->AddFunction(apiGui::begin, "begin", "imgui");
