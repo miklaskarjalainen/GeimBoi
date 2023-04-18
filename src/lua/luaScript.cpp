@@ -48,6 +48,8 @@ namespace GeimBoi
         if (mState == nullptr)
             return;
         lua_getglobal(mState, "on_update");
+        
+        // does the function exist
         if (!lua_isfunction(mState, -1)) {
             lua_pop(mState, 1);
             lua_getglobal(mState, "push_warning");
@@ -56,6 +58,8 @@ namespace GeimBoi
             Stop();
             return;
         }
+
+        // it does, run it.
         CheckResult(lua_pcall(mState, 0, 0, 0));
     }
 
