@@ -24,6 +24,18 @@ void LuaApi::OpenLibs(luaScript* script)
 
     // ImGui
     script->AddFunction(apiGui::begin, "begin", "imgui");
-    // FIXME: placeholder, "end" is a keyword in lua so this function cannot be called 
-    script->AddFunction(apiGui::end, "endd", "imgui"); 
+    script->AddFunction(apiGui::end, "endd", "imgui"); // FIXME: placeholder, "end" is a keyword in lua so this function cannot be called 
+    
+    script->AddFunction(apiGui::begin_main_menu_bar, "begin_main_menu_bar", "imgui");
+    script->AddFunction(apiGui::end_main_menu_bar, "end_main_menu_bar", "imgui");
+    script->AddFunction(apiGui::begin_menu, "begin_menu", "imgui");
+    script->AddFunction(apiGui::end_menu, "end_menu", "imgui");
+
+    script->AddFunction(apiGui::button, "button", "imgui");
+    script->AddFunction(apiGui::text, "text", "imgui");
+    script->AddFunction(apiGui::text_wrapped, "text_wrapped", "imgui");
+    script->AddFunction(apiGui::bullet_text, "bullet_text", "imgui");
+
+    script->AddFunction(apiGui::sameline, "sameline", "imgui");
+    script->AddFunction(apiGui::separator, "separator", "imgui");
 }
