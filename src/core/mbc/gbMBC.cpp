@@ -43,40 +43,18 @@ std::unique_ptr<gbMBC> gbMBC::CreateMBC(gbCart* cart)
     return std::move( std::unique_ptr<gbMBC>(ptr) );
 }
 
-
-bool gbMBC::SaveBatteryImpl(const std::string& path, uint8_t* src, size_t size)
-{
-    std::ofstream wf(path, std::ios::binary);
-    wf.write((char*)src, size);
-    if (wf.bad())
-    {
-        printf("An error occurred when trying to create a savefile at %s!\n", path.c_str());
-        wf.close();
-        return false;
-    }
-    wf.close();
-    printf("Savefile created to %s\n", path.c_str());
-    return true;
+bool gbMBC::SaveBattery(const std::string& path) {
+    std::ofstream wf(path);
+    return SaveBatteryImpl(wf);
 }
 
-bool gbMBC::LoadBatteryImpl(const std::string& path, uint8_t* dst, size_t size)
-{
+bool gbMBC::LoadBattery(const std::string& path) {
     if (!boost::filesystem::is_regular_file(path))
     {
         printf("No savefile at %s\n", path.c_str());
         return false;
     }
-
-    std::ifstream rf(path, std::ios::binary);
-    rf.read((char*)dst, size);
-    if (rf.bad())
-    {
-        printf("An error occurred when trying to read a savefile at %s!\n", path.c_str());
-        rf.close();
-        return false;
-    }
-    rf.close();
-
-    printf("Savefile %s loaded\n", path.c_str());
-    return true;
+    
+    std::ifstream rf(path);
+    return LoadBatteryImpl(rf);
 }

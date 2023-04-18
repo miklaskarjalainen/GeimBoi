@@ -28,8 +28,11 @@ namespace GeimBoi
 		virtual uint16_t GetCurRomBank() const { return 0; }
 		virtual uint16_t GetCurRamBank() const { return 0; }
 
-		virtual bool SaveBattery(const std::string&) { printf("No MBC\n"); return false; }
-		virtual bool LoadBattery(const std::string&) { printf("No MBC\n"); return false; }
+		bool SaveBattery(const std::string&);
+		bool LoadBattery(const std::string&);
+
+		virtual bool SaveBatteryImpl(std::ofstream&) { return false; };
+		virtual bool LoadBatteryImpl(std::ifstream&) { return false; };
 
 		virtual uint8_t ReadByte(uint16_t addr) const;
 		virtual void WriteByte(uint16_t addr, uint8_t data);
@@ -39,11 +42,12 @@ namespace GeimBoi
 			Gets the correct "mapper" for the cartridge.
 		*/
 		static std::unique_ptr<gbMBC> CreateMBC(gbCart* cart);
+
+
 	protected:
 		gbCart* mCart = nullptr;
+
 		
-		bool SaveBatteryImpl(const std::string& path, uint8_t* src, size_t size);
-		bool LoadBatteryImpl(const std::string& path, uint8_t* dst, size_t size);
 
 		gbMBC(gbCart* cart)
 			:mCart(cart) {};

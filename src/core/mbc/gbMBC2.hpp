@@ -10,10 +10,10 @@ namespace GeimBoi
 		~gbMBC2() override;
 
 		uint16_t GetCurRomBank() const override;
-
-		bool SaveBattery(const std::string& path) override;
-		bool LoadBattery(const std::string& path) override;
-
+		
+		bool SaveBatteryImpl(std::ofstream& wf) override;
+		bool LoadBatteryImpl(std::ifstream& rw) override;
+		
 		uint8_t ReadByte(uint16_t addr) const        override;
 		void    WriteByte(uint16_t addr, uint8_t data) override;
 		void    Reset() override;

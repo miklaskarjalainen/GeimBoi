@@ -1,4 +1,6 @@
 #include <cstring>
+#include <fstream>
+
 #include "../gbCart.hpp"
 #include "gbMBC2.hpp"
 
@@ -16,20 +18,24 @@ gbMBC2::~gbMBC2()
     printf("MBC2 Destroyed\n");
 }
 
-bool gbMBC2::SaveBattery(const std::string& path)
+bool gbMBC2::SaveBatteryImpl(std::ofstream& wf)
 {
     if (mCart->HasBattery())
     {
-        return SaveBatteryImpl(path, (uint8_t*)&mRam, sizeof(mRam));
+        wf.write((char*)&mRam, sizeof(mRam));
+        wf.close();
+        return !wf.bad();
     }
     return false;
 }
 
-bool gbMBC2::LoadBattery(const std::string& path)
+bool gbMBC2::LoadBatteryImpl(std::ifstream& rf)
 {
     if (mCart->HasBattery())
     {
-        return LoadBatteryImpl(path, (uint8_t*)&mRam, sizeof(mRam));
+        rf.read((char*)&mRam, sizeof(mRam));
+        rf.close();
+        return !rf.bad();
     }
     return false;
 }

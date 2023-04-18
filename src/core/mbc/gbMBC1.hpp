@@ -11,8 +11,8 @@ namespace GeimBoi
 		uint16_t GetCurRomBank() const override;
 		uint16_t GetCurRamBank() const override;
 
-		bool SaveBattery(const std::string& path) override;
-		bool LoadBattery(const std::string& path) override;
+		bool SaveBatteryImpl(std::ofstream& path) override;
+		bool LoadBatteryImpl(std::ifstream& path) override;
 
 		uint8_t ReadByte(uint16_t addr) const        override;
 		void    WriteByte(uint16_t addr, uint8_t data) override;
