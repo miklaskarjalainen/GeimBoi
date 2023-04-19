@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <fstream>
 
 namespace GeimBoi
 {
@@ -12,9 +13,10 @@ namespace GeimBoi
     public:
         apuSquare(gbGameBoy* gb, uint16_t length_addr, uint16_t envelope_addr, uint16_t freq_lo_addr, uint16_t freq_hi_addr);
         ~apuSquare();
-
+        
         void Restart();
-
+        bool WriteState(std::ofstream& wf);
+        bool ReadState(std::ifstream& rf);
     private:
         void WriteByte(uint16_t addr, uint8_t data);
         void ClockEnvelope();

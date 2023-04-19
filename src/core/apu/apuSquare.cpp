@@ -13,6 +13,36 @@ apuSquare::apuSquare(gbGameBoy* gb, uint16_t length_addr, uint16_t envelope_addr
 
 apuSquare::~apuSquare() {}
 
+bool apuSquare::WriteState(std::ofstream& wf)
+{
+    wf.write((char*)&mEnabled,          sizeof(mEnabled));
+    wf.write((char*)&mCycleDuty,        sizeof(mCycleDuty));
+    wf.write((char*)&mFreq,             sizeof(mFreq));
+    wf.write((char*)&mVolume,           sizeof(mVolume));
+    wf.write((char*)&mSweepTimer,       sizeof(mSweepTimer));
+    wf.write((char*)&mEnvelopeTimer,    sizeof(mEnvelopeTimer));
+    wf.write((char*)&mLengthTimer,      sizeof(mLengthTimer));
+    wf.write((char*)&mLengthEnable,     sizeof(mLengthEnable));
+    wf.write((char*)&mEnvelopeEnabled,  sizeof(mEnvelopeEnabled));
+    wf.write((char*)&mSweepEnabled,     sizeof(mSweepEnabled));
+    return !wf.bad();
+}
+
+bool apuSquare::ReadState(std::ifstream& rf)
+{
+    rf.read((char*)&mEnabled,           sizeof(mEnabled));
+    rf.read((char*)&mCycleDuty,         sizeof(mCycleDuty));
+    rf.read((char*)&mFreq,              sizeof(mFreq));
+    rf.read((char*)&mVolume,            sizeof(mVolume));
+    rf.read((char*)&mSweepTimer,        sizeof(mSweepTimer));
+    rf.read((char*)&mEnvelopeTimer,     sizeof(mEnvelopeTimer));
+    rf.read((char*)&mLengthTimer,       sizeof(mLengthTimer));
+    rf.read((char*)&mLengthEnable,      sizeof(mLengthEnable));
+    rf.read((char*)&mEnvelopeEnabled,   sizeof(mEnvelopeEnabled));
+    rf.read((char*)&mSweepEnabled,      sizeof(mSweepEnabled));
+    return !rf.bad();
+}
+
 void apuSquare::Restart()
 {
     mEnabled = false;

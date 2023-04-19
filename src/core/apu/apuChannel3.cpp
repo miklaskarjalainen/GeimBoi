@@ -19,6 +19,30 @@ void apuChannel3::Restart()
     mTableIdx = 0;
 }
 
+bool apuChannel3::WriteState(std::ofstream& wf)
+{
+    wf.write((char*)&mEnabled,      sizeof(mEnabled));
+    wf.write((char*)&mLengthEnable, sizeof(mLengthEnable));
+    wf.write((char*)&mLengthTimer,  sizeof(mLengthTimer));
+    wf.write((char*)&mVolume,       sizeof(mVolume));
+    wf.write((char*)&mFreq,         sizeof(mFreq));
+    wf.write((char*)&mTableIdx,     sizeof(mTableIdx));
+    wf.write((char*)&mSampleBuffer, sizeof(mSampleBuffer));
+    return !wf.bad();
+}
+
+bool apuChannel3::ReadState(std::ifstream& rf)
+{
+    rf.read((char*)&mEnabled, sizeof(mEnabled));
+    rf.read((char*)&mLengthEnable, sizeof(mLengthEnable));
+    rf.read((char*)&mLengthTimer, sizeof(mLengthTimer));
+    rf.read((char*)&mVolume, sizeof(mVolume));
+    rf.read((char*)&mFreq, sizeof(mFreq));
+    rf.read((char*)&mTableIdx, sizeof(mTableIdx));
+    rf.read((char*)&mSampleBuffer, sizeof(mSampleBuffer));
+    return !rf.bad();
+}
+
 void apuChannel3::Clock()
 {
 

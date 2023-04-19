@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <fstream>
 
 #define HZ(hz) (44100/hz)
 
@@ -13,6 +14,9 @@ namespace GeimBoi
     public:
         apuChannel3(gbGameBoy* gb);
         ~apuChannel3() = default;
+    
+        bool WriteState(std::ofstream& wf);
+        bool ReadState(std::ifstream& rf);
     
     private:
         void Restart();

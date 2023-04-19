@@ -37,6 +37,26 @@ gbAPU::~gbAPU()
     SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
+bool gbAPU::WriteState(std::ofstream& wf)
+{
+    wf.write((char*)&mSequenceCounter, sizeof(mSequenceCounter));
+    wf.write((char*)&timeElapsed, sizeof(timeElapsed));
+    channel1.WriteState(wf);
+    channel2.WriteState(wf);
+    channel3.WriteState(wf);
+    return !wf.bad();
+}
+
+bool gbAPU::ReadState(std::ifstream& rf)
+{
+    rf.read((char*)&mSequenceCounter, sizeof(mSequenceCounter));
+    rf.read((char*)&timeElapsed, sizeof(timeElapsed));
+    channel1.ReadState(rf);
+    channel2.ReadState(rf);
+    channel3.ReadState(rf);
+    return !rf.bad();
+}
+
 void gbAPU::Reset() 
 {
     channel1.Restart();

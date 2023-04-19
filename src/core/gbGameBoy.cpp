@@ -249,6 +249,7 @@ bool gbGameBoy::SaveState(const std::string& filePath)
     file.write((char*)&mBtsPressed, sizeof(mBtsPressed));
     mCpu.WriteState(file);
     mPpu.WriteState(file);
+    mApu.WriteState(file);
     mCart.mMBC->WriteState(file);
     file.close();
     
@@ -268,6 +269,7 @@ bool gbGameBoy::LoadState(const std::string& filePath)
     file.read((char*)&mBtsPressed, sizeof(mBtsPressed));
     mCpu.ReadState(file);
     mPpu.ReadState(file);
+    mApu.ReadState(file);
     mCart.mMBC->ReadState(file);
     file.close();
     

@@ -18,6 +18,9 @@ namespace GeimBoi
         gbAPU(gbGameBoy* gb);
         ~gbAPU();
 
+        bool WriteState(std::ofstream&);
+        bool ReadState(std::ifstream&);
+
         void Reset();
         void UpdateTimers(uint16_t cycles);
         void WriteByte(uint16_t addr, uint8_t data);
