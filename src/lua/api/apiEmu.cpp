@@ -33,6 +33,12 @@ int apiEmu::is_paused(lua_State* state)
     return 1;
 }
 
+int apiEmu::read_word(lua_State* state) {
+    int addr = luaL_checkinteger(state, -1);
+    lua_pushinteger(state, gGameBoy->ReadWord(addr));
+    return 1;
+}
+
 int apiEmu::read_byte(lua_State* state)
 {
     int addr = luaL_checkinteger(state, -1);
