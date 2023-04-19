@@ -58,19 +58,6 @@ namespace GeimBoi
             return mBootRom.IsBiosLoaded();
         }
 
-        struct State
-        {
-            State() = default;
-            State(const gbGameBoy&);
-            State(const State&) = default;
-            State(State&&) = default;
-            ~State() = default;
-            void Load(gbGameBoy&);
-
-            uint8_t Memory[0x10000] = {};
-            gbZ80::State CpuState;
-        };
-
         bool SaveState(const std::string& filePath);
         bool LoadState(const std::string& filePath);
 

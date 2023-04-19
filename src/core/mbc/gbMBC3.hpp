@@ -12,8 +12,8 @@ namespace GeimBoi
 		uint16_t GetCurRomBank() const override;
 		uint16_t GetCurRamBank() const override;
 
-		bool SaveBatteryImpl(std::ofstream& wf) override;
-		bool LoadBatteryImpl(std::ifstream& rw) override;
+		bool WriteState(std::ofstream&) override;
+		bool ReadState(std::ifstream&) override;
 
 		uint8_t ReadByte(uint16_t addr) const           override;
 		void    WriteByte(uint16_t addr, uint8_t data) override;
@@ -38,6 +38,9 @@ namespace GeimBoi
 			bool DayCarry = false;
 		} mRtc;
 	protected:
+		bool SaveBatteryImpl(std::ofstream& wf) override;
+		bool LoadBatteryImpl(std::ifstream& rw) override;
+
 		gbMBC3(gbCart* cart);
 		friend gbMBC;
 	};

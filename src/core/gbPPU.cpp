@@ -51,6 +51,18 @@ void gbPPU::Reset()
     memset(frontBuffer, 0, sizeof(gbColor[144 * 160]));
 }
 
+void gbPPU::WriteState(std::ofstream& file)
+{
+    file.write((char*)frontBuffer, sizeof(gbBuffer));
+    file.write((char*)&mScanlineCounter, sizeof(mScanlineCounter));
+}
+
+void gbPPU::ReadState(std::ifstream& file)
+{
+    file.read((char*)frontBuffer, sizeof(gbBuffer));
+    file.read((char*)&mScanlineCounter, sizeof(mScanlineCounter));
+}
+
 void gbPPU::UpdateGraphics(uint16_t cycles)
 {
     SetLCDStatus();

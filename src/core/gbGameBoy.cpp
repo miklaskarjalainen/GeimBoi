@@ -244,10 +244,14 @@ bool gbGameBoy::SaveState(const std::string& filePath)
     boost::filesystem::create_directories(fileDirectory);
 
     std::ofstream file(filePath, std::ios::binary);
-    State state(*this);
-    file.write((char*)&state, sizeof(State));
-    file.close();
 
+    file.write((char*)&mRom, sizeof(mRom));
+    file.write((char*)&mBtsPressed, sizeof(mBtsPressed));
+    mCpu.WriteState(file);
+    mPpu.WriteState(file);
+    mCart.mMBC->WriteState(file);
+    file.close();
+    
     printf("Savestate saved to '%s'\n", filePath.c_str());
     return true;
 }
@@ -260,23 +264,13 @@ bool gbGameBoy::LoadState(const std::string& filePath)
     }
 
     std::ifstream file(filePath, std::ios::binary);
-    State state;
-    file.read((char*)&state, sizeof(State));
-    state.Load(*this);
+    file.read((char*)&mRom, sizeof(mRom));
+    file.read((char*)&mBtsPressed, sizeof(mBtsPressed));
+    mCpu.ReadState(file);
+    mPpu.ReadState(file);
+    mCart.mMBC->ReadState(file);
     file.close();
     
     printf("Savestate loaded from '%s'\n", filePath.c_str());
     return true;
-}
-
-gbGameBoy::State::State(const gbGameBoy& g)
-    : CpuState(g.mCpu) 
-{
-    memcpy(&Memory, &g.mRom, sizeof(Memory));
-}
-
-void gbGameBoy::State::Load(gbGameBoy& g)
-{
-    memcpy(&g.mRom, &Memory, sizeof(Memory));
-    CpuState.Load(g.mCpu);
 }

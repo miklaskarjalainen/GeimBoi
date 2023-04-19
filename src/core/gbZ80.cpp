@@ -1,3 +1,4 @@
+#include <fstream>
 #include "gbZ80.hpp"
 #include "gbPPU.hpp"
 #include "gbGameBoy.hpp"
@@ -159,26 +160,39 @@ void gbZ80::Reset()
     mRegSP.val = 0xFFFE;
 }
 
-gbZ80::State::State(const gbZ80& c)
-    : RegAF(c.mRegAF), RegBC(c.mRegBC), RegDE(c.mRegDE), RegHL(c.mRegHL), RegSP(c.mRegSP), RegPC(c.mRegPC),
-    IsHalted(c.mIsHalted), EnableInterrupts(c.mEnableInterrupts), 
-    CounterFreq(c.mCounterFreq), DividerCounter(c.mDividerCounter), TimerCounter(c.mTimerCounter), CyclesDone(c.mCyclesDone)
-{}
-
-void gbZ80::State::Load(gbZ80& c)
+void gbZ80::WriteState(std::ofstream& wf)
 {
-    c.mRegAF = RegAF;
-    c.mRegBC = RegBC;
-    c.mRegDE = RegDE;
-    c.mRegHL = RegHL;
-    c.mRegSP = RegSP;
-    c.mRegPC = RegPC;
+    wf.write((char*)&mRegAF, sizeof(Reg16));
+    wf.write((char*)&mRegBC, sizeof(Reg16));
+    wf.write((char*)&mRegDE, sizeof(Reg16));
+    wf.write((char*)&mRegHL, sizeof(Reg16));
+    wf.write((char*)&mRegSP, sizeof(Reg16));
+    wf.write((char*)&mRegPC, sizeof(Reg16));
 
-    c.mIsHalted = IsHalted; 
-    c.mEnableInterrupts = EnableInterrupts; 
+    wf.write((char*)&mIsHalted, sizeof(mIsHalted));
+    wf.write((char*)&mEnableInterrupts, sizeof(mEnableInterrupts));
 
-    c.mCounterFreq = CounterFreq; 
-    c.mDividerCounter = DividerCounter; 
-    c.mTimerCounter = TimerCounter; 
-    c.mCyclesDone = CyclesDone; 
+    wf.write((char*)&mCounterFreq, sizeof(mCounterFreq));
+    wf.write((char*)&mDividerCounter, sizeof(mDividerCounter));
+    wf.write((char*)&mTimerCounter, sizeof(mTimerCounter));
+    wf.write((char*)&mCyclesDone, sizeof(mCyclesDone));
+
+}
+
+void gbZ80::ReadState(std::ifstream& rf)
+{
+    rf.read((char*)&mRegAF, sizeof(Reg16));
+    rf.read((char*)&mRegBC, sizeof(Reg16));
+    rf.read((char*)&mRegDE, sizeof(Reg16));
+    rf.read((char*)&mRegHL, sizeof(Reg16));
+    rf.read((char*)&mRegSP, sizeof(Reg16));
+    rf.read((char*)&mRegPC, sizeof(Reg16));
+    
+    rf.read((char*)&mIsHalted, sizeof(mIsHalted));
+    rf.read((char*)&mEnableInterrupts, sizeof(mEnableInterrupts));
+
+    rf.read((char*)&mCounterFreq, sizeof(mCounterFreq));
+    rf.read((char*)&mDividerCounter, sizeof(mDividerCounter));
+    rf.read((char*)&mTimerCounter, sizeof(mTimerCounter));
+    rf.read((char*)&mCyclesDone, sizeof(mCyclesDone));
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include <fstream>
 #include "reg.hpp"
 
 namespace GeimBoi
@@ -45,6 +46,8 @@ namespace GeimBoi
         inline bool GetIME()               const { return mEnableInterrupts; }                // 'Interrupt Master Enable'
         inline bool IsHalted()             const { return mIsHalted; }
 
+        void WriteState(std::ofstream& wf);
+        void ReadState(std::ifstream& rf);
     public:
         Reg16 mRegAF, mRegBC, mRegDE, mRegHL, mRegSP, mRegPC;
         bool mIsHalted = false;
@@ -56,20 +59,6 @@ namespace GeimBoi
 
         // Debugging
         uint16_t mLastExecutedOpcode = 0x00;
-
-    private:
-        struct State
-        {
-            State() = default;
-            State(const gbZ80& c);
-            State(const State&) = default;
-            ~State() = default;
-            void Load(gbZ80& c);
-
-            Reg16 RegAF, RegBC, RegDE, RegHL, RegSP, RegPC;
-            bool IsHalted, EnableInterrupts;
-            unsigned int CounterFreq, DividerCounter, TimerCounter, CyclesDone;
-        };
 
     private:
         gbGameBoy* mGameBoy = nullptr;

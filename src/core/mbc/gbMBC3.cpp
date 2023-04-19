@@ -19,12 +19,31 @@ gbMBC3::~gbMBC3()
     printf("MBC3 Destroyed\n"); 
 }
 
+bool gbMBC3::WriteState(std::ofstream& wf)
+{
+    wf.write((char*)&mRamEnable, sizeof(mRamEnable));
+    wf.write((char*)&mRam,       sizeof(mRam));
+    wf.write((char*)&mRomBank,   sizeof(mRomBank));
+    wf.write((char*)&mRamBank,   sizeof(mRamBank));
+    wf.write((char*)&mRtc,       sizeof(mRtc));
+    return wf.bad();
+}
+
+bool gbMBC3::ReadState(std::ifstream& rf)
+{
+    rf.read((char*)&mRamEnable, sizeof(mRamEnable));
+    rf.read((char*)&mRam,       sizeof(mRam));
+    rf.read((char*)&mRomBank,   sizeof(mRomBank));
+    rf.read((char*)&mRamBank,   sizeof(mRamBank));
+    rf.read((char*)&mRtc,       sizeof(mRtc));
+    return rf.bad();
+}
+
 bool gbMBC3::SaveBatteryImpl(std::ofstream& wf)
 {
     if (mCart->HasBattery())
     {
         wf.write((char*)&mRam, sizeof(mRam));
-        wf.close();
         return !wf.bad();
     }
     return false;
@@ -35,7 +54,6 @@ bool gbMBC3::LoadBatteryImpl(std::ifstream& rf)
     if (mCart->HasBattery())
     {
         rf.read((char*)&mRam, sizeof(mRam));
-        rf.close();
         return !rf.bad();
     }
     return false;

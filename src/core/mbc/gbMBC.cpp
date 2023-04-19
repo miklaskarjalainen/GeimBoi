@@ -43,12 +43,17 @@ std::unique_ptr<gbMBC> gbMBC::CreateMBC(gbCart* cart)
     return std::move( std::unique_ptr<gbMBC>(ptr) );
 }
 
-bool gbMBC::SaveBattery(const std::string& path) {
-    std::ofstream wf(path);
-    return SaveBatteryImpl(wf);
+bool gbMBC::SaveBattery(const std::string& path)
+{
+    printf("Saving battery file to '%s'\n", path.c_str());
+    std::ofstream wf(path, std::ios::binary);
+    bool r1 = SaveBatteryImpl(wf);
+    wf.close();
+    return r1;
 }
 
-bool gbMBC::LoadBattery(const std::string& path) {
+bool gbMBC::LoadBattery(const std::string& path)
+{
     if (!boost::filesystem::is_regular_file(path))
     {
         printf("No savefile at %s\n", path.c_str());
@@ -56,5 +61,7 @@ bool gbMBC::LoadBattery(const std::string& path) {
     }
     
     std::ifstream rf(path);
-    return LoadBatteryImpl(rf);
+    bool r = LoadBatteryImpl(rf);
+    rf.close();
+    return r;
 }

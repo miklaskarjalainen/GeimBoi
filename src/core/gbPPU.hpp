@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstdio>
+#include <fstream>
 #include <array>
 
 #define SCREEN_WIDTH 160
@@ -39,6 +40,8 @@ public:
     ~gbPPU();
     void Reset();
 
+    void WriteState(std::ofstream& file);
+    void ReadState(std::ifstream& file);
     using gbBuffer = gbColor[SCREEN_HEIGHT * SCREEN_WIDTH];
     
 public:

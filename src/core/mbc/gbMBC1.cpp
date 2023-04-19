@@ -18,12 +18,29 @@ gbMBC1::~gbMBC1()
     printf("MBC1 Destroyed\n");
 }
 
+bool gbMBC1::WriteState(std::ofstream& wf)
+{
+    wf.write((char*)&mMode,      sizeof(mMode));
+    wf.write((char*)&mRamEnable, sizeof(mRamEnable));
+    wf.write((char*)&mCurBank,   sizeof(mCurBank));
+    wf.write((char*)&mRam,       sizeof(mRam));
+    return wf.bad();
+}
+
+bool gbMBC1::ReadState(std::ifstream& rf)
+{
+    rf.read((char*)&mMode,      sizeof(mMode));
+    rf.read((char*)&mRamEnable, sizeof(mRamEnable));
+    rf.read((char*)&mCurBank,   sizeof(mCurBank));
+    rf.read((char*)&mRam,       sizeof(mRam));
+    return rf.bad();
+}
+
 bool gbMBC1::SaveBatteryImpl(std::ofstream& wf)
 {
     if (mCart->HasBattery())
     {
         wf.write((char*)&mRam, sizeof(mRam));
-        wf.close();
         return !wf.bad();
     }
     return false;
@@ -34,7 +51,6 @@ bool gbMBC1::LoadBatteryImpl(std::ifstream& rf)
     if (mCart->HasBattery())
     {
         rf.read((char*)&mRam, sizeof(mRam));
-        rf.close();
         return !rf.bad();
     }
     return false;
