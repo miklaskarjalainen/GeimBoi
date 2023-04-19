@@ -308,7 +308,7 @@ void appGui::DrawOptions()
             const ImVec2 ButtonSize = ImVec2(ListBoxSize.x, 18);
 
             ImGui::BeginListBox("##hotkeylist", ListBoxSize);
-            for (int i = 0; i < buttons.size(); i++) {
+            for (size_t i = 0; i < buttons.size(); i++) {
                 buttons[i].Draw(ButtonSize);
             }
             ImGui::EndListBox();

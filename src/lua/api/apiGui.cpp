@@ -8,7 +8,7 @@ using namespace GeimBoi;
 static ImVec2 luaL_checkimvec2(lua_State* state, int n) {
     // todo: error handling
     ImVec2 out;
-    if (lua_istable(state, -1)) {
+    if (lua_istable(state, n)) {
         // get X
         lua_rawgeti(state, -1, 1);
         out.x = luaL_checkinteger(state, -1);
@@ -101,13 +101,13 @@ int apiGui::bullet_text(lua_State* state)
     return 0;
 }
 
-int apiGui::sameline(lua_State* state)
+int apiGui::sameline(lua_State*)
 {
     ImGui::SameLine();
     return 0;
 }
 
-int apiGui::separator(lua_State* state)
+int apiGui::separator(lua_State*)
 {
     ImGui::Separator();
     return 0;
