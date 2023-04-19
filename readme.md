@@ -6,14 +6,15 @@
 ![gameboy_ss](pictures/geimboy.png)
 
 ## Building:
-- **Windows:**  
+### **Windows:**  
 `To build open the visual studio and press compile`  
-Requirements: 
-    1. Working Visual Studio C++ development environment
-    2. [Boost](https://sourceforge.net/projects/boost/files/boost-binaries/)
-    3. Your Boost include directory added to the settings `C++/General/AdditionalIncludeDirectories`.
+##### Requirements: 
+1. Working Visual Studio C++ development environment
+2. [Boost](https://sourceforge.net/projects/boost/files/boost-binaries/)
+3. Your Boost include directory added to the settings `C++/General/AdditionalIncludeDirectories`.
 
-- **Linux Arch:** `sudo pacman -S gcc make lib32-sdl2 boost && make -build=release -j4`
+### **Linux Arch:** 
+`sudo pacman -S gcc make lib32-sdl2 boost && make -build=release -j4`
 
 ## Features:
 - **MBC1:** support (passes Mooneye's mbc1 tests)
