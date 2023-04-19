@@ -127,8 +127,8 @@ void gbAPU::sdl2_callback(void* userdata, uint8_t *stream, int len)
     memset(&buffer, 0, sizeof(buffer));
     for(int i = 0; i < samples; i++)
     {
-        const double dt = audio->timeElapsed + ((1.0f / 44100.0)*i);
-        buffer[i] = (float)audio->channel3.GetAmplitude(dt) * Volume;
+        //const double dt = audio->timeElapsed + ((1.0f / 44100.0)*i);
+        //buffer[i] = (float)audio->channel3.GetAmplitude(dt) * Volume;
     }
     //SDL_MixAudio(stream, reinterpret_cast<uint8_t*>(buffer), len, SDL_MIX_MAXVOLUME);
 

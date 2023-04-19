@@ -34,22 +34,22 @@ int apiEmu::is_paused(lua_State* state)
 }
 
 int apiEmu::read_word(lua_State* state) {
-    int addr = luaL_checkinteger(state, -1);
+    int addr = (int)luaL_checkinteger(state, -1);
     lua_pushinteger(state, gGameBoy->ReadWord(addr));
     return 1;
 }
 
 int apiEmu::read_byte(lua_State* state)
 {
-    int addr = luaL_checkinteger(state, -1);
+    int addr = (int)luaL_checkinteger(state, -1);
     lua_pushinteger(state, gGameBoy->ReadByte(addr));
     return 1;
 }
 
 int apiEmu::write_byte(lua_State* state)
 {
-    int addr = luaL_checkinteger(state, -2);
-    int number = luaL_checkinteger(state, -1);
+    int addr = (int)luaL_checkinteger(state, -2);
+    int number = (int)luaL_checkinteger(state, -1);
     gGameBoy->WriteByte(addr, number);
     return 0;
 }
@@ -63,7 +63,7 @@ int apiEmu::load_rom(lua_State* state)
 
 int apiEmu::set_button(lua_State* state)
 {
-    int btn = luaL_checkinteger(state, -2);
+    int btn = (int)luaL_checkinteger(state, -2);
     bool btn_state = lua_toboolean(state, -1);
     if (btn_state)
         gGameBoy->PressButton((gbButton)btn);
@@ -75,7 +75,7 @@ int apiEmu::set_button(lua_State* state)
 
 int apiEmu::get_button(lua_State* state)
 {
-    int btn = luaL_checkinteger(state, -1);
+    int btn = (int)luaL_checkinteger(state, -1);
     bool btn_state = gGameBoy->IsButtonPressed((gbButton)btn);
     lua_pushboolean(state, btn_state);
     return 1;
