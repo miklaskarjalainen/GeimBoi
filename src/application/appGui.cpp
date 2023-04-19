@@ -128,7 +128,7 @@ void appGui::DrawTopbar()
     
     int x, y;
     SDL_GetWindowPosition(sWindow, &x, &y);
-    ImGui::SetWindowPos(ImVec2(x-2, y));
+    ImGui::SetWindowPos(ImVec2((float)x-2.0f, (float)y));
     ImGui::SetWindowSize(ImVec2(io.DisplaySize.x + 4, 1));
 
     if (ImGui::BeginMenuBar())
@@ -333,21 +333,21 @@ void appGui::DrawOptions()
             auto update_palette = [&]()
             {
                 gbColor color1, color2, color3, color4;
-                color1.r = c1.Value.x * 255;
-                color1.g = c1.Value.y * 255;
-                color1.b = c1.Value.z * 255;
+                color1.r = (uint8_t)(c1.Value.x * 255.0f);
+                color1.g = (uint8_t)(c1.Value.y * 255.0f);
+                color1.b = (uint8_t)(c1.Value.z * 255.0f);
 
-                color2.r = c2.Value.x * 255;
-                color2.g = c2.Value.y * 255;
-                color2.b = c2.Value.z * 255;
+                color2.r = (uint8_t)(c2.Value.x * 255.0f);
+                color2.g = (uint8_t)(c2.Value.y * 255.0f);
+                color2.b = (uint8_t)(c2.Value.z * 255.0f);
                 
-                color3.r = c3.Value.x * 255;
-                color3.g = c3.Value.y * 255;
-                color3.b = c3.Value.z * 255;
+                color3.r = (uint8_t)(c3.Value.x * 255.0f);
+                color3.g = (uint8_t)(c3.Value.y * 255.0f);
+                color3.b = (uint8_t)(c3.Value.z * 255.0f);
                 
-                color4.r = c4.Value.x * 255;
-                color4.g = c4.Value.y * 255;
-                color4.b = c4.Value.z * 255;
+                color4.r = (uint8_t)(c4.Value.x * 255.0f);
+                color4.g = (uint8_t)(c3.Value.y * 255.0f);
+                color4.b = (uint8_t)(c3.Value.z * 255.0f);
                 mGameBoy->SetPalette(color1, color2, color3, color4);
             };
             

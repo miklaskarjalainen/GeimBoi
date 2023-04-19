@@ -98,7 +98,7 @@ void appWindow::Run()
             constexpr int MenuBarHeight = 38;
             constexpr int HalfHeight = MenuBarHeight / 2;
             const float MenuBarOffset = static_cast<float>(MenuBarHeight) / io.DisplaySize.y;
-            glRasterPos2f(-1, 1.0 - MenuBarOffset);
+            glRasterPos2f(-1, 1.0f - MenuBarOffset);
             glPixelZoom(io.DisplaySize.x / SCREEN_WIDTH, ((io.DisplaySize.y - HalfHeight) / SCREEN_HEIGHT) * -1);
             glDrawPixels(160, 144, GL_RGB, GL_UNSIGNED_BYTE, mGameBoy->mPpu.frontBuffer);
             
