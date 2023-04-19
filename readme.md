@@ -6,7 +6,13 @@
 ![gameboy_ss](pictures/geimboy.png)
 
 ## Building:
-- **Windows:**  `(Visual Studio): should be just the matter of opening the GeimBoy.sln file an pressing compile. (assuming you have working c++ building environment.)`
+- **Windows:**  
+`To build open the visual studio and press compile`  
+Requirements: 
+    1. Working Visual Studio C++ development environment
+    2. [Boost](https://sourceforge.net/projects/boost/files/boost-binaries/)
+    3. Your Boost include directory added to the settings `C++/General/AdditionalIncludeDirectories`.
+
 - **Linux Arch:** `sudo pacman -S gcc make lib32-sdl2 boost && make -build=release -j4`
 
 ## Features:
@@ -14,12 +20,11 @@
 - **MBC2:** support (passes Mooneye's mbc2 tests)
 - **MBC3:** support (both banking and realtime clock)
 - **Saving:** roms with a battery gets it's ram dumbed into a *.sav file on exit and loaded on game power on.
+- **Audio:** janky, but works.
 
 ## Todo:
-- **Audio:** Audio emulation is currently WIP. Audio emulation is very primitive.
 - **Accuracy:** This emulator is not currently timing/cycle accurate, and i'm not planning to make this 100% perfect, but atleast to pass some of the timing tests.
 - **GBC Support:** GameBoy Color support down the line.
-- **SaveState:** There're not currently savestates available.
 - **GUI:** Lacks a lot of features.
 
 ## Screenshots:
