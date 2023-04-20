@@ -157,45 +157,21 @@ void appWindow::DoEvents()
                 // Direction buttons, can't hold opposite directions at the same time
                 if (key == appSettings::controls.right)
                 { 
-                    if (io.KeysDown[appSettings::controls.left])
-                    {
-                        mGameBoy->ReleaseButton(gbButton::LEFT);
-                        mGameBoy->ReleaseButton(gbButton::RIGHT);
-                        break;
-                    }
                     mGameBoy->PressButton(gbButton::RIGHT);
                     break;
                 }
                 if (key == appSettings::controls.left)
                 {
-                    if (io.KeysDown[appSettings::controls.right])
-                    {
-                        mGameBoy->ReleaseButton(gbButton::LEFT);
-                        mGameBoy->ReleaseButton(gbButton::RIGHT);
-                        break;
-                    }
                     mGameBoy->PressButton(gbButton::LEFT);
                     break;
                 }
                 if (key == appSettings::controls.up)
                 { 
-                    if (io.KeysDown[appSettings::controls.down])
-                    {
-                        mGameBoy->ReleaseButton(gbButton::UP);
-                        mGameBoy->ReleaseButton(gbButton::DOWN);
-                        break;
-                    }
                     mGameBoy->PressButton(gbButton::UP);
                     break;
                 }
                 if (key == appSettings::controls.down)
                 { 
-                    if (io.KeysDown[appSettings::controls.up])
-                    {
-                        mGameBoy->ReleaseButton(gbButton::UP);
-                        mGameBoy->ReleaseButton(gbButton::DOWN);
-                        break;
-                    }
                     mGameBoy->PressButton(gbButton::DOWN);   
                     break; 
                 }
@@ -240,34 +216,21 @@ void appWindow::DoEvents()
                 if (key == appSettings::controls.right) 
                 { 
                     mGameBoy->ReleaseButton(gbButton::RIGHT);
-                    if (io.KeysDown[appSettings::controls.left]) {
-                        mGameBoy->PressButton(gbButton::LEFT);
-                    }
                     break;
                 }
                 if (key == appSettings::controls.left)
                 {
                     mGameBoy->ReleaseButton(gbButton::LEFT);
-                    if (io.KeysDown[appSettings::controls.right]) {
-                        mGameBoy->PressButton(gbButton::RIGHT);
-                    }
                     break;
                 }
                 if (key == appSettings::controls.up)
                 {
                     mGameBoy->ReleaseButton(gbButton::UP);
-                    if (io.KeysDown[appSettings::controls.down]) {
-                        mGameBoy->PressButton(gbButton::DOWN);
-                    }
                     break;
                 }
                 if (key == appSettings::controls.down)
                 {
                     mGameBoy->ReleaseButton(gbButton::DOWN);
-                    if (io.KeysDown[appSettings::controls.up])
-                    {
-                        mGameBoy->PressButton(gbButton::UP);
-                    }
                     break;
                 }
                 
