@@ -1,5 +1,6 @@
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <fstream>
+
 #include "gbMBC.hpp"
 #include "gbMBC1.hpp"
 #include "gbMBC2.hpp"
@@ -61,7 +62,7 @@ bool gbMBC::SaveBatteryImpl(const std::string& path, uint8_t* src, size_t size)
 
 bool gbMBC::LoadBatteryImpl(const std::string& path, uint8_t* dst, size_t size)
 {
-    if (!boost::filesystem::is_regular_file(path))
+    if (!std::filesystem::is_regular_file(path))
     {
         printf("No savefile at %s\n", path.c_str());
         return false;

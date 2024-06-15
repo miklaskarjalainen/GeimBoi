@@ -31,7 +31,7 @@
 - [SDL2](https://www.libsdl.org/download-2.0.php) a cross-platform development library designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware via OpenGL and Direct3D.
 - [Dear ImGui](https://github.com/ocornut/imgui) a bloat-free graphical user interface library for C++.
 - [Portable File Dialogs](https://github.com/samhocevar/portable-file-dialogs) simple to use crossplatform filedialogs.
-- [Boost](https://github.com/boostorg/boost) C++ crossplatform standard library.
+- [toml++](https://github.com/marzer/tomlplusplus) TOML config parser and serializer for C++.
 ### Docs:
 - [Pan Docs](https://gbdev.io/pandocs/) a technical reference guide for the GameBoy.
 - [Gekkio's Complete Technical Guide](https://gekkio.fi/files/gb-docs/gbctr.pdf)

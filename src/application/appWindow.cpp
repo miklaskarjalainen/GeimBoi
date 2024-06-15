@@ -1,4 +1,3 @@
-#include <boost/filesystem.hpp>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include "imgui/imgui.h"

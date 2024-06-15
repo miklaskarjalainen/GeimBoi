@@ -1,4 +1,4 @@
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <cstring>
 #include <fstream>
 #include "gbGameBoy.hpp"
@@ -155,7 +155,7 @@ void gbCart::Reset()
 bool gbCart::LoadRom(const std::string& path)
 {
     // Load
-    if (!boost::filesystem::is_regular_file(path))
+    if (!std::filesystem::is_regular_file(path))
     {
         printf("Can't find a file at %s\n", path.c_str());
         mGameLoaded = false;

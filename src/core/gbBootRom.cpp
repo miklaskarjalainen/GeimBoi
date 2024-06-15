@@ -1,4 +1,4 @@
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <fstream>
 #include "gbBootRom.hpp"
 
@@ -6,7 +6,7 @@ using namespace GeimBoi;
 
 bool gbBootRom::LoadBios(const std::string& _path)
 {
-	if (!boost::filesystem::is_regular_file(_path))
+	if (!std::filesystem::is_regular_file(_path))
 	{
 		printf("Couldn't find a bios at %s!\n", _path.c_str());
 		mHasBios = false;

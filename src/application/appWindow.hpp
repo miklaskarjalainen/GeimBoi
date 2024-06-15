@@ -28,7 +28,7 @@ namespace GeimBoi
 		bool mClosing = false;
 	
 	private:
-		const std::string SettingsPath = "./settings.ini"; 
+		const std::string SettingsPath = "./settings.toml"; 
 	};
 
 }

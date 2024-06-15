@@ -1,7 +1,8 @@
 #include <cstring>
 #include <string>
 #include <fstream>
-#include <boost/filesystem.hpp>
+#include <filesystem>
+
 #include "gbGameBoy.hpp"
 
 using namespace GeimBoi;
@@ -240,8 +241,8 @@ void gbGameBoy::WriteByte(uint16_t addr, uint8_t data)
 bool gbGameBoy::SaveState(const std::string& filePath)
 {
     // TODO: check if gameboy is running.
-    auto fileDirectory = boost::filesystem::path(filePath).parent_path();
-    boost::filesystem::create_directories(fileDirectory);
+    auto fileDirectory = std::filesystem::path(filePath).parent_path();
+    std::filesystem::create_directories(fileDirectory);
 
     std::ofstream file(filePath, std::ios::binary);
     State state(*this);
@@ -254,15 +255,17 @@ bool gbGameBoy::SaveState(const std::string& filePath)
 
 bool gbGameBoy::LoadState(const std::string& filePath)
 {
-    if (!boost::filesystem::exists(filePath)) {
+    if (!std::filesystem::exists(filePath)) {
         printf("No savestate exists at '%s'\n", filePath.c_str());
         return false;
     }
 
     std::ifstream file(filePath, std::ios::binary);
-    State state;
+    std::unique_ptr<State> state = std::make_unique<State>(); // Because of the size of this, we initialize it on the heap.
+    std::memset(state.get(), 0, sizeof(State));
+
     file.read((char*)&state, sizeof(State));
-    state.Load(*this);
+    state->Load(*this);
     file.close();
     
     printf("Savestate loaded from '%s'\n", filePath.c_str());
