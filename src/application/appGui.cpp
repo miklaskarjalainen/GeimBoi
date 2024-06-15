@@ -4,7 +4,7 @@
 
 #include <SDL2/SDL.h>
 #include <toml++/toml.hpp>
-#include <FileDialogs/FileDialogs.hpp>
+#include <portable-file-dialogs/portable-file-dialogs.h>
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
