@@ -1,7 +1,9 @@
 #include <string>
 #include <sstream>
 #include <cassert>
+
 #include <SDL2/SDL.h>
+#include <toml++/toml.hpp>
 #include <FileDialogs/FileDialogs.hpp>
 
 #include "imgui/imgui.h"
@@ -605,6 +607,8 @@ void appGui::DrawLicences()
     }
     if (ImGui::CollapsingHeader("toml++"))
     {
+        ImGui::Text("toml++ version: %i.%i.%i", TOML_LIB_MAJOR, TOML_LIB_MINOR, TOML_LIB_PATCH);
+        ImGui::Text("lang   version: %i.%i.%i", TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH);
         ImGui::TextWrapped("Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>\n\n"
 
         "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated"
