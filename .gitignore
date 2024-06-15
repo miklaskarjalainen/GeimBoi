@@ -26,9 +26,13 @@
 *.a
 *.lib
 
+# Common build directories
+bin/
+bin_int/
+build/
+
 # Visual Studio Project
 .vs/
-bin_int/
 *.ilk
 *.pdb
 *.ini
