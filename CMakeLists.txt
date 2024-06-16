@@ -36,6 +36,7 @@ set(SOURCE_FILES
     src/core/gbZ80.cpp     src/core/gbZ80.hpp
     src/core/reg.hpp
 )
+
 set(INCLUDE_DIRS
     vendor/include
     vendor/include/imgui/backends
@@ -61,8 +62,12 @@ if (WIN32)
         imgui
     )
 else()
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+    find_package(SDL2 REQUIRED)
+    
+    include_directories(${SDL2_INCLUDE_DIRS})
     target_link_directories(${PROJECT_NAME} PRIVATE vendor/include/imgui)
-    target_link_libraries(${PROJECT_NAME} imgui)
+    target_link_libraries(${PROJECT_NAME} imgui ${SDL2_LIBRARIES} GL)
 endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
