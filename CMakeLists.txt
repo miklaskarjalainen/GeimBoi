@@ -35,24 +35,21 @@ set(SOURCE_FILES
     src/core/gbPPU.cpp     src/core/gbPPU.hpp
     src/core/gbZ80.cpp     src/core/gbZ80.hpp
     src/core/reg.hpp
-
-    src/application/imgui/imgui_demo.cpp
-    src/application/imgui/imgui_draw.cpp
-    src/application/imgui/imgui_impl_opengl2.cpp
-    src/application/imgui/imgui_impl_sdl.cpp
-    src/application/imgui/imgui_tables.cpp
-    src/application/imgui/imgui_widgets.cpp
-    src/application/imgui/imgui.cpp
 )
 set(INCLUDE_DIRS
     vendor/include
+    vendor/include/imgui/backends
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_subdirectory(cmake/imgui)
 
-if (WIN32)
+if (MSVC)
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
     target_sources(${PROJECT_NAME} PRIVATE GeimBoi.rc)
+endif()
+
+if (WIN32)
     list(APPEND INCLUDE_DIRS vendor/include/WindowsOnly)
     target_link_directories(${PROJECT_NAME} PRIVATE vendor/lib)
     target_link_libraries(
@@ -61,7 +58,11 @@ if (WIN32)
         SDL2main.lib
         SDL2test.lib
         opengl32.lib
+        imgui
     )
+else()
+    target_link_directories(${PROJECT_NAME} PRIVATE vendor/include/imgui)
+    target_link_libraries(${PROJECT_NAME} imgui)
 endif()
-target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
 
+target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})

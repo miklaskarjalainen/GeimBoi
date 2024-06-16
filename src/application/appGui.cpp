@@ -6,9 +6,10 @@
 #include <toml++/toml.hpp>
 #include <portable-file-dialogs/portable-file-dialogs.h>
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl.h"
-#include "imgui/imgui_impl_opengl2.h"
+#include <imgui.h>
+#include <imgui_impl_sdl2.h>
+#include <imgui_impl_opengl2.h>
+
 #include "appGui.hpp"
 #include "appSettings.hpp"
 #include "gui/rebindButton.hpp"
@@ -573,7 +574,6 @@ void appGui::DrawLicences()
     }
     if (ImGui::CollapsingHeader("Dear ImGui"))
     {
-        ImGui::Text("Branch: [docking] 9764adc7bb7a582601dd4dd1c34d4fa17ab5c8e8");
         ImGui::TextWrapped("The MIT License (MIT)\n\n"
 
         "Copyright (c) 2014-2022 Omar Cornut\n\n"
