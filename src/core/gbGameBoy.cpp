@@ -245,8 +245,10 @@ bool gbGameBoy::SaveState(const std::string& filePath)
     std::filesystem::create_directories(fileDirectory);
 
     std::ofstream file(filePath, std::ios::binary);
-    State state(*this);
-    file.write((char*)&state, sizeof(State));
+    std::unique_ptr<State> state = std::make_unique<State>(); // Because of the size of this, we initialize it on the heap.
+    std::memset(state.get(), 0, sizeof(State));
+
+    file.write((char*)state.get(), sizeof(State));
     file.close();
 
     printf("Savestate saved to '%s'\n", filePath.c_str());
