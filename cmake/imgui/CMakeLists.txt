@@ -24,7 +24,14 @@ add_library(imgui
 if (WIN32)
     target_include_directories(imgui PUBLIC ../../vendor/include/imgui/ ../../vendor/include/WindowsOnly/SDL2)
 else()
-    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/..)
+    # Detect NixOS
+    file(READ /etc/os-release OS_RELEASE)
+    string(FIND "${OS_RELEASE}" "ID=nixos" IS_NIXOS)
+    
+    # Only append if not NixOS.
+    if (${IS_NIXOS} EQUAL -1)
+        list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/..)
+    endif()
     find_package(SDL2 REQUIRED)
 
     include_directories(${SDL2_INCLUDE_DIRS})
