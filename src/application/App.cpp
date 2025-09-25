@@ -10,6 +10,7 @@ extern "C" {
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
+#include <imgui_memory_editor.h>
 
 void GeimBoi::App::run()
 {
@@ -102,8 +103,13 @@ void GeimBoi::App::run()
 			m_LastExecutedOpcode = addr;
 			gb_emu_advance_opcode(m_Emulator);
 		}
-
 		ImGui::End();
+
+		static MemoryEditor cpu_memory;
+		cpu_memory.DrawWindow("Cpu Memory Editor (0x8000 - 0xFFFF)", m_Emulator->cpu.memory, 0x8000);
+
+		static MemoryEditor rom_memory;
+		rom_memory.DrawWindow("Rom Memory Editor (0x0000 - 0x7FFF)", m_Emulator->cart.rom, m_Emulator->cart.len);
 
 		// Rendering
 		ImGui::Render();
@@ -220,6 +226,7 @@ GeimBoi::App::App()
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.ScaleAllSizes(main_scale);
 	style.FontScaleDpi = main_scale;
+	style.FontSizeBase = 24.0f;
 	io.ConfigDpiScaleFonts = true;
 	io.ConfigDpiScaleViewports = true;
 
@@ -233,7 +240,9 @@ GeimBoi::App::App()
 
 	m_Emulator = new gb_emu_t;
 	*m_Emulator = gb_emu_create();
-	gb_emu_load_rom_file(m_Emulator, "");
+	gb_emu_load_rom_file(
+		m_Emulator, "/home/giffi/Downloads/Tetris (World) (Rev 1).gb"
+	);
 }
 
 GeimBoi::App::~App()
