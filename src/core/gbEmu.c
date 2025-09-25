@@ -1,7 +1,8 @@
 #include "gbEmu.h"
 #include "gbCart.h"
 #include "gbReg.h"
-#include "gbZ80.h"
+#include "gbSM83.h"
+#include "log.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,6 +29,10 @@ bool gb_emu_load_rom_bytes(gb_emu_t* emu, u8* rom, size_t length)
 bool gb_emu_load_rom_file(gb_emu_t* emu, const char* fpath)
 {
     FILE* file = fopen(fpath, "rb");
+    if (!file) {
+        GB_ERROR("Could not open file '%s'!", fpath);
+        return false;
+    }
 
     // Get size
     fseek(file, 0, SEEK_END);

@@ -1,14 +1,14 @@
 #ifndef _GB_CONSOLE_H
 #define _GB_CONSOLE_H
 
-#include "gbZ80.h"
+#include "gbSM83.h"
 #include "gbCart.h"
 
 #include <stdbool.h>
 #include <stddef.h>
 
 typedef struct gb_emu {
-    gbZ80_t cpu;
+    gbSM83_t cpu;
     gb_cart_t cart;
 } gb_emu_t;
 

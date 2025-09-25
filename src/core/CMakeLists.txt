@@ -9,7 +9,8 @@ add_library(${PROJECT_NAME} SHARED
     gbCore.h
     gbCart.c gbCart.h
     gbEmu.c gbEmu.h
-    gbZ80.c gbZ80.h
+    gbSM83.c gbSM83.h
+    gbDisassembler.c gbDisassembler.h
     gbReg.h
     log.h
     opcodes.c

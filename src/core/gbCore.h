@@ -8,7 +8,8 @@ extern "C" {
 #include "gbCart.h"
 #include "gbEmu.h"
 #include "gbReg.h"
-#include "gbZ80.h"
+#include "gbSM83.h"
+#include "gbDisassembler.h"
 
 #ifdef __cplusplus
 }

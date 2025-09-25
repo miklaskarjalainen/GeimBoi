@@ -1,5 +1,5 @@
-#ifndef _GB_Z80_H
-#define _GB_Z80_H
+#ifndef _GB_SM83_H
+#define _GB_SM83_H
 
 #include "gbReg.h"
 
@@ -21,10 +21,10 @@
 #define GB_REG_L(regs) (regs[3].nibble.low)
 
 
-typedef struct gbZ80 {
+typedef struct gbSM83 {
     gb_reg16_t regs[GB_REG_COUNT];
-} gbZ80_t;
+} gbSM83_t;
 
-gbZ80_t gb_cpu_create(void);
+gbSM83_t gb_cpu_create(void);
 
 #endif
