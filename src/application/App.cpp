@@ -19,6 +19,38 @@ void GeimBoi::App::run()
 	ImGuiIO& io = ImGui::GetIO();
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+	auto text_opcode = [&](uint16_t addr) -> int {
+		uint8_t opcode = gb_emu_read_u8(m_Emulator, addr);
+		uint8_t opcode_size = gb_opcode_size(opcode);
+
+		switch (opcode_size) {
+			case 3: {
+				ImGui::Text(
+					"[0x%04X] %s (0x%04X)",
+					addr,
+					gb_opcode_asm(opcode),
+					gb_emu_read_u16(m_Emulator, addr + 1)
+				);
+				break;
+			}
+			case 2: {
+				ImGui::Text(
+					"[0x%04X] %s (0x%02X)",
+					addr,
+					gb_opcode_asm(opcode),
+					gb_emu_read_u8(m_Emulator, addr + 1)
+				);
+				break;
+			}
+
+			default: {
+				ImGui::Text("[0x%04X] %s", addr, gb_opcode_asm(opcode));
+				break;
+			}
+		}
+		return opcode_size;
+	};
+
 	while (!done) {
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
@@ -38,26 +70,36 @@ void GeimBoi::App::run()
 		// Our rendering stuff :p
 		ImGui::Begin("CPU State");
 
-        ImGui::SeparatorText("Registers");
+		ImGui::SeparatorText("Registers");
 		ImGui::Text("AF 0x%04X", GB_REG_AF(m_Emulator->cpu.regs));
 		ImGui::SameLine();
 		ImGui::Text("BC 0x%04X", GB_REG_BC(m_Emulator->cpu.regs));
 		ImGui::Text("DE 0x%04X", GB_REG_DE(m_Emulator->cpu.regs));
 		ImGui::SameLine();
 		ImGui::Text("HL 0x%04X", GB_REG_HL(m_Emulator->cpu.regs));
-		ImGui::Text("SP 0x%04X [0x%04X]", GB_REG_SP(m_Emulator->cpu.regs), gb_emu_read_u16(m_Emulator, GB_REG_SP(m_Emulator->cpu.regs)));
-        ImGui::Text("PC 0x%04X [0x%04X]", GB_REG_PC(m_Emulator->cpu.regs), gb_emu_read_u16(m_Emulator, GB_REG_PC(m_Emulator->cpu.regs)));
+		ImGui::Text(
+			"SP 0x%04X [0x%04X]",
+			GB_REG_SP(m_Emulator->cpu.regs),
+			gb_emu_read_u16(m_Emulator, GB_REG_SP(m_Emulator->cpu.regs))
+		);
+		ImGui::Text(
+			"PC 0x%04X [0x%04X]",
+			GB_REG_PC(m_Emulator->cpu.regs),
+			gb_emu_read_u16(m_Emulator, GB_REG_PC(m_Emulator->cpu.regs))
+		);
+		text_opcode(m_LastExecutedOpcode);
 
-        ImGui::SeparatorText("Upcoming instructions");
-        for (int i = 0; i < 8;) {
-			uint8_t opcode =
-				gb_emu_read_u8(m_Emulator, GB_REG_PC(m_Emulator->cpu.regs) + i);
-			ImGui::Text("%s", gb_opcode_asm(opcode));
-			i += gb_opcode_size(opcode);
+		ImGui::SeparatorText("Upcoming instructions");
+		int offset = 0;
+		for (int i = 0; i < 8; i++) {
+			uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs) + offset;
+			offset += text_opcode(addr);
 		}
 
-        ImGui::SeparatorText("Control");
+		ImGui::SeparatorText("Control");
 		if (ImGui::Button("Execute opcode")) {
+			uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
+			m_LastExecutedOpcode = addr;
 			gb_emu_advance_opcode(m_Emulator);
 		}
 
