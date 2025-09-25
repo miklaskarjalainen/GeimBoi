@@ -4,30 +4,39 @@
 #include "gbSM83.h"
 #include "log.h"
 
-static void _gb_xor(gb_sm83_t* cpu, u8 data)
+static inline void _gb_xor(gb_sm83_t* cpu, u8 data)
 {
 	u8 result = GB_REG_A(cpu->regs) ^= data;
 	GB_REG_F(cpu->regs) = result == 0 ? GB_FLAG_ZERO : 0x0;
 }
 
-static void _gb_sub(gb_sm83_t* cpu, u8 data)
+static inline void _gb_sub(gb_sm83_t* cpu, u8 data)
 {
-	u8 result = GB_REG_A(cpu->regs) - data;
+    u8 result = GB_REG_A(cpu->regs) - data;
 
 	GB_REG_F(cpu->regs) = result == 0 ? GB_FLAG_ZERO : 0x0;
 	GB_REG_F(cpu->regs) |= GB_FLAG_SUBS;
 	GB_REG_F(cpu->regs) |= (result & GB_BIT(3)) != 0 ? GB_FLAG_HALF : 0;
 	GB_REG_F(cpu->regs) |= (result & GB_BIT(7)) != 0 ? GB_FLAG_CARR : 0;
+
 }
 
-static void _gb_srl(gb_sm83_t* cpu, u8* reg)
+static inline void _gb_add_hl_u16(gb_sm83_t* cpu, u16 data)
+{
+	u16 result = GB_REG_HL(cpu->regs) + data;
+	GB_REG_F(cpu->regs) ^= GB_FLAG_HALF | GB_FLAG_CARR | GB_FLAG_SUBS;
+	GB_REG_F(cpu->regs) |= (result & GB_BIT(11)) != 0 ? GB_FLAG_HALF : 0;
+	GB_REG_F(cpu->regs) |= (result & GB_BIT(15)) != 0 ? GB_FLAG_CARR : 0;
+}
+
+static inline void _gb_srl(gb_sm83_t* cpu, u8* reg)
 {
 	GB_REG_F(cpu->regs) = (*reg) & GB_BIT(0) ? GB_FLAG_CARR : 0;
 	*reg >>= 1;
 	GB_REG_F(cpu->regs) |= (*reg) == 0 ? GB_FLAG_ZERO : 0;
 }
 
-static void _gb_call(gb_emu_t* emu)
+static inline void _gb_call(gb_emu_t* emu)
 {
 	gb_emu_push_u16(emu, GB_REG_PC(emu->cpu.regs) + 2);
 	GB_REG_PC(emu->cpu.regs) = gb_emu_read_u16(emu, GB_REG_PC(emu->cpu.regs));
@@ -222,6 +231,23 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 			GB_REG_PC(emu->cpu.regs)++;
 			_gb_sub(&emu->cpu, data);
 			return 2;
+		}
+
+		/* ADD HL, BC */ case 0x09: {
+            _gb_add_hl_u16(&emu->cpu, GB_REG_BC(emu->cpu.regs));
+		    return 2;
+		}
+		/* ADD HL, DE */ case 0x19: {
+            _gb_add_hl_u16(&emu->cpu, GB_REG_DE(emu->cpu.regs));
+		    return 2;
+		}
+		/* ADD HL, HL */ case 0x29: {
+            _gb_add_hl_u16(&emu->cpu, GB_REG_HL(emu->cpu.regs));
+		    return 2;
+		}
+		/* ADD HL, SP */ case 0x39: {
+            _gb_add_hl_u16(&emu->cpu, GB_REG_SP(emu->cpu.regs));
+		    return 2;
 		}
 
 		/* CB PREFIX */ case 0xCB: {
