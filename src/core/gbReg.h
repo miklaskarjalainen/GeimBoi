@@ -1,5 +1,5 @@
-#ifndef GB_REG_H
-#define GB_REG_H
+#ifndef _GB_REG_H
+#define _GB_REG_H
 
 #include <stdint.h>
 
@@ -17,14 +17,6 @@ typedef union gb_reg16 {
     } nibble;
     u16 value;
 } gb_reg16_t;
-
-#define GB_REG_AF 0
-#define GB_REG_BC 1
-#define GB_REG_DE 2
-#define GB_REG_HL 3
-#define GB_REG_SP 4
-#define GB_REG_PC 5
-#define GB_REG_COUNT 6
 
 #define GB_BIT(x) (1 << x)
 #define GB_IS_BIT(from, bit) (from & GB_BIT(bit))

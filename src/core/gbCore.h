@@ -1,5 +1,5 @@
-#ifndef GB_CORE_H
-#define GB_CORE_H
+#ifndef _GB_CORE_H
+#define _GB_CORE_H
 
 #ifdef __cplusplus
 extern "C" {
