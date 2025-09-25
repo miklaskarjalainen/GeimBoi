@@ -21,10 +21,10 @@
 #define GB_REG_L(regs) (regs[3].nibble.low)
 
 
-typedef struct gbSM83 {
+typedef struct gb_sm83 {
     gb_reg16_t regs[GB_REG_COUNT];
-} gbSM83_t;
+} gb_sm83_t;
 
-gbSM83_t gb_cpu_create(void);
+gb_sm83_t gb_cpu_create(void);
 
 #endif

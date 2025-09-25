@@ -61,3 +61,19 @@ u8 gb_emu_read_u8(gb_emu_t* emu, u16 addr)
 {
     return gb_cart_read_u8(&emu->cart, addr);
 }
+
+i8 gb_emu_read_i8(gb_emu_t* emu, u16 addr)
+{
+    return (i8)gb_emu_read_u8(emu, addr);
+}
+
+void gb_emu_write_u8(gb_emu_t* emu, u16 addr, u8 data)
+{
+    if (addr < 0x8000) {
+        return;
+    }
+
+    (void)emu;
+    (void)data;
+    return;
+}

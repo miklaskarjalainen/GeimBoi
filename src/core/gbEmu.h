@@ -8,7 +8,7 @@
 #include <stddef.h>
 
 typedef struct gb_emu {
-    gbSM83_t cpu;
+    gb_sm83_t cpu;
     gb_cart_t cart;
 } gb_emu_t;
 
@@ -24,8 +24,14 @@ bool gb_emu_load_rom_file(gb_emu_t* emu, const char* fpath);
 
 u16 gb_emu_read_u16(gb_emu_t* emu, u16 addr);
 u8 gb_emu_read_u8(gb_emu_t* emu, u16 addr);
+i8 gb_emu_read_i8(gb_emu_t* emu, u16 addr);
+
+void gb_emu_write_u8(gb_emu_t* emu, u16 addr, u8 data);
 
 void gb_emu_advance_frame(gb_emu_t* emu);
-void gb_emu_advance_opcode(gb_emu_t* emu);
+/**
+ * @note returns the amount of cycles used.
+ */
+u8 gb_emu_advance_opcode(gb_emu_t* emu);
 
 #endif
