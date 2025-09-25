@@ -7,10 +7,11 @@ set(GEIMBOI_CORE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 # Define the backend library
 add_library(${PROJECT_NAME} SHARED
     gbCore.h
+    gbCart.c gbCart.h
     gbEmu.c gbEmu.h
     gbZ80.c gbZ80.h
-    gbCart.c gbCart.h
     gbReg.h
+    log.h
 )
 add_library(GeimBoi::core ALIAS ${PROJECT_NAME})
 
