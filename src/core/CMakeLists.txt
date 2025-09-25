@@ -7,6 +7,7 @@ set(GEIMBOI_CORE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 # Define the backend library
 add_library(${PROJECT_NAME} SHARED
     gbCore.h
+    gbEmu.c gbEmu.h
     gbZ80.c gbZ80.h
     gbReg.h
 )

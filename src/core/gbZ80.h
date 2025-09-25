@@ -25,4 +25,6 @@ typedef struct gbZ80 {
     gb_reg16_t regs[GB_REG_COUNT];
 } gbZ80_t;
 
+gbZ80_t gb_cpu_create(void);
+
 #endif

@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#include "gbEmu.h"
 #include "gbReg.h"
 #include "gbZ80.h"
 
