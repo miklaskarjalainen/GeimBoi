@@ -53,7 +53,8 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 		}
 
 		/* JR NZ, s8 */ case 0x20: {
-			const i8 d = gb_emu_read_i8(emu, GB_REG_PC(emu->cpu.regs)++);
+			const i8 d = gb_emu_read_i8(emu, GB_REG_PC(emu->cpu.regs));
+			GB_REG_PC(emu->cpu.regs)++;
 			if (!(GB_REG_F(emu->cpu.regs) & GB_FLAG_ZERO)) {
 				GB_REG_PC(emu->cpu.regs) += (u16)(i16)d;
 				return 3;
@@ -61,7 +62,8 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 			return 2;
 		}
 		/* JR NC, s8 */ case 0x30: {
-			const i8 d = gb_emu_read_i8(emu, GB_REG_PC(emu->cpu.regs)++);
+			const i8 d = gb_emu_read_i8(emu, GB_REG_PC(emu->cpu.regs));
+			GB_REG_PC(emu->cpu.regs)++;
 			if (!(GB_REG_F(emu->cpu.regs) & GB_FLAG_CARR)) {
 				GB_REG_PC(emu->cpu.regs) += (u16)(i16)d;
 				return 3;
@@ -147,9 +149,23 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 			return 1;
 		}
 		/* XOR A */ case 0xEE: {
-			const u8 d = gb_emu_read_u8(emu, GB_REG_PC(emu->cpu.regs)++);
+			const u8 d = gb_emu_read_u8(emu, GB_REG_PC(emu->cpu.regs));
+			GB_REG_PC(emu->cpu.regs)++;
 			_gb_xor(&emu->cpu, d);
 			return 2;
+		}
+
+		/* LD (a8), A */ case 0xE0: {
+		    u16 addr = (u16)0xFF00 | (u16)gb_emu_read_u8(emu, GB_REG_PC(emu->cpu.regs));
+			GB_REG_PC(emu->cpu.regs)++;
+			gb_emu_write_u8(emu, addr, GB_REG_A(emu->cpu.regs));
+		    return 3;
+		}
+		/* LD A, (a8) */ case 0xF0: {
+		    u16 addr = (u16)0xFF00 | (u16)gb_emu_read_u8(emu, GB_REG_PC(emu->cpu.regs));
+			GB_REG_PC(emu->cpu.regs)++;
+			GB_REG_A(emu->cpu.regs) = gb_emu_read_u8(emu, addr);
+		    return 3;
 		}
 
 		default: {
