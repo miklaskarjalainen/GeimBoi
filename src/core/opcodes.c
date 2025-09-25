@@ -10,6 +10,12 @@ static void _gb_xor(gb_sm83_t* cpu, u8 data)
 	GB_REG_F(cpu->regs) = result == 0 ? GB_FLAG_ZERO : 0x0;
 }
 
+static void _gb_call(gb_emu_t* emu)
+{
+	gb_cpu_push_u16(&emu->cpu, GB_REG_PC(emu->cpu.regs) + 2);
+	GB_REG_PC(emu->cpu.regs) = gb_emu_read_u16(emu, GB_REG_PC(emu->cpu.regs));
+}
+
 u8 gb_emu_advance_opcode(gb_emu_t* emu)
 {
 	u8 opcode = gb_cart_read_u8(&emu->cart, GB_REG_PC(emu->cpu.regs)++);
@@ -24,6 +30,26 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 			GB_REG_PC(emu->cpu.regs) = gb_emu_read_u16(emu, GB_REG_PC(emu->cpu.regs));
 			GB_REG_PC(emu->cpu.regs) += 2;
 			return 4;
+		}
+
+		/* CALL Z, a16 */ case 0xCC: {
+			if (GB_REG_F(emu->cpu.regs) & GB_FLAG_ZERO) {
+				_gb_call(emu);
+				return 6;
+			}
+			return 3;
+		}
+		/* CALL C, a16 */ case 0xDC: {
+			if (GB_REG_F(emu->cpu.regs) & GB_FLAG_CARR) {
+				_gb_call(emu);
+				return 6;
+			}
+			return 3;
+		}
+
+		/* CALL, a16 */ case 0xCD: {
+			_gb_call(emu);
+			return 6;
 		}
 
 		/* JR NZ, s8 */ case 0x20: {
@@ -48,19 +74,19 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 			return 2;
 		}
 		/* LD (DE), A */ case 0x12: {
-    		gb_emu_write_u8(emu, GB_REG_DE(emu->cpu.regs), GB_REG_A(emu->cpu.regs));
-    		return 2;
-    	}
+			gb_emu_write_u8(emu, GB_REG_DE(emu->cpu.regs), GB_REG_A(emu->cpu.regs));
+			return 2;
+		}
 		/* LD (HL+), A */ case 0x22: {
-    		gb_emu_write_u8(emu, GB_REG_HL(emu->cpu.regs), GB_REG_A(emu->cpu.regs));
-            GB_REG_HL(emu->cpu.regs) += 1;
-    		return 2;
-    	}
+			gb_emu_write_u8(emu, GB_REG_HL(emu->cpu.regs), GB_REG_A(emu->cpu.regs));
+			GB_REG_HL(emu->cpu.regs) += 1;
+			return 2;
+		}
 		/* LD (HL-), A */ case 0x32: {
-		    gb_emu_write_u8(emu, GB_REG_HL(emu->cpu.regs), GB_REG_A(emu->cpu.regs));
-            GB_REG_HL(emu->cpu.regs) -= 1;
-            return 2;
-    	}
+			gb_emu_write_u8(emu, GB_REG_HL(emu->cpu.regs), GB_REG_A(emu->cpu.regs));
+			GB_REG_HL(emu->cpu.regs) -= 1;
+			return 2;
+		}
 
 		/* LD BC, d16 */ case 0x01: {
 			const u16 d = gb_emu_read_u16(emu, GB_REG_PC(emu->cpu.regs));
