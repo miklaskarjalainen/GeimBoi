@@ -21,6 +21,7 @@
 	#define GB_INFO(...)
 	#define GB_WARN(...)
 	#define GB_ERROR(...)
+	#define GB_FATAL(...)
 #else
 	#include <stdio.h>
 	#include <stdlib.h>
