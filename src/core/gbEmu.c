@@ -47,33 +47,12 @@ bool gb_emu_load_rom_file(gb_emu_t* emu, const char* fpath)
 
 void gb_emu_advance_frame(gb_emu_t* emu) { (void)emu; }
 
-void gb_emu_advance_opcode(gb_emu_t* emu) {
-    u8 opcode = gb_cart_read_u8(&emu->cart, GB_REG_PC(emu->cpu.regs)++);
-    switch (opcode) {
-        // NOP
-        case 0x00: {
-            break;
-        }
-
-        // jp, a16
-        case 0xC3: {
-            GB_REG_PC(emu->cpu.regs) = gb_cart_read_u16(&emu->cart, GB_REG_PC(emu->cpu.regs));
-            break;
-        }
-
-        default: {
-            printf("UNIMPLEMENTED OPCODE! 0x%X\n", opcode);
-            break;
-        }
-    }
-}
-
 u16 gb_emu_read_u16(gb_emu_t* emu, u16 addr)
 {
     return gb_cart_read_u16(&emu->cart, addr);
 }
 
-u8 gb_emu_read_u8(gb_emu_t* emu, u8 addr)
+u8 gb_emu_read_u8(gb_emu_t* emu, u16 addr)
 {
     return gb_cart_read_u8(&emu->cart, addr);
 }

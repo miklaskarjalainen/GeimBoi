@@ -12,6 +12,7 @@ add_library(${PROJECT_NAME} SHARED
     gbZ80.c gbZ80.h
     gbReg.h
     log.h
+    opcodes.c
 )
 add_library(GeimBoi::core ALIAS ${PROJECT_NAME})
 

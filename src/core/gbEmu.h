@@ -23,7 +23,7 @@ bool gb_emu_load_rom_bytes(gb_emu_t* emu, u8* rom, size_t length);
 bool gb_emu_load_rom_file(gb_emu_t* emu, const char* fpath);
 
 u16 gb_emu_read_u16(gb_emu_t* emu, u16 addr);
-u8 gb_emu_read_u8(gb_emu_t* emu, u8 addr);
+u8 gb_emu_read_u8(gb_emu_t* emu, u16 addr);
 
 void gb_emu_advance_frame(gb_emu_t* emu);
 void gb_emu_advance_opcode(gb_emu_t* emu);
