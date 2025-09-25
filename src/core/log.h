@@ -23,6 +23,7 @@
 	#define GB_ERROR(...)
 #else
 	#include <stdio.h>
+	#include <stdlib.h>
 
 	#ifndef _GB_LOG_OUT
 		#define _GB_LOG_OUT stdout
