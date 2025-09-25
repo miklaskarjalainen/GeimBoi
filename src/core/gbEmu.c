@@ -1,4 +1,5 @@
 #include "gbEmu.h"
+#include "gbCart.h"
 #include "gbReg.h"
 #include "gbZ80.h"
 
@@ -12,7 +13,7 @@ gb_emu_t gb_emu_create(void)
     };
 }
 
-void gb_emu_delete(gb_emu_t* emu) { free(emu->rom); }
+void gb_emu_delete(gb_emu_t* emu) { gb_cart_delete(&emu->cart); }
 
 bool gb_emu_load_rom_bytes(gb_emu_t* emu, u8* rom, size_t length)
 {
@@ -20,7 +21,7 @@ bool gb_emu_load_rom_bytes(gb_emu_t* emu, u8* rom, size_t length)
         free(rom);
         return false;
     }
-    emu->rom = rom;
+    emu->cart = gb_cart_create(rom, length);
     return true;
 }
 
@@ -47,7 +48,7 @@ bool gb_emu_load_rom_file(gb_emu_t* emu, const char* fpath)
 void gb_emu_advance_frame(gb_emu_t* emu) { (void)emu; }
 
 void gb_emu_advance_opcode(gb_emu_t* emu) {
-    u8 opcode = emu->rom[GB_REG_PC(emu->cpu.regs)++];
+    u8 opcode = gb_cart_read_u8(&emu->cart, GB_REG_PC(emu->cpu.regs)++);
     switch (opcode) {
         // NOP
         case 0x00: {
@@ -56,10 +57,7 @@ void gb_emu_advance_opcode(gb_emu_t* emu) {
 
         // jp, a16
         case 0xC3: {
-            gb_reg16_t reg;
-            reg.nibble.low = emu->rom[GB_REG_PC(emu->cpu.regs)++];
-            reg.nibble.high = emu->rom[GB_REG_PC(emu->cpu.regs)++];
-            GB_REG_PC(emu->cpu.regs) = reg.value;
+            GB_REG_PC(emu->cpu.regs) = gb_cart_read_u16(&emu->cart, GB_REG_PC(emu->cpu.regs));
             break;
         }
 
@@ -68,4 +66,14 @@ void gb_emu_advance_opcode(gb_emu_t* emu) {
             break;
         }
     }
+}
+
+u16 gb_emu_read_u16(gb_emu_t* emu, u16 addr)
+{
+    return gb_cart_read_u16(&emu->cart, addr);
+}
+
+u8 gb_emu_read_u8(gb_emu_t* emu, u8 addr)
+{
+    return gb_cart_read_u8(&emu->cart, addr);
 }

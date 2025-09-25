@@ -9,6 +9,7 @@ add_library(${PROJECT_NAME} SHARED
     gbCore.h
     gbEmu.c gbEmu.h
     gbZ80.c gbZ80.h
+    gbCart.c gbCart.h
     gbReg.h
 )
 add_library(GeimBoi::core ALIAS ${PROJECT_NAME})
