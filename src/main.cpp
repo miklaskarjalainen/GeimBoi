@@ -1,11 +1,8 @@
-#include <SDL2/SDL.h> //! gives a linking error if not included in visual studio, and only in "release" configuration.
-#include "application/appWindow.hpp"
-using namespace GeimBoi;
+namespace GeimBoi {
+    extern int main();
+}
 
-int main(int argc, char* argv[])
+int main()
 {
-    const char* loadRom = argc > 1 ? argv[1] : nullptr;
-    appWindow window(loadRom);
-    window.Run();
-    return 0;
+    return GeimBoi::main();
 }

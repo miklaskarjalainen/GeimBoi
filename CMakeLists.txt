@@ -1,80 +1,11 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 4.1.1)
+
+# Add libs
+add_subdirectory(src/core)
+add_subdirectory(src/application)
+
 project(
-    GeimBoi 
-    LANGUAGES CXX C
+    GeimBoi C CXX
 )
-
-set(CMAKE_CXX_STANDARD 17)
-set(SOURCE_FILES
-    src/main.cpp
-    src/version.hpp
-
-    src/application/appGui.cpp src/application/appGui.hpp
-    src/application/appSettings.cpp src/application/appSettings.hpp
-    src/application/appWindow.cpp src/application/appWindow.hpp
-    src/application/gui/rebindButton.cpp src/application/gui/rebindButton.hpp
-
-    src/core/apu/apuChannel1.cpp src/core/apu/apuChannel1.hpp
-    src/core/apu/apuChannel2.cpp src/core/apu/apuChannel2.hpp
-    src/core/apu/apuChannel3.cpp src/core/apu/apuChannel3.hpp
-    src/core/apu/apuSquare.cpp src/core/apu/apuSquare.hpp
-    src/core/apu/soundWaves.cpp src/core/apu/soundWaves.hpp
-
-    src/core/mbc/gbMBC.cpp src/core/mbc/gbMBC.hpp
-    src/core/mbc/gbMBC1.cpp src/core/mbc/gbMBC1.hpp
-    src/core/mbc/gbMBC2.cpp src/core/mbc/gbMBC2.hpp
-    src/core/mbc/gbMBC3.cpp src/core/mbc/gbMBC3.hpp
-
-    src/core/opcode/cb_opcode.cpp src/core/opcode/opcode.cpp
-    src/core/opcode/debugger.cpp src/core/opcode/debugger.hpp
-
-    src/core/gbAPU.cpp     src/core/gbAPU.hpp
-    src/core/gbBootRom.cpp src/core/gbBootRom.hpp
-    src/core/gbCart.cpp    src/core/gbCart.hpp
-    src/core/gbGameBoy.cpp src/core/gbGameBoy.hpp
-    src/core/gbPPU.cpp     src/core/gbPPU.hpp
-    src/core/gbZ80.cpp     src/core/gbZ80.hpp
-    src/core/reg.hpp
-)
-
-set(INCLUDE_DIRS
-    vendor/include
-    vendor/include/imgui/backends
-)
-
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-add_subdirectory(cmake/imgui)
-
-if (MSVC)
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
-    target_sources(${PROJECT_NAME} PRIVATE GeimBoi.rc)
-endif()
-
-if (WIN32)
-    list(APPEND INCLUDE_DIRS vendor/include/WindowsOnly)
-    target_link_directories(${PROJECT_NAME} PRIVATE vendor/lib)
-    target_link_libraries(
-        ${PROJECT_NAME} PRIVATE
-        SDL2.lib
-        SDL2main.lib
-        SDL2test.lib
-        opengl32.lib
-        imgui
-    )
-else()
-    # Detect NixOS
-    file(READ /etc/os-release OS_RELEASE)
-    string(FIND "${OS_RELEASE}" "ID=nixos" IS_NIXOS)
-    
-    # Only append if not NixOS.
-    if (${IS_NIXOS} EQUAL -1)
-        list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-    endif()
-
-    find_package(SDL2 REQUIRED)
-    include_directories(${SDL2_INCLUDE_DIRS})
-    target_link_directories(${PROJECT_NAME} PRIVATE vendor/include/imgui)
-    target_link_libraries(${PROJECT_NAME} imgui ${SDL2_LIBRARIES} GL)
-endif()
-
-target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
+add_executable(${PROJECT_NAME} src/main.cpp)
+target_link_libraries(${PROJECT_NAME} PUBLIC GeimBoi::core GeimBoi::app)
