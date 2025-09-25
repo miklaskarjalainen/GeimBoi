@@ -39,8 +39,29 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 {
 	u8 opcode = gb_cart_read_u8(&emu->cart, GB_REG_PC(emu->cpu.regs)++);
 	switch (opcode) {
+	    /* LD B, B */ case 0x40:
+		/* LD C, C */ case 0x49:
+		/* LD D, D */ case 0x52:
+		/* LD E, E */ case 0x5B:
+		/* LD H, H */ case 0x64:
+		/* LD L, L */ case 0x6D:
 		/* NOP */ case 0x00: {
 			return 1;
+		}
+
+		/* LD D, B */ case 0x05: {
+		    GB_REG_D(emu->cpu.regs) = GB_REG_B(emu->cpu.regs);
+		    return 1;
+		}
+
+		/* LD H, B */ case 0x06: {
+		    GB_REG_H(emu->cpu.regs) = GB_REG_B(emu->cpu.regs);
+		    return 1;
+		}
+
+		/* LD E, A */ case 0x5F: {
+		    GB_REG_E(emu->cpu.regs) = GB_REG_A(emu->cpu.regs);
+		    return 1;
 		}
 
 		/* jp, a16 */ case 0xC3: {
