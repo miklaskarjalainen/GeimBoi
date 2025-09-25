@@ -12,7 +12,7 @@ static void _gb_xor(gb_sm83_t* cpu, u8 data)
 
 static void _gb_call(gb_emu_t* emu)
 {
-	gb_cpu_push_u16(&emu->cpu, GB_REG_PC(emu->cpu.regs) + 2);
+	gb_emu_push_u16(emu, GB_REG_PC(emu->cpu.regs) + 2);
 	GB_REG_PC(emu->cpu.regs) = gb_emu_read_u16(emu, GB_REG_PC(emu->cpu.regs));
 }
 
@@ -20,13 +20,11 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 {
 	u8 opcode = gb_cart_read_u8(&emu->cart, GB_REG_PC(emu->cpu.regs)++);
 	switch (opcode) {
-		// NOP
-		case 0x00: {
+		/* NOP */ case 0x00: {
 			return 1;
 		}
 
-		// jp, a16
-		case 0xC3: {
+		/* jp, a16 */ case 0xC3: {
 			GB_REG_PC(emu->cpu.regs) = gb_emu_read_u16(emu, GB_REG_PC(emu->cpu.regs));
 			GB_REG_PC(emu->cpu.regs) += 2;
 			return 4;

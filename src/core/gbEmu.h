@@ -28,6 +28,11 @@ i8 gb_emu_read_i8(gb_emu_t* emu, u16 addr);
 
 void gb_emu_write_u8(gb_emu_t* emu, u16 addr, u8 data);
 
+void gb_emu_push_u8(gb_emu_t* emu, u8 data);
+void gb_emu_push_u16(gb_emu_t* emu, u16 data);
+u8 gb_emu_pop_u8(gb_emu_t* emu);
+u16 gb_emu_pop_u16(gb_emu_t* emu);
+
 void gb_emu_advance_frame(gb_emu_t* emu);
 /**
  * @note returns the amount of cycles used.

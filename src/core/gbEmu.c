@@ -81,3 +81,27 @@ void gb_emu_write_u8(gb_emu_t* emu, u16 addr, u8 data)
     gb_cpu_write_u8(&emu->cpu, addr, data);
     return;
 }
+
+void gb_emu_push_u8(gb_emu_t* emu, u8 data)
+{
+    GB_REG_SP(emu->cpu.regs) -= 1;
+	gb_emu_write_u8(emu, GB_REG_SP(emu->cpu.regs), data);
+}
+
+void gb_emu_push_u16(gb_emu_t* emu, u16 data)
+{
+    gb_emu_push_u8(emu, (u8)data);
+	gb_emu_push_u8(emu, (u8)(data >> 8));
+}
+
+u8 gb_emu_pop_u8(gb_emu_t* emu)
+{
+    u8 d = gb_emu_read_u8(emu, GB_REG_SP(emu->cpu.regs));
+    GB_REG_SP(emu->cpu.regs) += 1;
+    return d;
+}
+
+u16 gb_emu_pop_u16(gb_emu_t* emu)
+{
+    return (u16) ((gb_emu_pop_u8(emu) << 8) | gb_emu_pop_u8(emu));
+}

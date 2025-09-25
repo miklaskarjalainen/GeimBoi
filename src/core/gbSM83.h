@@ -29,7 +29,5 @@ gb_sm83_t gb_cpu_create(void);
 
 u8 gb_cpu_read_u8(const gb_sm83_t* cpu, u16 addr);
 void gb_cpu_write_u8(gb_sm83_t* cpu, u16 addr, u8 data);
-void gb_cpu_push_u8(gb_sm83_t* cpu, u8 data);
-void gb_cpu_push_u16(gb_sm83_t* cpu, u16 data);
 
 #endif
