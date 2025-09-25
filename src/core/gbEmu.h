@@ -22,9 +22,9 @@ void gb_emu_delete(gb_emu_t* emu);
 bool gb_emu_load_rom_bytes(gb_emu_t* emu, u8* rom, size_t length);
 bool gb_emu_load_rom_file(gb_emu_t* emu, const char* fpath);
 
-u16 gb_emu_read_u16(gb_emu_t* emu, u16 addr);
-u8 gb_emu_read_u8(gb_emu_t* emu, u16 addr);
-i8 gb_emu_read_i8(gb_emu_t* emu, u16 addr);
+u16 gb_emu_read_u16(const gb_emu_t* emu, u16 addr);
+u8 gb_emu_read_u8(const gb_emu_t* emu, u16 addr);
+i8 gb_emu_read_i8(const gb_emu_t* emu, u16 addr);
 
 void gb_emu_write_u8(gb_emu_t* emu, u16 addr, u8 data);
 
