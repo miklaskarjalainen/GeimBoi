@@ -36,13 +36,6 @@ u8 gb_cart_read_u8(const gb_cart_t* cart, u16 addr)
     return cart->rom[addr];
 }
 
-u16 gb_cart_read_u16(const gb_cart_t* cart, u16 addr)
-{
-    const u16 low = gb_cart_read_u8(cart, addr);
-    const u16 high = gb_cart_read_u8(cart, addr+1);
-    return (u16)((low) | (high << 8));
-}
-
 void gb_cart_write_u8(gb_cart_t* cart, u16 addr, u8 data)
 {
     (void)cart;

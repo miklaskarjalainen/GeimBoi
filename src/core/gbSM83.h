@@ -20,11 +20,16 @@
 #define GB_REG_H(regs) (regs[3].nibble.high)
 #define GB_REG_L(regs) (regs[3].nibble.low)
 
-
 typedef struct gb_sm83 {
     gb_reg16_t regs[GB_REG_COUNT];
+    u8 memory[0x8000]; // 0x8000 - 0xFFFF
 } gb_sm83_t;
 
 gb_sm83_t gb_cpu_create(void);
+
+u8 gb_cpu_read_u8(const gb_sm83_t* cpu, u16 addr);
+void gb_cpu_write_u8(gb_sm83_t* cpu, u16 addr, u8 data);
+void gb_cpu_push_u8(gb_sm83_t* cpu, u8 data);
+void gb_cpu_push_u16(gb_sm83_t* cpu, u16 data);
 
 #endif
