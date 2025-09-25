@@ -105,11 +105,16 @@ void GeimBoi::App::run()
 		}
 		ImGui::End();
 
-		static MemoryEditor cpu_memory;
-		cpu_memory.DrawWindow("Cpu Memory Editor (0x8000 - 0xFFFF)", m_Emulator->cpu.memory, 0x8000);
-
-		static MemoryEditor rom_memory;
-		rom_memory.DrawWindow("Rom Memory Editor (0x0000 - 0x7FFF)", m_Emulator->cart.rom, m_Emulator->cart.len);
+		static MemoryEditor rom_memory = [&]() {
+		    MemoryEditor mem;
+				mem.UserData = (void*)m_Emulator;
+				mem.ReadFn = [](auto, size_t addr, void* void_emu) -> ImU8{
+                    const gb_emu_t* emu = (const gb_emu_t*)void_emu;
+                    return gb_emu_read_u8(emu, (uint16_t)addr);
+				};
+				return mem;
+		}();
+		rom_memory.DrawWindow("GameBoy memory", nullptr, 0x10000);
 
 		// Rendering
 		ImGui::Render();
