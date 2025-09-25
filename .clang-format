@@ -53,7 +53,7 @@ IncludeCategories:
     Priority: 1
 IncludeIsMainRegex: "(Test)?$"
 IndentCaseLabels: true # false
-IndentPPDirectives: AfterHash
+IndentPPDirectives: BeforeHash
 IndentWidth: 4 #2
 IndentWrappedFunctionNames: false
 JavaScriptQuotes: Leave
