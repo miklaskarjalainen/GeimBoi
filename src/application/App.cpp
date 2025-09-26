@@ -103,6 +103,15 @@ void GeimBoi::App::run()
 			m_LastExecutedOpcode = addr;
 			gb_emu_advance_opcode(m_Emulator);
 		}
+		ImGui::SameLine();
+		if (ImGui::Button("Execute 100x ops")) {
+			for (int i = 0; i < 99; i++) {
+			    gb_emu_advance_opcode(m_Emulator);
+			}
+		    uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
+			m_LastExecutedOpcode = addr;
+			gb_emu_advance_opcode(m_Emulator);
+		}
 		ImGui::End();
 
 		static MemoryEditor rom_memory = [&]() {
