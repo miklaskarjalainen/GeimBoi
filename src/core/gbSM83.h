@@ -23,6 +23,8 @@
 typedef struct gb_sm83 {
     gb_reg16_t regs[GB_REG_COUNT];
     u8 memory[0x8000]; // 0x8000 - 0xFFFF
+
+    u8 interrupt_enable;
 } gb_sm83_t;
 
 gb_sm83_t gb_cpu_create(void);

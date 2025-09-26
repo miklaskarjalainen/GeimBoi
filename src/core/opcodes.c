@@ -88,8 +88,8 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 		}
 
 		/* CCF */ case 0x3F: {
-		    GB_REG_F(emu->cpu.regs) &= (u8)~(GB_FLAG_SUBS | GB_FLAG_HALF);
-		    GB_REG_F(emu->cpu.regs) = GB_REG_F(emu->cpu.regs) ^ GB_FLAG_CARR;
+			GB_REG_F(emu->cpu.regs) &= (u8) ~(GB_FLAG_SUBS | GB_FLAG_HALF);
+			GB_REG_F(emu->cpu.regs) = GB_REG_F(emu->cpu.regs) ^ GB_FLAG_CARR;
 			return 1;
 		}
 
@@ -119,9 +119,9 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 		}
 
 		/* DEC L */ case 0x2D: {
-            _gb_dec(&emu->cpu, &GB_REG_L(emu->cpu.regs));
-            return 1;
-        }
+			_gb_dec(&emu->cpu, &GB_REG_L(emu->cpu.regs));
+			return 1;
+		}
 
 		/* DEC (HL) */ case 0x35: {
 			u8 data = gb_emu_read_u8(emu, GB_REG_HL(emu->cpu.regs));
@@ -131,9 +131,9 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 		}
 
 		/* DEC A */ case 0x3D: {
-            _gb_dec(&emu->cpu, &GB_REG_A(emu->cpu.regs));
-            return 1;
-        }
+			_gb_dec(&emu->cpu, &GB_REG_A(emu->cpu.regs));
+			return 1;
+		}
 
 		/* LD H, B */ case 0x06: {
 			GB_REG_H(emu->cpu.regs) = GB_REG_B(emu->cpu.regs);
@@ -427,6 +427,22 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 		/* RST 0x18 */ case 0xFF: {
 			_gb_call_addr(emu, 0x38);
 			return 4;
+		}
+
+		/* RETI */ case 0xD9: {
+			emu->cpu.interrupt_enable = 1;
+			GB_REG_PC(emu->cpu.regs) = gb_emu_pop_u16(emu);
+			return 4;
+		}
+
+		/* DI */ case 0xF3: {
+			emu->cpu.interrupt_enable = 0;
+			return 1;
+		}
+
+		/* EI */ case 0xFB: {
+			emu->cpu.interrupt_enable = 1;
+			return 1;
 		}
 
 		/* CB PREFIX */ case 0xCB: {
