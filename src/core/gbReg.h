@@ -18,8 +18,9 @@ typedef union gb_reg16 {
     u16 value;
 } gb_reg16_t;
 
-#define GB_BIT(x) (1 << x)
-#define GB_IS_BIT(from, bit) (from & GB_BIT(bit))
+#define GB_BIT(x) (1 << (x))
+#define GB_GET_BIT(from, bit) ((from) & GB_BIT(bit))
+#define GB_IS_BIT(from, bit) (GB_GET_BIT(from, bit) != 0)
 #define GB_FLAG_ZERO GB_BIT(7)
 #define GB_FLAG_SUBS GB_BIT(6)
 #define GB_FLAG_HALF GB_BIT(5)
