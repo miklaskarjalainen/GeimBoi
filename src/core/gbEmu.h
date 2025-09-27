@@ -12,8 +12,28 @@ typedef struct gb_emu {
     gb_cart_t cart;
 } gb_emu_t;
 
-gb_emu_t gb_emu_create(void);
+/**
+ * @brief Crients the emulator on the heap. And initializes it.
+ * @see gb_emu_init.
+ */
+gb_emu_t* gb_emu_create(void);
+/**
+ * @brief Deinitialises and frees the emulator
+ * @see gb_emu_deinit.
+ */
 void gb_emu_delete(gb_emu_t* emu);
+
+/**
+ * @brief initializes on an already allocated memory.
+ * @see gb_emu_create.
+ */
+void gb_emu_init(gb_emu_t* emu);
+/**
+ * @brief deinitialises the emulator.
+ * @warning DOES NOT FREE THE SOURCE PTR. Use `gb_emu_delete` instead!
+ * @see gb_emu_delete
+ */
+void gb_emu_deinit(gb_emu_t* emu);
 
 /**
  * @brief Copies the bytes to be used for the emulator.

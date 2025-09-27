@@ -1,15 +1,73 @@
 #include "gbSM83.h"
+#include "gbEmu.h"
+#include "log.h"
 
-gb_sm83_t gb_cpu_create(void)
+#define GB_ADDR_IE (0xFFFF) // Interrupt Enable
+#define GB_ADDR_IF (0xFF0F) // Interrupt Flag
+
+gb_sm83_t gb_cpu_create(struct gb_emu* emu)
 {
-	gb_sm83_t cpu = {
-	    .interrupt_enable = 0
-	};
+	gb_sm83_t cpu = {.interrupt_enable = 0, .emu = emu};
 	GB_REG_PC(cpu.regs) = 0x100;
 	GB_REG_SP(cpu.regs) = 0xFFFE;
 	return cpu;
 }
 
-u8 gb_cpu_read_u8(const gb_sm83_t* cpu, u16 addr) { return cpu->memory[addr - 0x8000]; }
+u8 gb_cpu_read_u8(const gb_sm83_t* cpu, u16 addr)
+{
+	return cpu->memory[addr - 0x8000];
+}
 
-void gb_cpu_write_u8(gb_sm83_t* cpu, u16 addr, u8 data) { cpu->memory[addr - 0x8000] = data; }
+void gb_cpu_write_u8(gb_sm83_t* cpu, u16 addr, u8 data)
+{
+	cpu->memory[addr - 0x8000] = data;
+}
+
+static void _gb_cpu_serve_interrupt(gb_sm83_t* cpu, u8 interrupt)
+{
+	cpu->interrupt_enable = 0;
+
+	gb_emu_push_u16(cpu->emu, GB_REG_PC(cpu->regs));
+
+	switch (interrupt)
+	{
+		case GB_INTERRUPT_VBLANK: {
+			GB_REG_PC(cpu->regs) = 0x40;
+			break;
+		}
+		case GB_INTERRUPT_LCD: {
+			GB_REG_PC(cpu->regs) = 0x48;
+			break;
+		}
+		case GB_INTERRUPT_TIMER: {
+			GB_REG_PC(cpu->regs) = 0x50;
+			break;
+		}
+		case GB_INTERRUPT_SERIAL: {
+			GB_REG_PC(cpu->regs) = 0x58;
+			break;
+		}
+		case GB_INTERRUPT_JOYPAD: {
+			GB_REG_PC(cpu->regs) = 0x60;
+			break;
+		}
+
+		default: {
+			// GB_FATAL("Invalid interrupt.");
+		}
+	}
+}
+
+void gb_cpu_request_interrupt(gb_sm83_t* cpu, u8 interrupt)
+{
+	(void)interrupt;
+	// gb_cpu_write_u8(cpu, u16 addr, u8 data)
+
+	/*
+	if (gb_cpu_read_u8(cpu, GB_ADDR_IE)) {
+
+	}
+	 */
+
+	_gb_cpu_serve_interrupt(cpu, interrupt);
+}

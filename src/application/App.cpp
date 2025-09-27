@@ -279,8 +279,7 @@ GeimBoi::App::App()
 	ImGui_ImplSDL3_InitForOpenGL(m_Window, m_GL);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
-	m_Emulator = new gb_emu_t;
-	*m_Emulator = gb_emu_create();
+	m_Emulator = gb_emu_create();
 	gb_emu_load_rom_file(
 		m_Emulator, "/home/giffi/Downloads/Tetris (World) (Rev 1).gb"
 	);
@@ -288,7 +287,7 @@ GeimBoi::App::App()
 
 GeimBoi::App::~App()
 {
-	delete m_Emulator;
+	gb_emu_delete(m_Emulator);
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL3_Shutdown();
