@@ -634,6 +634,59 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 			GB_REG_PC(emu->cpu.regs) = gb_emu_pop_u16(emu);
 			return 4;
 		}
+		/* RET Z */ case 0xC8: {
+			if ((GB_REG_F(emu->cpu.regs) & GB_FLAG_ZERO)) {
+				GB_REG_PC(emu->cpu.regs) = gb_emu_pop_u16(emu);
+				return 5;
+			}
+			return 2;
+		}
+		/* RET C */ case 0xD8: {
+			if ((GB_REG_F(emu->cpu.regs) & GB_FLAG_CARR)) {
+				GB_REG_PC(emu->cpu.regs) = gb_emu_pop_u16(emu);
+				return 5;
+			}
+			return 2;
+		}
+		/* RET NZ */ case 0xC0: {
+			if (!(GB_REG_F(emu->cpu.regs) & GB_FLAG_ZERO)) {
+				GB_REG_PC(emu->cpu.regs) = gb_emu_pop_u16(emu);
+				return 5;
+			}
+			return 2;
+		}
+		/* RET NC */ case 0xD0: {
+			if (!(GB_REG_F(emu->cpu.regs) & GB_FLAG_CARR)) {
+				GB_REG_PC(emu->cpu.regs) = gb_emu_pop_u16(emu);
+				return 5;
+			}
+			return 2;
+		}
+
+		/* JR s8 */ case 0x18: {
+			const i8 d = gb_emu_read_i8(emu, GB_REG_PC(emu->cpu.regs));
+			GB_REG_PC(emu->cpu.regs)++;
+			GB_REG_PC(emu->cpu.regs) += (u16)(i16)d;
+			return 3;
+		}
+		/* JR Z, s8 */ case 0x28: {
+			const i8 d = gb_emu_read_i8(emu, GB_REG_PC(emu->cpu.regs));
+			GB_REG_PC(emu->cpu.regs)++;
+			if ((GB_REG_F(emu->cpu.regs) & GB_FLAG_ZERO)) {
+				GB_REG_PC(emu->cpu.regs) += (u16)(i16)d;
+				return 3;
+			}
+			return 2;
+		}
+		/* JR C, s8 */ case 0x38: {
+			const i8 d = gb_emu_read_i8(emu, GB_REG_PC(emu->cpu.regs));
+			GB_REG_PC(emu->cpu.regs)++;
+			if ((GB_REG_F(emu->cpu.regs) & GB_FLAG_CARR)) {
+				GB_REG_PC(emu->cpu.regs) += (u16)(i16)d;
+				return 3;
+			}
+			return 2;
+		}
 
 		/* JR NZ, s8 */ case 0x20: {
 			const i8 d = gb_emu_read_i8(emu, GB_REG_PC(emu->cpu.regs));
