@@ -3,6 +3,7 @@
 
 #include "gbSM83.h"
 #include "gbCart.h"
+#include "gbPPU.h"
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -10,6 +11,7 @@
 typedef struct gb_emu {
     gb_sm83_t cpu;
     gb_cart_t cart;
+    gb_ppu_t ppu;
 } gb_emu_t;
 
 /**

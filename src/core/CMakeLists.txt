@@ -11,6 +11,7 @@ add_library(${PROJECT_NAME} SHARED
     gbEmu.c gbEmu.h
     gbSM83.c gbSM83.h
     gbDisassembler.c gbDisassembler.h
+    gbPPU.c gbPPU.h
     gbReg.h
     log.h
     opcodes.c
