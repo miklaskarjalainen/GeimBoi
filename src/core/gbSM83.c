@@ -5,11 +5,29 @@
 #define GB_ADDR_IE (0xFFFF) // Interrupt Enable
 #define GB_ADDR_IF (0xFF0F) // Interrupt Flag
 
+#define CGB_MODE 0
+
 gb_sm83_t gb_cpu_create(struct gb_emu* emu)
 {
 	gb_sm83_t cpu = {.interrupt_enable = 0, .emu = emu};
-	GB_REG_PC(cpu.regs) = 0x100;
+
+	// CFB initial values
+	if (CGB_MODE) {
+    	GB_REG_AF(cpu.regs) = 0x1180;
+    	GB_REG_BC(cpu.regs) = 0x0000;
+    	GB_REG_DE(cpu.regs) = 0xFF56;
+    	GB_REG_HL(cpu.regs) = 0x000D;
+	}
+	// DMG intial values
+	else {
+	    GB_REG_AF(cpu.regs) = 0x01B0;
+    	GB_REG_BC(cpu.regs) = 0x0013;
+    	GB_REG_DE(cpu.regs) = 0x00D8;
+    	GB_REG_HL(cpu.regs) = 0x014D;
+	}
+
 	GB_REG_SP(cpu.regs) = 0xFFFE;
+	GB_REG_PC(cpu.regs) = 0x0100;
 	return cpu;
 }
 
