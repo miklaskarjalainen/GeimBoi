@@ -14,12 +14,8 @@ extern "C" {
 #include <imgui_impl_sdl3.h>
 #include <imgui_memory_editor.h>
 
-static bool LoadTextureFromMemory(
-	const void* data,
-	size_t width,
-	size_t height,
-	GLuint* out_texture
-)
+static bool
+LoadTextureFromMemory(size_t width, size_t height, GLuint* out_texture)
 {
 	// Create a OpenGL texture identifier
 	GLuint image_texture;
@@ -30,8 +26,10 @@ static bool LoadTextureFromMemory(
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	// Upload pixels into texture
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	// Wrapping
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
 	glTexImage2D(
 		GL_TEXTURE_2D,
 		0,
@@ -41,11 +39,20 @@ static bool LoadTextureFromMemory(
 		0,
 		GL_RGB,
 		GL_UNSIGNED_BYTE,
-		data
+		nullptr
 	);
 
 	*out_texture = image_texture;
 	return true;
+}
+
+void UpdateTexture(GLuint tex, int width, int height, const unsigned char* data)
+{
+	glBindTexture(GL_TEXTURE_2D, tex);
+
+	glTexSubImage2D(
+		GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data
+	);
 }
 
 void GeimBoi::App::run()
@@ -89,12 +96,8 @@ void GeimBoi::App::run()
 	};
 
 	GLuint my_image_texture = 0;
-	bool ret = LoadTextureFromMemory(
-		(void*)&m_Emulator->ppu.frame,
-		GB_LCD_WIDTH,
-		GB_LCD_HEIGHT,
-		&my_image_texture
-	);
+	bool ret =
+		LoadTextureFromMemory(GB_LCD_WIDTH, GB_LCD_HEIGHT, &my_image_texture);
 	IM_ASSERT(ret);
 
 	while (!done) {
@@ -113,9 +116,19 @@ void GeimBoi::App::run()
 		ImGui_ImplSDL3_NewFrame();
 		ImGui::NewFrame();
 
+		UpdateTexture(
+			my_image_texture,
+			GB_LCD_WIDTH,
+			GB_LCD_HEIGHT,
+			(unsigned char*)m_Emulator->ppu.frame
+		);
+
 		// Our rendering stuff :p
 		ImGui::Begin("PPU");
-		ImGui::Image((ImTextureID)(intptr_t)my_image_texture, ImVec2(GB_LCD_WIDTH * 2, GB_LCD_HEIGHT * 2));
+		ImGui::Image(
+			(ImTextureID)(intptr_t)my_image_texture,
+			ImVec2(GB_LCD_WIDTH * 2, GB_LCD_HEIGHT * 2)
+		);
 		ImGui::End();
 
 		ImGui::Begin("CPU State");

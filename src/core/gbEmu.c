@@ -24,7 +24,7 @@ void gb_emu_delete(gb_emu_t* emu)
 void gb_emu_init(gb_emu_t* emu) {
     memset((void*)emu, 0, sizeof(gb_emu_t));
     emu->cpu = gb_cpu_create(emu);
-    gb_ppu_init(&emu->ppu);
+    gb_ppu_init(&emu->ppu, &emu->cpu);
 }
 
 void gb_emu_deinit(gb_emu_t* emu) { gb_cart_delete(&emu->cart); }
