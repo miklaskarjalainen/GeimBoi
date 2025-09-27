@@ -13,17 +13,17 @@ gb_sm83_t gb_cpu_create(struct gb_emu* emu)
 
 	// CFB initial values
 	if (CGB_MODE) {
-    	GB_REG_AF(cpu.regs) = 0x1180;
-    	GB_REG_BC(cpu.regs) = 0x0000;
-    	GB_REG_DE(cpu.regs) = 0xFF56;
-    	GB_REG_HL(cpu.regs) = 0x000D;
+		GB_REG_AF(cpu.regs) = 0x1180;
+		GB_REG_BC(cpu.regs) = 0x0000;
+		GB_REG_DE(cpu.regs) = 0xFF56;
+		GB_REG_HL(cpu.regs) = 0x000D;
 	}
 	// DMG intial values
 	else {
-	    GB_REG_AF(cpu.regs) = 0x01B0;
-    	GB_REG_BC(cpu.regs) = 0x0013;
-    	GB_REG_DE(cpu.regs) = 0x00D8;
-    	GB_REG_HL(cpu.regs) = 0x014D;
+		GB_REG_AF(cpu.regs) = 0x01B0;
+		GB_REG_BC(cpu.regs) = 0x0013;
+		GB_REG_DE(cpu.regs) = 0x00D8;
+		GB_REG_HL(cpu.regs) = 0x014D;
 	}
 
 	GB_REG_SP(cpu.regs) = 0xFFFE;
@@ -41,51 +41,51 @@ void gb_cpu_write_u8(gb_sm83_t* cpu, u16 addr, u8 data)
 	cpu->memory[addr - 0x8000] = data;
 }
 
-static void _gb_cpu_serve_interrupt(gb_sm83_t* cpu, u8 interrupt)
+/**
+ * @note interrupt_bit is 0-4, the bit number instead of a mask.
+ */
+static void _gb_cpu_serve_interrupt(gb_sm83_t* cpu, u8 interrupt_bit)
 {
 	cpu->interrupt_enable = 0;
 
 	gb_emu_push_u16(cpu->emu, GB_REG_PC(cpu->regs));
 
-	switch (interrupt)
-	{
-		case GB_INTERRUPT_VBLANK: {
-			GB_REG_PC(cpu->regs) = 0x40;
-			break;
-		}
-		case GB_INTERRUPT_LCD: {
-			GB_REG_PC(cpu->regs) = 0x48;
-			break;
-		}
-		case GB_INTERRUPT_TIMER: {
-			GB_REG_PC(cpu->regs) = 0x50;
-			break;
-		}
-		case GB_INTERRUPT_SERIAL: {
-			GB_REG_PC(cpu->regs) = 0x58;
-			break;
-		}
-		case GB_INTERRUPT_JOYPAD: {
-			GB_REG_PC(cpu->regs) = 0x60;
-			break;
-		}
+	static u8 s_JumpTable[] = {0x40, 0x48, 0x50, 0x58, 0x60};
+	GB_REG_PC(cpu->regs) = s_JumpTable[interrupt_bit];
+}
 
-		default: {
-			// GB_FATAL("Invalid interrupt.");
+static inline u8 _gb_first_bit_pos(u8 num)
+{
+	for (u8 i = 0; i < 8; i++) {
+		if (GB_IS_BIT(num, i)) {
+			return i;
 		}
 	}
+	return 255;
+}
+
+void gb_cpu_poll_interrupts(gb_sm83_t* cpu)
+{
+	u8 ints =
+		(gb_cpu_read_u8(cpu, GB_ADDR_IE) & gb_cpu_read_u8(cpu, GB_ADDR_IF)) &
+		GB_INTERRUPT_MASK;
+
+	if (!ints) {
+		return;
+	}
+
+	cpu->m_cycles += cpu->is_halted;
+	cpu->is_halted = false;
+
+	if (!cpu->interrupt_enable) {
+		return;
+	}
+
+	_gb_cpu_serve_interrupt(cpu, _gb_first_bit_pos(ints));
+	cpu->m_cycles += 5;
 }
 
 void gb_cpu_request_interrupt(gb_sm83_t* cpu, u8 interrupt)
 {
-	(void)interrupt;
-	// gb_cpu_write_u8(cpu, u16 addr, u8 data)
-
-	/*
-	if (gb_cpu_read_u8(cpu, GB_ADDR_IE)) {
-
-	}
-	 */
-
-	_gb_cpu_serve_interrupt(cpu, interrupt);
+	gb_cpu_write_u8(cpu, GB_ADDR_IF, interrupt);
 }

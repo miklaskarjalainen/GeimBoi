@@ -25,12 +25,16 @@
 #define GB_INTERRUPT_TIMER GB_BIT(2)
 #define GB_INTERRUPT_LCD GB_BIT(1)
 #define GB_INTERRUPT_VBLANK GB_BIT(0)
+#define GB_INTERRUPT_MASK (0x1F)
 
 typedef struct gb_sm83 {
 	gb_reg16_t regs[GB_REG_COUNT];
 	u8 memory[0x8000]; // 0x8000 - 0xFFFF
 
-	u8 interrupt_enable;
+	u8 interrupt_enable:1;
+	u8 is_halted:1;
+
+	u32 m_cycles; // Machine cycles
 
 	/* a-bit hacky, but needed in interrupt handling */
 	struct gb_emu* emu;
@@ -41,6 +45,10 @@ gb_sm83_t gb_cpu_create(struct gb_emu* emu);
 u8 gb_cpu_read_u8(const gb_sm83_t* cpu, u16 addr);
 void gb_cpu_write_u8(gb_sm83_t* cpu, u16 addr, u8 data);
 
+/**
+ * @brief jumps to an interrupt handler, if an interrupt can be served.
+ */
+void gb_cpu_poll_interrupts(gb_sm83_t* cpu);
 void gb_cpu_request_interrupt(gb_sm83_t* cpu, u8 interrupt);
 
 #endif
