@@ -4,18 +4,20 @@
 #include <stdint.h>
 
 typedef uint8_t u8;
-typedef uint16_t u16;
 typedef int8_t i8;
+typedef uint16_t u16;
 typedef int16_t i16;
+typedef int32_t i32;
+typedef int32_t u32;
 
 typedef u8 gb_reg8_t;
 
 typedef union gb_reg16 {
-    struct {
-        u8 low;
-        u8 high;
-    } nibble;
-    u16 value;
+	struct {
+		u8 low;
+		u8 high;
+	} nibble;
+	u16 value;
 } gb_reg16_t;
 
 #define GB_BIT(x) (1 << (x))
