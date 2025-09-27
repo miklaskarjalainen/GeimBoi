@@ -87,6 +87,8 @@ static u8 gb_emu_execute_cb(gb_emu_t* emu);
 
 u8 gb_emu_advance_opcode(gb_emu_t* emu)
 {
+    gb_cpu_poll_interrupts(&emu->cpu);
+
 	u8 opcode = gb_cart_read_u8(&emu->cart, GB_REG_PC(emu->cpu.regs));
 	GB_REG_PC(emu->cpu.regs)++;
 	switch (opcode) {
@@ -194,6 +196,46 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 		/* DEC A */ case 0x3D: {
 			_gb_dec(&emu->cpu, &GB_REG_A(emu->cpu.regs));
 			return 1;
+		}
+
+		/* INC BC */ case 0x03: {
+		    GB_REG_BC(emu->cpu.regs)++;
+			return 2;
+		}
+
+		/* INC DE */ case 0x13: {
+		    GB_REG_DE(emu->cpu.regs)++;
+			return 2;
+		}
+
+		/* INC HL */ case 0x23: {
+		    GB_REG_HL(emu->cpu.regs)++;
+			return 2;
+		}
+
+		/* INC SP */ case 0x33: {
+		    GB_REG_SP(emu->cpu.regs)++;
+			return 2;
+		}
+
+		/* DEC BC */ case 0x0B: {
+		    GB_REG_BC(emu->cpu.regs)--;
+			return 2;
+		}
+
+		/* DEC DE */ case 0x1B: {
+		    GB_REG_DE(emu->cpu.regs)--;
+			return 2;
+		}
+
+		/* DEC HL */ case 0x2B: {
+		    GB_REG_HL(emu->cpu.regs)--;
+			return 2;
+		}
+
+		/* DEC SP */ case 0x3B: {
+		    GB_REG_SP(emu->cpu.regs)--;
+			return 2;
 		}
 
 		/* LD B, d8 */ case 0x06: {
