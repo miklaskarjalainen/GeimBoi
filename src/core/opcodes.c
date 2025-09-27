@@ -98,6 +98,7 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 		/* LD E, E */ case 0x5B:
 		/* LD H, H */ case 0x64:
 		/* LD L, L */ case 0x6D:
+		/* LD A, A */ case 0x7F:
 		/* NOP */ case 0x00: {
 			return 1;
 		}
@@ -325,8 +326,259 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 			return 1;
 		}
 
+		/* LOAD C, X */
+
+		/* LD C, B */ case 0x48: {
+			GB_REG_B(emu->cpu.regs) = GB_REG_C(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD C, D */ case 0x4A: {
+			GB_REG_C(emu->cpu.regs) = GB_REG_D(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD C, E */ case 0x4B: {
+			GB_REG_C(emu->cpu.regs) = GB_REG_E(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD C, H */ case 0x4C: {
+			GB_REG_C(emu->cpu.regs) = GB_REG_H(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD C, L */ case 0x4D: {
+			GB_REG_C(emu->cpu.regs) = GB_REG_L(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD C, (HL) */ case 0x4E: {
+			uint16_t addr = GB_REG_HL(emu->cpu.regs);
+			GB_REG_C(emu->cpu.regs) = gb_emu_read_u8(emu, addr);
+			return 2;
+		}
+
+		/* LD C, A */ case 0x4F: {
+			GB_REG_C(emu->cpu.regs) = GB_REG_A(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LOAD D, X */
+
+		/* LD D, B */ case 0x50: {
+			GB_REG_D(emu->cpu.regs) = GB_REG_B(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD D, C */ case 0x51: {
+			GB_REG_D(emu->cpu.regs) = GB_REG_C(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD D, E */ case 0x53: {
+			GB_REG_D(emu->cpu.regs) = GB_REG_E(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD D, H */ case 0x54: {
+			GB_REG_D(emu->cpu.regs) = GB_REG_H(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD D, L */ case 0x55: {
+			GB_REG_D(emu->cpu.regs) = GB_REG_L(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD D, (HL) */ case 0x56: {
+			uint16_t addr = GB_REG_HL(emu->cpu.regs);
+			GB_REG_D(emu->cpu.regs) = gb_emu_read_u8(emu, addr);
+			return 2;
+		}
+
+		/* LD D, A */ case 0x57: {
+			GB_REG_D(emu->cpu.regs) = GB_REG_L(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LOAD E, X */
+
+		/* LD E, B */ case 0x58: {
+			GB_REG_E(emu->cpu.regs) = GB_REG_B(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD E, C */ case 0x59: {
+			GB_REG_E(emu->cpu.regs) = GB_REG_C(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD E, D */ case 0x5A: {
+			GB_REG_E(emu->cpu.regs) = GB_REG_D(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD E, H */ case 0x5C: {
+			GB_REG_E(emu->cpu.regs) = GB_REG_H(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD E, L */ case 0x5D: {
+			GB_REG_E(emu->cpu.regs) = GB_REG_L(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD E, (HL) */ case 0x5E: {
+			uint16_t addr = GB_REG_HL(emu->cpu.regs);
+			GB_REG_E(emu->cpu.regs) = gb_emu_read_u8(emu, addr);
+			return 2;
+		}
+
 		/* LD E, A */ case 0x5F: {
 			GB_REG_E(emu->cpu.regs) = GB_REG_A(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LOAD H, X */
+
+		/* LD H, B */ case 0x60: {
+			GB_REG_H(emu->cpu.regs) = GB_REG_B(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD H, C */ case 0x61: {
+			GB_REG_H(emu->cpu.regs) = GB_REG_C(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD H, D */ case 0x62: {
+			GB_REG_H(emu->cpu.regs) = GB_REG_D(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD H, E */ case 0x63: {
+			GB_REG_H(emu->cpu.regs) = GB_REG_E(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD H, L */ case 0x65: {
+			GB_REG_H(emu->cpu.regs) = GB_REG_L(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD H, (HL) */ case 0x66: {
+			uint16_t addr = GB_REG_HL(emu->cpu.regs);
+			GB_REG_H(emu->cpu.regs) = gb_emu_read_u8(emu, addr);
+			return 2;
+		}
+
+		/* LD H, A */ case 0x67: {
+			GB_REG_H(emu->cpu.regs) = GB_REG_L(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LOAD L, X */
+
+		/* LD L, B */ case 0x68: {
+			GB_REG_L(emu->cpu.regs) = GB_REG_B(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD L, C */ case 0x69: {
+			GB_REG_L(emu->cpu.regs) = GB_REG_C(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD L, D */ case 0x6A: {
+			GB_REG_L(emu->cpu.regs) = GB_REG_D(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD L, E */ case 0x6B: {
+			GB_REG_L(emu->cpu.regs) = GB_REG_D(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD L, H */ case 0x6C: {
+			GB_REG_L(emu->cpu.regs) = GB_REG_H(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD L, (HL) */ case 0x6E: {
+			uint16_t addr = GB_REG_HL(emu->cpu.regs);
+			GB_REG_L(emu->cpu.regs) = gb_emu_read_u8(emu, addr);
+			return 2;
+		}
+
+		/* LD L, A */ case 0x6F: {
+			GB_REG_L(emu->cpu.regs) = GB_REG_A(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LOAD (HL), X */
+
+		/* LD (HL), B */ case 0x70: {
+		    uint16_t addr = GB_REG_HL(emu->cpu.regs);
+			gb_emu_write_u8(emu, addr, GB_REG_B(emu->cpu.regs));
+			return 2;
+		}
+
+		/* LD (HL), C */ case 0x71: {
+            uint16_t addr = GB_REG_HL(emu->cpu.regs);
+            gb_emu_write_u8(emu, addr, GB_REG_C(emu->cpu.regs));
+			return 2;
+		}
+
+		/* LD (HL), D */ case 0x72: {
+		    uint16_t addr = GB_REG_HL(emu->cpu.regs);
+            gb_emu_write_u8(emu, addr, GB_REG_D(emu->cpu.regs));
+			return 2;
+		}
+
+		/* LD (HL), E */ case 0x73: {
+		    uint16_t addr = GB_REG_HL(emu->cpu.regs);
+            gb_emu_write_u8(emu, addr, GB_REG_E(emu->cpu.regs));
+			return 2;
+		}
+
+		/* LD (HL), H */ case 0x74: {
+		    uint16_t addr = GB_REG_HL(emu->cpu.regs);
+            gb_emu_write_u8(emu, addr, GB_REG_H(emu->cpu.regs));
+			return 2;
+		}
+
+		/* LD (HL), L */ case 0x75: {
+		    uint16_t addr = GB_REG_HL(emu->cpu.regs);
+            gb_emu_write_u8(emu, addr, GB_REG_L(emu->cpu.regs));
+			return 2;
+		}
+
+		/* LD (HL), A */ case 0x77: {
+		    uint16_t addr = GB_REG_HL(emu->cpu.regs);
+            gb_emu_write_u8(emu, addr, GB_REG_A(emu->cpu.regs));
+			return 2;
+		}
+
+		/* LOAD A, X */
+
+		/* LD A, B */ case 0x78: {
+			GB_REG_A(emu->cpu.regs) = GB_REG_B(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD A, C */ case 0x79: {
+			GB_REG_A(emu->cpu.regs) = GB_REG_C(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD A, D */ case 0x7A: {
+			GB_REG_A(emu->cpu.regs) = GB_REG_D(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD A, E */ case 0x7B: {
+			GB_REG_A(emu->cpu.regs) = GB_REG_D(emu->cpu.regs);
 			return 1;
 		}
 
