@@ -20,11 +20,17 @@
 #define GB_REG_H(regs) (regs[3].nibble.high)
 #define GB_REG_L(regs) (regs[3].nibble.low)
 
-typedef struct gb_sm83 {
-    gb_reg16_t regs[GB_REG_COUNT];
-    u8 memory[0x8000]; // 0x8000 - 0xFFFF
+#define GB_INTERRUPT_JOYPAD GB_BIT(4)
+#define GB_INTERRUPT_SERIAL GB_BIT(3)
+#define GB_INTERRUPT_TIMER GB_BIT(2)
+#define GB_INTERRUPT_LCD GB_BIT(1)
+#define GB_INTERRUPT_VBLANK GB_BIT(0)
 
-    u8 interrupt_enable;
+typedef struct gb_sm83 {
+	gb_reg16_t regs[GB_REG_COUNT];
+	u8 memory[0x8000]; // 0x8000 - 0xFFFF
+
+	u8 interrupt_enable;
 } gb_sm83_t;
 
 gb_sm83_t gb_cpu_create(void);
