@@ -66,9 +66,9 @@ static inline u8 _gb_first_bit_pos(u8 num)
 
 void gb_cpu_poll_interrupts(gb_sm83_t* cpu)
 {
-	u8 ints =
-		(gb_cpu_read_u8(cpu, GB_ADDR_IE) & gb_cpu_read_u8(cpu, GB_ADDR_IF)) &
-		GB_INTERRUPT_MASK;
+	const u8 IE = gb_cpu_read_u8(cpu, GB_ADDR_IE);
+	const u8 IF = gb_cpu_read_u8(cpu, GB_ADDR_IF);
+	u8 ints = (IE & IF) & GB_INTERRUPT_MASK;
 
 	if (!ints) {
 		return;
@@ -81,7 +81,9 @@ void gb_cpu_poll_interrupts(gb_sm83_t* cpu)
 		return;
 	}
 
-	_gb_cpu_serve_interrupt(cpu, _gb_first_bit_pos(ints));
+	const u8 INT = _gb_first_bit_pos(ints);
+	_gb_cpu_serve_interrupt(cpu, INT);
+	gb_cpu_write_u8(cpu, GB_ADDR_IF, IF ^ (u8)GB_BIT(INT));
 	cpu->m_cycles += 5;
 }
 
