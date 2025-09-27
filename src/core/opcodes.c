@@ -287,10 +287,42 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 			return 2;
 		}
 
+		/* LOAD B, X */
+
+		/* LD B, C */ case 0x41: {
+			GB_REG_B(emu->cpu.regs) = GB_REG_C(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD B, D */ case 0x42: {
+			GB_REG_B(emu->cpu.regs) = GB_REG_D(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD B, E */ case 0x43: {
+			GB_REG_B(emu->cpu.regs) = GB_REG_E(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD B, H */ case 0x44: {
+			GB_REG_B(emu->cpu.regs) = GB_REG_H(emu->cpu.regs);
+			return 1;
+		}
+
+		/* LD B, L */ case 0x45: {
+			GB_REG_B(emu->cpu.regs) = GB_REG_L(emu->cpu.regs);
+			return 1;
+		}
+
 		/* LD B, (HL) */ case 0x46: {
 			uint16_t addr = GB_REG_HL(emu->cpu.regs);
 			GB_REG_B(emu->cpu.regs) = gb_emu_read_u8(emu, addr);
 			return 2;
+		}
+
+		/* LD B, A */ case 0x47: {
+			GB_REG_B(emu->cpu.regs) = GB_REG_L(emu->cpu.regs);
+			return 1;
 		}
 
 		/* LD E, A */ case 0x5F: {
