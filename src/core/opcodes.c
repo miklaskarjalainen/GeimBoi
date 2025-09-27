@@ -30,6 +30,15 @@ static inline void _gb_dec(gb_sm83_t* cpu, u8* data)
 	GB_REG_F(cpu->regs) |= GB_IS_BIT(*data, 3) ? GB_FLAG_HALF : 0;
 }
 
+static inline void _gb_inc(gb_sm83_t* cpu, u8* data)
+{
+	(*data) += 1;
+
+	GB_REG_F(cpu->regs) &= (u8) ~(GB_FLAG_ZERO | GB_FLAG_SUBS | GB_FLAG_HALF);
+	GB_REG_F(cpu->regs) |= (*data == 0) ? GB_FLAG_ZERO : 0;
+	GB_REG_F(cpu->regs) |= GB_IS_BIT(*data, 3) ? GB_FLAG_HALF : 0;
+}
+
 static inline void _gb_and(gb_sm83_t* cpu, u8 data)
 {
 	u8 result = GB_REG_A(cpu->regs) & data;
@@ -103,6 +112,48 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 			return 1;
 		}
 
+		/* DEC B */ case 0x04: {
+			_gb_inc(&emu->cpu, &GB_REG_B(emu->cpu.regs));
+			return 1;
+		}
+
+		/* INC C */ case 0x0C: {
+			_gb_inc(&emu->cpu, &GB_REG_C(emu->cpu.regs));
+			return 1;
+		}
+
+		/* INC D */ case 0x14: {
+			_gb_inc(&emu->cpu, &GB_REG_D(emu->cpu.regs));
+			return 1;
+		}
+
+		/* INC E */ case 0x1C: {
+			_gb_inc(&emu->cpu, &GB_REG_E(emu->cpu.regs));
+			return 1;
+		}
+
+		/* INC H */ case 0x24: {
+			_gb_inc(&emu->cpu, &GB_REG_H(emu->cpu.regs));
+			return 1;
+		}
+
+		/* INC L */ case 0x2C: {
+			_gb_inc(&emu->cpu, &GB_REG_L(emu->cpu.regs));
+			return 1;
+		}
+
+		/* INC (HL) */ case 0x34: {
+		    u8 data = gb_emu_read_u8(emu, GB_REG_HL(emu->cpu.regs));
+			_gb_inc(&emu->cpu, &data);
+			gb_emu_write_u8(emu, GB_REG_HL(emu->cpu.regs), data);
+			return 3;
+		}
+
+		/* INC A */ case 0x3C: {
+			_gb_inc(&emu->cpu, &GB_REG_A(emu->cpu.regs));
+			return 1;
+		}
+
 		/* DEC B */ case 0x05: {
 			_gb_dec(&emu->cpu, &GB_REG_B(emu->cpu.regs));
 			return 1;
@@ -145,9 +196,29 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 			return 1;
 		}
 
-		/* LD H, B */ case 0x06: {
-			GB_REG_H(emu->cpu.regs) = GB_REG_B(emu->cpu.regs);
-			return 1;
+		/* LD B, d8 */ case 0x06: {
+		    u16 addr = GB_REG_PC(emu->cpu.regs)++;
+			GB_REG_B(emu->cpu.regs) = gb_emu_read_u8(emu, addr);
+			return 2;
+		}
+
+		/* LD D, d8 */ case 0x16: {
+		    u16 addr = GB_REG_PC(emu->cpu.regs)++;
+		    GB_REG_D(emu->cpu.regs) = gb_emu_read_u8(emu, addr);
+			return 2;
+		}
+
+		/* LD H, d8 */ case 0x26: {
+		    u16 addr = GB_REG_PC(emu->cpu.regs)++;
+            GB_REG_H(emu->cpu.regs) = gb_emu_read_u8(emu, addr);
+            return 2;
+		}
+
+		/* LD (HL), d8 */ case 0x36: {
+		    u16 read_addr = GB_REG_PC(emu->cpu.regs)++;
+            u16 write_addr = GB_REG_HL(emu->cpu.regs);
+			gb_emu_write_u8(emu, write_addr, gb_emu_read_u8(emu, read_addr));
+            return 3;
 		}
 
 		/* LD C, d8 */ case 0x0E: {
@@ -263,6 +334,7 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 			);
 			return 2;
 		}
+
 		/* LD (HL+), A */ case 0x22: {
 			gb_emu_write_u8(
 				emu, GB_REG_HL(emu->cpu.regs), GB_REG_A(emu->cpu.regs)
@@ -270,11 +342,26 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 			GB_REG_HL(emu->cpu.regs) += 1;
 			return 2;
 		}
+
 		/* LD (HL-), A */ case 0x32: {
 			gb_emu_write_u8(
 				emu, GB_REG_HL(emu->cpu.regs), GB_REG_A(emu->cpu.regs)
 			);
 			GB_REG_HL(emu->cpu.regs) -= 1;
+			return 2;
+		}
+
+		/* LD A, (HL+) */ case 0x2A: {
+		    u8 data = gb_emu_read_u8(emu, GB_REG_HL(emu->cpu.regs));
+			GB_REG_HL(emu->cpu.regs) += 1;
+			GB_REG_A(emu->cpu.regs) = data;
+			return 2;
+		}
+
+		/* LD A, (HL-) */ case 0x3A: {
+    		u8 data = gb_emu_read_u8(emu, GB_REG_HL(emu->cpu.regs));
+            GB_REG_HL(emu->cpu.regs) -= 1;
+            GB_REG_A(emu->cpu.regs) = data;
 			return 2;
 		}
 
@@ -430,12 +517,27 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 			gb_emu_write_u8(emu, addr, GB_REG_A(emu->cpu.regs));
 			return 3;
 		}
+
 		/* LD A, (a8) */ case 0xF0: {
 			u16 addr = (u16)0xFF00 |
 					   (u16)gb_emu_read_u8(emu, GB_REG_PC(emu->cpu.regs));
 			GB_REG_PC(emu->cpu.regs)++;
 			GB_REG_A(emu->cpu.regs) = gb_emu_read_u8(emu, addr);
 			return 3;
+		}
+
+		/* LD (a16), A */ case 0xEA: {
+    		u16 addr = gb_emu_read_u16(emu, GB_REG_PC(emu->cpu.regs));
+    		GB_REG_PC(emu->cpu.regs) += 2;
+            gb_emu_write_u8(emu, addr, GB_REG_A(emu->cpu.regs));
+			return 4;
+		}
+
+		/* LD A, (a16) */ case 0xFA: {
+			u16 addr = gb_emu_read_u16(emu, GB_REG_PC(emu->cpu.regs));
+			GB_REG_PC(emu->cpu.regs) += 2;
+			GB_REG_A(emu->cpu.regs) = gb_emu_read_u8(emu, addr);
+			return 4;
 		}
 
 		/* SUB d8 */ case 0xD6: {
@@ -493,6 +595,18 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 		/* EI */ case 0xFB: {
 			emu->cpu.interrupt_enable = 1;
 			return 1;
+		}
+
+		/* LD (C), A */ case 0xE2: {
+			u16 addr = 0xFF00 | GB_REG_C(emu->cpu.regs);
+			gb_emu_write_u8(emu, addr, GB_REG_A(emu->cpu.regs));
+			return 2;
+		}
+
+		/* LD A, (C) */ case 0xF2: {
+            u16 addr = 0xFF00 | GB_REG_C(emu->cpu.regs);
+      		GB_REG_A(emu->cpu.regs) = gb_emu_read_u8(emu, addr);
+            return 2;
 		}
 
 		/* CB PREFIX */ case 0xCB: {
