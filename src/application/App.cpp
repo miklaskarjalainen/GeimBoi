@@ -2,6 +2,7 @@
 
 extern "C" {
 #include "gbCore.h"
+#include "gbReg.h"
 #include "log.h"
 }
 
@@ -88,6 +89,19 @@ void GeimBoi::App::run()
 			GB_REG_PC(m_Emulator->cpu.regs),
 			gb_emu_read_u16(m_Emulator, GB_REG_PC(m_Emulator->cpu.regs))
 		);
+
+		ImGui::Text(
+			"FLAGS %c %c %c %c",
+			GB_IS_BIT(GB_REG_F(m_Emulator->cpu.regs), GB_FLAG_ZERO_BIT) ? 'Z' : '-',
+			GB_IS_BIT(GB_REG_F(m_Emulator->cpu.regs), GB_FLAG_SUBS_BIT) ? 'N' : '-',
+			GB_IS_BIT(GB_REG_F(m_Emulator->cpu.regs), GB_FLAG_HALF_BIT) ? 'H' : '-',
+			GB_IS_BIT(GB_REG_F(m_Emulator->cpu.regs), GB_FLAG_CARR_BIT) ? 'C' : '-'
+		);
+
+		ImGui::Text("InterruptEnable: %s", m_Emulator->cpu.interrupt_enable ? "true" : "false");
+
+		ImGui::Text("Last Executed Opcode: ");
+		ImGui::SameLine();
 		text_opcode(m_LastExecutedOpcode);
 
 		ImGui::SeparatorText("Upcoming instructions");
@@ -112,6 +126,15 @@ void GeimBoi::App::run()
 			m_LastExecutedOpcode = addr;
 			gb_emu_advance_opcode(m_Emulator);
 		}
+		if (ImGui::Button("Execute 1000x ops")) {
+			for (int i = 0; i < 999; i++) {
+			    gb_emu_advance_opcode(m_Emulator);
+			}
+		    uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
+			m_LastExecutedOpcode = addr;
+			gb_emu_advance_opcode(m_Emulator);
+		}
+
 		ImGui::End();
 
 		static MemoryEditor rom_memory = [&]() {
@@ -120,6 +143,10 @@ void GeimBoi::App::run()
 				mem.ReadFn = [](auto, size_t addr, void* void_emu) -> ImU8{
                     const gb_emu_t* emu = (const gb_emu_t*)void_emu;
                     return gb_emu_read_u8(emu, (uint16_t)addr);
+				};
+				mem.WriteFn = [](auto, size_t addr, ImU8 byte, void* void_emu) {
+                    gb_emu_t* emu = (gb_emu_t*)void_emu;
+                    gb_emu_write_u8(emu, (uint16_t)addr, (u8)byte);
 				};
 				return mem;
 		}();
