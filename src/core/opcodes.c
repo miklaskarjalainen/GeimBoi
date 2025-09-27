@@ -26,6 +26,20 @@ static inline void _gb_cp(gb_sm83_t* cpu, u8 data)
 	GB_REG_F(cpu->regs) |= GB_IS_BIT(result, 7) ? GB_FLAG_CARR : 0;
 }
 
+static inline void _gb_add(gb_sm83_t* cpu, u8 data)
+{
+	u8 result = GB_REG_A(cpu->regs) + data;
+
+	const u8 half = ((data & 0xF) + (GB_REG_A(cpu->regs) & 0xF)) > 0xF;
+	const u8 curry = (data + GB_REG_A(cpu->regs)) > 0xFF;
+
+	GB_REG_F(cpu->regs) = result ? 0 : GB_FLAG_ZERO;
+	GB_REG_F(cpu->regs) |= half ? GB_FLAG_HALF : 0;
+	GB_REG_F(cpu->regs) |= curry ? GB_FLAG_CARR : 0;
+
+	GB_REG_A(cpu->regs) = result;
+}
+
 static inline void _gb_dec(gb_sm83_t* cpu, u8* data)
 {
 	(*data) -= 1;
@@ -932,6 +946,46 @@ u8 gb_emu_advance_opcode(gb_emu_t* emu)
 			const u8 d = gb_emu_read_u8(emu, GB_REG_PC(emu->cpu.regs));
 			GB_REG_PC(emu->cpu.regs)++;
 			_gb_and(&emu->cpu, d);
+			return 2;
+		}
+
+		/* ADD B */ case 0x80: {
+			_gb_add(&emu->cpu, GB_REG_B(emu->cpu.regs));
+			return 1;
+		}
+		/* ADD C */ case 0x81: {
+			_gb_add(&emu->cpu, GB_REG_C(emu->cpu.regs));
+			return 1;
+		}
+		/* ADD D */ case 0x82: {
+			_gb_add(&emu->cpu, GB_REG_D(emu->cpu.regs));
+			return 1;
+		}
+		/* ADD E */ case 0x83: {
+			_gb_add(&emu->cpu, GB_REG_E(emu->cpu.regs));
+			return 1;
+		}
+		/* ADD H */ case 0x84: {
+			_gb_add(&emu->cpu, GB_REG_H(emu->cpu.regs));
+			return 1;
+		}
+		/* ADD L */ case 0x85: {
+			_gb_add(&emu->cpu, GB_REG_L(emu->cpu.regs));
+			return 1;
+		}
+		/* ADD [HL] */ case 0x86: {
+			const u8 d = gb_emu_read_u8(emu, GB_REG_HL(emu->cpu.regs));
+			_gb_add(&emu->cpu, d);
+			return 2;
+		}
+		/* ADD A */ case 0x87: {
+			_gb_add(&emu->cpu, GB_REG_A(emu->cpu.regs));
+			return 1;
+		}
+		/* ADD d8 */ case 0xC6: {
+			const u8 d = gb_emu_read_u8(emu, GB_REG_PC(emu->cpu.regs));
+			GB_REG_PC(emu->cpu.regs)++;
+			_gb_add(&emu->cpu, d);
 			return 2;
 		}
 
