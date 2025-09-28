@@ -106,11 +106,8 @@ static inline void _gb_call(gb_emu_t* emu)
 
 static u8 gb_emu_execute_cb(gb_emu_t* emu);
 
-u8 gb_emu_advance_opcode(gb_emu_t* emu)
+u8 gb_emu_execute_opcode(gb_emu_t* emu)
 {
-	gb_cpu_poll_interrupts(&emu->cpu);
-	gb_ppu_render(&emu->ppu);
-
 	u8 opcode = gb_cart_read_u8(&emu->cart, GB_REG_PC(emu->cpu.regs));
 	GB_REG_PC(emu->cpu.regs)++;
 	switch (opcode) {

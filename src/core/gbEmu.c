@@ -65,6 +65,13 @@ bool gb_emu_load_rom_file(gb_emu_t* emu, const char* fpath)
 
 void gb_emu_advance_frame(gb_emu_t* emu) { (void)emu; }
 
+void gb_emu_advance_opcode(gb_emu_t *emu)
+{
+    gb_cpu_poll_interrupts(&emu->cpu);
+    u8 cycles = gb_emu_execute_opcode(emu);
+    gb_ppu_clock(&emu->ppu, cycles * 4);
+}
+
 u16 gb_emu_read_u16(const gb_emu_t* emu, u16 addr)
 {
 	const u16 low = gb_emu_read_u8(emu, addr);

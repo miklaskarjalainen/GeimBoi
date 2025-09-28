@@ -56,9 +56,10 @@ u8 gb_emu_pop_u8(gb_emu_t* emu);
 u16 gb_emu_pop_u16(gb_emu_t* emu);
 
 void gb_emu_advance_frame(gb_emu_t* emu);
+void gb_emu_advance_opcode(gb_emu_t* emu);
 /**
  * @note returns the amount of cycles used.
  */
-u8 gb_emu_advance_opcode(gb_emu_t* emu);
+u8 gb_emu_execute_opcode(gb_emu_t* emu);
 
 #endif
