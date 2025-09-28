@@ -80,60 +80,57 @@ void gb_ppu_clock(gb_ppu_t* ppu, u16 t_cycles)
 {
     for (u16 i = 0; i < t_cycles; i++ ) {
         ppu->t_cycles++;
-        switch (ppu->t_cycles) {
+        switch (ppu->ppu_mode) {
+            // Horizontal blank
             case 0: {
-                if (ppu->t_cycles >= 204) {
-                    ppu->t_cycles -= 204;
-
-                    u8 ly = gb_cpu_read_u8(ppu->cpu, 0xFF44);
-                    ppu->ppu_mode = ly <= 143 ? 2 : 1;
-                    ly += 1;
-                    gb_cpu_write_u8(ppu->cpu, 0xFF44, ly);
+                if (ppu->t_cycles < 204) {
+                    return;
                 }
+                ppu->t_cycles -= 204;
+                u8 ly = gb_cpu_read_u8(ppu->cpu, 0xFF44);
+                if (ly == 144) {
+                    ppu->ppu_mode = 1;
+                    gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_VBLANK);
+                }
+                else {
+                    ppu->ppu_mode = 2;
+                }
+
+                gb_cpu_write_u8(ppu->cpu, 0xFF44, ly + 1);
                 break;
             }
             case 1: {
-                if (ppu->t_cycles >= 4560) {
-                    ppu->t_cycles -= 4560;
+                if (ppu->t_cycles < 4560) {
+                    return;
+                }
+                ppu->t_cycles -= 4560;
 
-                    u8 ly = gb_cpu_read_u8(ppu->cpu, 0xFF44);
-                    if (ly == 153) {
-                        gb_cpu_write_u8(ppu->cpu, 0xFF44, 0);
-                        ppu->ppu_mode = 2;
-                    }
-                    else {
-                        gb_cpu_write_u8(ppu->cpu, 0xFF44, ly + 1);
-                    }
+                u8 ly = gb_cpu_read_u8(ppu->cpu, 0xFF44);
+                if (ly == 153) {
+                    gb_cpu_write_u8(ppu->cpu, 0xFF44, 0);
+                    ppu->ppu_mode = 2;
+                }
+                else {
+                    gb_cpu_write_u8(ppu->cpu, 0xFF44, ly + 1);
                 }
                 break;
             }
             case 2: {
-                if (ppu->t_cycles >= 80) {
-                    ppu->t_cycles -= 80;
-                    ppu->ppu_mode = 3;
+                if (ppu->t_cycles < 80) {
+                    return;
                 }
+                ppu->t_cycles -= 80;
+                ppu->ppu_mode = 3;
                 break;
             }
             case 3: {
-                if (ppu->t_cycles >= 172) {
-                    ppu->t_cycles -= 172;
-                    ppu->ppu_mode = 0;
+                if (ppu->t_cycles < 172) {
+                    return;
                 }
+                ppu->t_cycles -= 172;
+                ppu->ppu_mode = 0;
                 break;
             }
         }
     }
-    /*
-    static u8 data[] = {0x3C, 0x7E, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x7E, 0x5E, 0x7E, 0x0A, 0x7C, 0x56, 0x38, 0x7C};
-    struct gb_tile_data t = get_as_tile((u8*)&data);
-    (void)t;
-
-    for (size_t y = 0; y < 8; y++) {
-        for (size_t x = 0; x < 8; x++) {
-            ppu->frame[x][y][0] = t.data[x][y][0];
-            ppu->frame[x][y][1] = t.data[x][y][1];
-            ppu->frame[x][y][2] = t.data[x][y][2];
-        }
-    }
-    */
 }
