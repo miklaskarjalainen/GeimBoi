@@ -38,6 +38,11 @@ u8 gb_cpu_read_u8(const gb_sm83_t* cpu, u16 addr)
 
 void gb_cpu_write_u8(gb_sm83_t* cpu, u16 addr, u8 data)
 {
+    if (addr == 0xFF02 && data == 0x81) {
+		printf("%c", gb_cpu_read_u8(cpu, 0xFF01));
+		return;
+	}
+
 	cpu->memory[addr - 0x8000] = data;
 }
 
