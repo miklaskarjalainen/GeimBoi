@@ -108,7 +108,7 @@ static u8 gb_emu_execute_cb(gb_emu_t* emu);
 
 u8 gb_emu_execute_opcode(gb_emu_t* emu)
 {
-	u8 opcode = gb_cart_read_u8(&emu->cart, GB_REG_PC(emu->cpu.regs));
+	u8 opcode = gb_emu_read_u8(emu, GB_REG_PC(emu->cpu.regs));
 	GB_REG_PC(emu->cpu.regs)++;
 	switch (opcode) {
 		/* LD B, B */ case 0x40:
@@ -623,6 +623,11 @@ u8 gb_emu_execute_opcode(gb_emu_t* emu)
 			return 4;
 		}
 
+		/* jp, (HL) */ case 0xE9: {
+			GB_REG_PC(emu->cpu.regs) = GB_REG_HL(emu->cpu.regs);
+			return 4;
+		}
+
 		/* CALL Z, a16 */ case 0xCC: {
 			if (GB_REG_F(emu->cpu.regs) & GB_FLAG_ZERO) {
 				_gb_call(emu);
@@ -1130,6 +1135,7 @@ u8 gb_emu_execute_opcode(gb_emu_t* emu)
 			break;
 		}
 	}
+	return 1;
 }
 
 static u8 gb_emu_execute_cb(gb_emu_t* emu)
@@ -1176,4 +1182,5 @@ static u8 gb_emu_execute_cb(gb_emu_t* emu)
 			break;
 		}
 	}
+	return 2;
 }
