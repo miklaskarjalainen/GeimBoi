@@ -107,6 +107,13 @@ static inline void _gb_srl(gb_sm83_t* cpu, u8* reg)
 	GB_REG_F(cpu->regs) |= (*reg) == 0 ? GB_FLAG_ZERO : 0;
 }
 
+static inline void _gb_sla(gb_sm83_t* cpu, u8* reg)
+{
+	GB_REG_F(cpu->regs) = GB_GET_BIT(*reg, 7) ? GB_FLAG_CARR : 0;
+	*reg <<= 1;
+	GB_REG_F(cpu->regs) |= (*reg) == 0 ? GB_FLAG_ZERO : 0;
+}
+
 static inline void _gb_get_bit(gb_sm83_t* cpu, u8 data, u8 bit)
 {
 	GB_REG_F(cpu->regs) &= (u8) ~(GB_FLAG_HALF);
@@ -1337,6 +1344,41 @@ static u8 gb_emu_execute_cb(gb_emu_t* emu)
 		}
 		/* SRL A */ case 0x3F: {
 			_gb_srl(&emu->cpu, &GB_REG_A(emu->cpu.regs));
+			return 2;
+		}
+
+		/* SLA B */ case 0x20: {
+			_gb_sla(&emu->cpu, &GB_REG_B(emu->cpu.regs));
+			return 2;
+		}
+		/* SLA C */ case 0x21: {
+			_gb_sla(&emu->cpu, &GB_REG_C(emu->cpu.regs));
+			return 2;
+		}
+		/* SLA D */ case 0x22: {
+			_gb_sla(&emu->cpu, &GB_REG_D(emu->cpu.regs));
+			return 2;
+		}
+		/* SLA E */ case 0x23: {
+			_gb_sla(&emu->cpu, &GB_REG_E(emu->cpu.regs));
+			return 2;
+		}
+		/* SLA H */ case 0x24: {
+			_gb_sla(&emu->cpu, &GB_REG_H(emu->cpu.regs));
+			return 2;
+		}
+		/* SLA L */ case 0x25: {
+			_gb_sla(&emu->cpu, &GB_REG_L(emu->cpu.regs));
+			return 2;
+		}
+		/* SLA (HL) */ case 0x26: {
+			u8 data = gb_emu_read_u8(emu, GB_REG_HL(emu->cpu.regs));
+			_gb_sla(&emu->cpu, &data);
+			gb_emu_write_u8(emu, GB_REG_HL(emu->cpu.regs), data);
+			return 4;
+		}
+		/* SLA A */ case 0x27: {
+			_gb_sla(&emu->cpu, &GB_REG_A(emu->cpu.regs));
 			return 2;
 		}
 
