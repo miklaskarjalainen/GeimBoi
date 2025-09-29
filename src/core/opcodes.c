@@ -1421,6 +1421,142 @@ static u8 gb_emu_execute_cb(gb_emu_t* emu)
 			return 2;
 		}
 
+		/* BIT 4, B */ case 0x60: {
+			_gb_get_bit(&emu->cpu, GB_REG_B(emu->cpu.regs), 4);
+			return 2;
+		}
+		/* BIT 4, C */ case 0x61: {
+			_gb_get_bit(&emu->cpu, GB_REG_C(emu->cpu.regs), 4);
+			return 2;
+		}
+		/* BIT 4, D */ case 0x62: {
+			_gb_get_bit(&emu->cpu, GB_REG_D(emu->cpu.regs), 4);
+			return 2;
+		}
+		/* BIT 4, E */ case 0x63: {
+			_gb_get_bit(&emu->cpu, GB_REG_E(emu->cpu.regs), 4);
+			return 2;
+		}
+		/* BIT 4, H */ case 0x64: {
+			_gb_get_bit(&emu->cpu, GB_REG_H(emu->cpu.regs), 4);
+			return 2;
+		}
+		/* BIT 4, L */ case 0x65: {
+			_gb_get_bit(&emu->cpu, GB_REG_L(emu->cpu.regs), 4);
+			return 2;
+		}
+		/* BIT 4, (HL) */ case 0x66: {
+			u8 data = gb_emu_read_u8(emu, GB_REG_HL(emu->cpu.regs));
+			_gb_get_bit(&emu->cpu, data, 4);
+			return 4;
+		}
+		/* BIT 4, A */ case 0x67: {
+			_gb_get_bit(&emu->cpu, GB_REG_A(emu->cpu.regs), 4);
+			return 2;
+		}
+
+		/* BIT 5, B */ case 0x68: {
+			_gb_get_bit(&emu->cpu, GB_REG_B(emu->cpu.regs), 5);
+			return 2;
+		}
+		/* BIT 5, C */ case 0x69: {
+			_gb_get_bit(&emu->cpu, GB_REG_C(emu->cpu.regs), 5);
+			return 2;
+		}
+		/* BIT 5, D */ case 0x6A: {
+			_gb_get_bit(&emu->cpu, GB_REG_D(emu->cpu.regs), 5);
+			return 2;
+		}
+		/* BIT 5, E */ case 0x6B: {
+			_gb_get_bit(&emu->cpu, GB_REG_E(emu->cpu.regs), 5);
+			return 2;
+		}
+		/* BIT 5, H */ case 0x6C: {
+			_gb_get_bit(&emu->cpu, GB_REG_H(emu->cpu.regs), 5);
+			return 2;
+		}
+		/* BIT 5, L */ case 0x6D: {
+			_gb_get_bit(&emu->cpu, GB_REG_L(emu->cpu.regs), 5);
+			return 2;
+		}
+		/* BIT 5, (HL) */ case 0x6E: {
+			u8 data = gb_emu_read_u8(emu, GB_REG_HL(emu->cpu.regs));
+			_gb_get_bit(&emu->cpu, data, 5);
+			return 4;
+		}
+		/* BIT 5, A */ case 0x6F: {
+			_gb_get_bit(&emu->cpu, GB_REG_A(emu->cpu.regs), 5);
+			return 2;
+		}
+
+		/* BIT 6, B */ case 0x70: {
+			_gb_get_bit(&emu->cpu, GB_REG_B(emu->cpu.regs), 6);
+			return 2;
+		}
+		/* BIT 6, C */ case 0x71: {
+			_gb_get_bit(&emu->cpu, GB_REG_C(emu->cpu.regs), 6);
+			return 2;
+		}
+		/* BIT 6, D */ case 0x72: {
+			_gb_get_bit(&emu->cpu, GB_REG_D(emu->cpu.regs), 6);
+			return 2;
+		}
+		/* BIT 6, E */ case 0x73: {
+			_gb_get_bit(&emu->cpu, GB_REG_E(emu->cpu.regs), 6);
+			return 2;
+		}
+		/* BIT 6, H */ case 0x74: {
+			_gb_get_bit(&emu->cpu, GB_REG_H(emu->cpu.regs), 6);
+			return 2;
+		}
+		/* BIT 6, L */ case 0x75: {
+			_gb_get_bit(&emu->cpu, GB_REG_L(emu->cpu.regs), 6);
+			return 2;
+		}
+		/* BIT 6, (HL) */ case 0x76: {
+			u8 data = gb_emu_read_u8(emu, GB_REG_HL(emu->cpu.regs));
+			_gb_get_bit(&emu->cpu, data, 6);
+			return 4;
+		}
+		/* BIT 6, A */ case 0x77: {
+			_gb_get_bit(&emu->cpu, GB_REG_A(emu->cpu.regs), 6);
+			return 2;
+		}
+
+		/* BIT 7, B */ case 0x78: {
+			_gb_get_bit(&emu->cpu, GB_REG_B(emu->cpu.regs), 7);
+			return 2;
+		}
+		/* BIT 7, C */ case 0x79: {
+			_gb_get_bit(&emu->cpu, GB_REG_C(emu->cpu.regs), 7);
+			return 2;
+		}
+		/* BIT 7, D */ case 0x7A: {
+			_gb_get_bit(&emu->cpu, GB_REG_D(emu->cpu.regs), 7);
+			return 2;
+		}
+		/* BIT 7, E */ case 0x7B: {
+			_gb_get_bit(&emu->cpu, GB_REG_E(emu->cpu.regs), 7);
+			return 2;
+		}
+		/* BIT 7, H */ case 0x7C: {
+			_gb_get_bit(&emu->cpu, GB_REG_H(emu->cpu.regs), 7);
+			return 2;
+		}
+		/* BIT 7, L */ case 0x7D: {
+			_gb_get_bit(&emu->cpu, GB_REG_L(emu->cpu.regs), 7);
+			return 2;
+		}
+		/* BIT 7, (HL) */ case 0x7E: {
+			u8 data = gb_emu_read_u8(emu, GB_REG_HL(emu->cpu.regs));
+			_gb_get_bit(&emu->cpu, data, 7);
+			return 4;
+		}
+		/* BIT 7, A */ case 0x7F: {
+			_gb_get_bit(&emu->cpu, GB_REG_A(emu->cpu.regs), 7);
+			return 2;
+		}
+
 		default: {
 			GB_FATAL("UNIMPLEMENTED CB OPCODE! 0x%X\n", opcode);
 			break;
