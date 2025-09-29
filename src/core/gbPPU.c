@@ -9,9 +9,9 @@ void gb_ppu_init(gb_ppu_t* ppu, struct gb_sm83* cpu)
 {
     for (int y = 0; y < GB_LCD_HEIGHT; y++) {
         for (int x = 0; x < GB_LCD_WIDTH; x++) {
-            ppu->frame[x][y][0] = (u8)(255);
-            ppu->frame[x][y][1] = (u8)(0);
-            ppu->frame[x][y][2] = (u8)(0);
+            ppu->frame[y][x][0] = (u8)(255);
+            ppu->frame[y][x][1] = (u8)(0);
+            ppu->frame[y][x][2] = (u8)(0);
         }
     }
     ppu->t_cycles = 0;
@@ -76,6 +76,16 @@ struct gb_tile_data get_as_tile(u8* begin)
     return d;
 }
 
+void gb_render_scanline(gb_ppu_t* ppu, u8 ly)
+{
+    for (u8 lx = 0; lx < GB_LCD_WIDTH; lx++)
+    {
+        ppu->frame[ly][lx][0] = 0;
+        ppu->frame[ly][lx][1] = ly;
+        ppu->frame[ly][lx][2] = lx;
+    }
+}
+
 void gb_ppu_clock(gb_ppu_t* ppu, u16 t_cycles)
 {
     for (u16 i = 0; i < t_cycles; i++ ) {
@@ -88,7 +98,8 @@ void gb_ppu_clock(gb_ppu_t* ppu, u16 t_cycles)
                 }
                 ppu->t_cycles -= 204;
                 u8 ly = gb_cpu_read_u8(ppu->cpu, 0xFF44);
-                if (ly == 144) {
+                gb_render_scanline(ppu, ly);
+                if (ly == 143) {
                     ppu->ppu_mode = 1;
                     gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_VBLANK);
                 }

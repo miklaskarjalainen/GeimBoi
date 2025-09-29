@@ -4,10 +4,10 @@
 #include "gbReg.h"
 
 #define GB_LCD_HEIGHT 144
-#define GB_LCD_WIDTH 144
+#define GB_LCD_WIDTH 160
 
 typedef struct gb_ppu {
-    u8 frame[GB_LCD_WIDTH][GB_LCD_HEIGHT][3];
+    u8 frame[GB_LCD_HEIGHT][GB_LCD_WIDTH][3];
     u16 t_cycles;
     u8 ppu_mode: 2;
 
