@@ -125,9 +125,11 @@ void GeimBoi::App::run()
 
 		// Our rendering stuff :p
 		ImGui::Begin("PPU");
+		ImGui::Text("T-Cycles 0x%04X", m_Emulator->ppu.t_cycles);
+		ImGui::Text("Mode %u", m_Emulator->ppu.ppu_mode);
 		ImGui::Image(
 			(ImTextureID)(intptr_t)my_image_texture,
-			ImVec2(GB_LCD_WIDTH * 2, GB_LCD_HEIGHT * 2)
+			ImVec2(GB_LCD_WIDTH * 4, GB_LCD_HEIGHT * 4)
 		);
 		ImGui::End();
 
@@ -350,7 +352,7 @@ GeimBoi::App::App()
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.ScaleAllSizes(main_scale);
 	style.FontScaleDpi = main_scale;
-	style.FontSizeBase = 24.0f;
+	style.FontSizeBase = 12.0f;
 	io.ConfigDpiScaleFonts = true;
 	io.ConfigDpiScaleViewports = true;
 
