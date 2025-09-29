@@ -92,6 +92,15 @@ static inline void _gb_srl(gb_sm83_t* cpu, u8* reg)
 	GB_REG_F(cpu->regs) |= (*reg) == 0 ? GB_FLAG_ZERO : 0;
 }
 
+static inline void _gb_swap(gb_sm83_t* cpu, u8* reg)
+{
+	u8 lower = *reg & 0xF;
+	u8 upper = (*reg) >> 4;
+	*reg = (u8)(lower << 4) | upper;
+
+	GB_REG_F(cpu->regs) = *reg == 0 ? GB_FLAG_ZERO : 0;
+}
+
 static inline void _gb_call_addr(gb_emu_t* emu, u16 addr)
 {
 	gb_emu_push_u16(emu, GB_REG_PC(emu->cpu.regs));
@@ -125,6 +134,12 @@ u8 gb_emu_execute_opcode(gb_emu_t* emu)
 		/* CPL */ case 0x2F: {
 			GB_REG_F(emu->cpu.regs) |= GB_FLAG_SUBS | GB_FLAG_HALF;
 			GB_REG_A(emu->cpu.regs) = ~GB_REG_A(emu->cpu.regs);
+			return 1;
+		}
+
+		/* SCF */ case 0x37: {
+			GB_REG_F(emu->cpu.regs) &= (u8) ~(GB_FLAG_SUBS | GB_FLAG_HALF);
+			GB_REG_F(emu->cpu.regs) |= GB_FLAG_CARR;
 			return 1;
 		}
 
@@ -626,6 +641,14 @@ u8 gb_emu_execute_opcode(gb_emu_t* emu)
 		/* jp, (HL) */ case 0xE9: {
 			GB_REG_PC(emu->cpu.regs) = GB_REG_HL(emu->cpu.regs);
 			return 4;
+		}
+
+		/* JP Z, a16 */ case 0xCA: {
+			if (GB_REG_F(emu->cpu.regs) & GB_FLAG_ZERO) {
+				GB_REG_PC(emu->cpu.regs) = gb_emu_read_u16(emu, GB_REG_PC(emu->cpu.regs));
+				return 4;
+			}
+			return 3;
 		}
 
 		/* CALL Z, a16 */ case 0xCC: {
@@ -1142,6 +1165,41 @@ static u8 gb_emu_execute_cb(gb_emu_t* emu)
 {
 	u8 opcode = gb_cart_read_u8(&emu->cart, GB_REG_PC(emu->cpu.regs)++);
 	switch (opcode) {
+        /* SWAP B */ case 0x30: {
+           	_gb_swap(&emu->cpu, &GB_REG_B(emu->cpu.regs));
+            return 2;
+       	}
+        /* SWAP C */ case 0x31: {
+           	_gb_swap(&emu->cpu, &GB_REG_C(emu->cpu.regs));
+            return 2;
+       	}
+        /* SWAP D */ case 0x32: {
+           	_gb_swap(&emu->cpu, &GB_REG_D(emu->cpu.regs));
+            return 2;
+       	}
+        /* SWAP E */ case 0x33: {
+           	_gb_swap(&emu->cpu, &GB_REG_E(emu->cpu.regs));
+            return 2;
+       	}
+        /* SWAP H */ case 0x34: {
+           	_gb_swap(&emu->cpu, &GB_REG_H(emu->cpu.regs));
+            return 2;
+       	}
+        /* SWAP L */ case 0x35: {
+           	_gb_swap(&emu->cpu, &GB_REG_L(emu->cpu.regs));
+            return 2;
+       	}
+        /* SWAP (HL) */ case 0x36: {
+            u8 value = gb_emu_read_u8(emu, GB_REG_HL(emu->cpu.regs));
+           	_gb_swap(&emu->cpu, &value);
+            gb_emu_write_u8(emu, GB_REG_HL(emu->cpu.regs), value);
+            return 2;
+       	}
+        /* SWAP A */ case 0x37: {
+           	_gb_swap(&emu->cpu, &GB_REG_A(emu->cpu.regs));
+            return 4;
+       	}
+
 		/* SRL B */ case 0x38: {
 			_gb_srl(&emu->cpu, &GB_REG_B(emu->cpu.regs));
 			return 2;
