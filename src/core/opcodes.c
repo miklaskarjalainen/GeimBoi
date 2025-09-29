@@ -29,16 +29,31 @@ static inline void _gb_cp(gb_sm83_t* cpu, u8 data)
 
 static inline void _gb_add(gb_sm83_t* cpu, u8 data)
 {
-	u8 result = GB_REG_A(cpu->regs) + data;
+	u16 result = GB_REG_A(cpu->regs) + data;
 
 	const u8 half = ((data & 0xF) + (GB_REG_A(cpu->regs) & 0xF)) > 0xF;
-	const u8 curry = (data + GB_REG_A(cpu->regs)) > 0xFF;
+	const u8 carry = result > 0xFF;
 
 	GB_REG_F(cpu->regs) = result ? 0 : GB_FLAG_ZERO;
 	GB_REG_F(cpu->regs) |= half ? GB_FLAG_HALF : 0;
-	GB_REG_F(cpu->regs) |= curry ? GB_FLAG_CARR : 0;
+	GB_REG_F(cpu->regs) |= carry ? GB_FLAG_CARR : 0;
 
-	GB_REG_A(cpu->regs) = result;
+	GB_REG_A(cpu->regs) = (u8)result;
+}
+
+static inline void _gb_adc(gb_sm83_t* cpu, u8 data)
+{
+    u8 add_carry = GB_IS_BIT(GB_REG_F(cpu->regs), GB_FLAG_CARR_BIT);
+	u16 result = (u16)(GB_REG_A(cpu->regs) + data + add_carry);
+
+	const u8 half = ((data & 0xF) + (GB_REG_A(cpu->regs) & 0xF) + add_carry) > 0xF;
+	const u8 carry = result > 0xFF;
+
+	GB_REG_F(cpu->regs) = result ? 0 : GB_FLAG_ZERO;
+	GB_REG_F(cpu->regs) |= half ? GB_FLAG_HALF : 0;
+	GB_REG_F(cpu->regs) |= carry ? GB_FLAG_CARR : 0;
+
+	GB_REG_A(cpu->regs) = (u8)result;
 }
 
 static inline void _gb_dec(gb_sm83_t* cpu, u8* data)
@@ -1063,6 +1078,46 @@ u8 gb_emu_execute_opcode(gb_emu_t* emu)
 			const u8 d = gb_emu_read_u8(emu, GB_REG_PC(emu->cpu.regs));
 			GB_REG_PC(emu->cpu.regs)++;
 			_gb_add(&emu->cpu, d);
+			return 2;
+		}
+
+		/* ADC B */ case 0x88: {
+			_gb_adc(&emu->cpu, GB_REG_B(emu->cpu.regs));
+			return 1;
+		}
+		/* ADC C */ case 0x89: {
+			_gb_adc(&emu->cpu, GB_REG_C(emu->cpu.regs));
+			return 1;
+		}
+		/* ADC D */ case 0x8A: {
+			_gb_adc(&emu->cpu, GB_REG_D(emu->cpu.regs));
+			return 1;
+		}
+		/* ADC E */ case 0x8B: {
+			_gb_adc(&emu->cpu, GB_REG_E(emu->cpu.regs));
+			return 1;
+		}
+		/* ADC H */ case 0x8C: {
+			_gb_adc(&emu->cpu, GB_REG_H(emu->cpu.regs));
+			return 1;
+		}
+		/* ADC L */ case 0x8D: {
+			_gb_adc(&emu->cpu, GB_REG_L(emu->cpu.regs));
+			return 1;
+		}
+		/* ADC [HL] */ case 0x8E: {
+			const u8 d = gb_emu_read_u8(emu, GB_REG_HL(emu->cpu.regs));
+			_gb_adc(&emu->cpu, d);
+			return 2;
+		}
+		/* ADC A */ case 0x8F: {
+			_gb_adc(&emu->cpu, GB_REG_A(emu->cpu.regs));
+			return 1;
+		}
+		/* ADC d8 */ case 0xCE: {
+			const u8 d = gb_emu_read_u8(emu, GB_REG_PC(emu->cpu.regs));
+			GB_REG_PC(emu->cpu.regs)++;
+			_gb_adc(&emu->cpu, d);
 			return 2;
 		}
 
