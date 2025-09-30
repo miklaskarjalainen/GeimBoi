@@ -7,24 +7,30 @@
 
 static inline void _gb_or(gb_sm83_t* cpu, u8 data)
 {
-	u8 result = GB_REG_A(cpu->regs) | data;
-	GB_REG_F(cpu->regs) = result == 0 ? GB_FLAG_ZERO : 0x0;
+	GB_REG_A(cpu->regs) |= data;
+	GB_REG_F(cpu->regs) = GB_REG_A(cpu->regs) == 0 ? GB_FLAG_ZERO : 0x0;
 }
 
 static inline void _gb_xor(gb_sm83_t* cpu, u8 data)
 {
-	u8 result = GB_REG_A(cpu->regs) ^= data;
-	GB_REG_F(cpu->regs) = result == 0 ? GB_FLAG_ZERO : 0x0;
+	GB_REG_A(cpu->regs) ^= data;
+	GB_REG_F(cpu->regs) = GB_REG_A(cpu->regs) == 0 ? GB_FLAG_ZERO : 0x0;
 }
 
 static inline void _gb_cp(gb_sm83_t* cpu, u8 data)
 {
-	u8 result = GB_REG_A(cpu->regs) - data;
+    u8 before = GB_REG_A(cpu->regs);
 
 	GB_REG_F(cpu->regs) = GB_FLAG_SUBS;
-	GB_REG_F(cpu->regs) |= result == 0 ? GB_FLAG_ZERO : 0;
-	GB_REG_F(cpu->regs) |= GB_IS_BIT(result, 3) ? GB_FLAG_HALF : 0;
-	GB_REG_F(cpu->regs) |= GB_IS_BIT(result, 7) ? GB_FLAG_CARR : 0;
+	GB_REG_F(cpu->regs) |= GB_REG_A(cpu->regs) == data ? GB_FLAG_ZERO : 0;
+	GB_REG_F(cpu->regs) |= GB_REG_A(cpu->regs) < data ? GB_FLAG_CARR : 0;
+
+	int16_t htest = before & 0xF;
+    htest -= (data & 0xF);
+    if (htest < 0)
+    {
+        GB_REG_F(cpu->regs) |= GB_FLAG_HALF;
+    }
 }
 
 static inline void _gb_add(gb_sm83_t* cpu, u8 data)
@@ -80,6 +86,7 @@ static inline void _gb_and(gb_sm83_t* cpu, u8 data)
 	u8 result = GB_REG_A(cpu->regs) & data;
 	GB_REG_F(cpu->regs) = result == 0 ? GB_FLAG_ZERO : 0x0;
 	GB_REG_F(cpu->regs) |= GB_FLAG_HALF;
+	GB_REG_A(cpu->regs) = result;
 }
 
 static inline void _gb_sub(gb_sm83_t* cpu, u8 data)
@@ -102,7 +109,7 @@ static inline void _gb_add_hl_u16(gb_sm83_t* cpu, u16 data)
 
 static inline void _gb_srl(gb_sm83_t* cpu, u8* reg)
 {
-	GB_REG_F(cpu->regs) = (*reg) & GB_BIT(0) ? GB_FLAG_CARR : 0;
+	GB_REG_F(cpu->regs) = GB_GET_BIT(*reg, 0) ? GB_FLAG_CARR : 0;
 	*reg >>= 1;
 	GB_REG_F(cpu->regs) |= (*reg) == 0 ? GB_FLAG_ZERO : 0;
 }
@@ -116,8 +123,8 @@ static inline void _gb_sla(gb_sm83_t* cpu, u8* reg)
 
 static inline void _gb_get_bit(gb_sm83_t* cpu, u8 data, u8 bit)
 {
-	GB_REG_F(cpu->regs) &= (u8) ~(GB_FLAG_HALF);
-	GB_REG_F(cpu->regs) |= GB_FLAG_SUBS;
+	GB_REG_F(cpu->regs) &= (u8) ~(GB_FLAG_ZERO | GB_FLAG_SUBS);
+	GB_REG_F(cpu->regs) |= GB_FLAG_HALF;
 	GB_REG_F(cpu->regs) |= GB_GET_BIT(data, bit) ? 0x0 : GB_FLAG_ZERO;
 }
 
@@ -208,7 +215,7 @@ u8 gb_emu_execute_opcode(gb_emu_t* emu)
 			return 1;
 		}
 
-		/* DEC B */ case 0x04: {
+		/* INC B */ case 0x04: {
 			_gb_inc(&emu->cpu, &GB_REG_B(emu->cpu.regs));
 			return 1;
 		}
@@ -271,7 +278,7 @@ u8 gb_emu_execute_opcode(gb_emu_t* emu)
 		}
 
 		/* DEC H */ case 0x25: {
-			_gb_dec(&emu->cpu, &GB_REG_D(emu->cpu.regs));
+			_gb_dec(&emu->cpu, &GB_REG_H(emu->cpu.regs));
 			return 1;
 		}
 
@@ -415,7 +422,7 @@ u8 gb_emu_execute_opcode(gb_emu_t* emu)
 		}
 
 		/* LD B, A */ case 0x47: {
-			GB_REG_B(emu->cpu.regs) = GB_REG_L(emu->cpu.regs);
+			GB_REG_B(emu->cpu.regs) = GB_REG_A(emu->cpu.regs);
 			return 1;
 		}
 
@@ -491,7 +498,7 @@ u8 gb_emu_execute_opcode(gb_emu_t* emu)
 		}
 
 		/* LD D, A */ case 0x57: {
-			GB_REG_D(emu->cpu.regs) = GB_REG_L(emu->cpu.regs);
+			GB_REG_D(emu->cpu.regs) = GB_REG_A(emu->cpu.regs);
 			return 1;
 		}
 
@@ -567,7 +574,7 @@ u8 gb_emu_execute_opcode(gb_emu_t* emu)
 		}
 
 		/* LD H, A */ case 0x67: {
-			GB_REG_H(emu->cpu.regs) = GB_REG_L(emu->cpu.regs);
+			GB_REG_H(emu->cpu.regs) = GB_REG_A(emu->cpu.regs);
 			return 1;
 		}
 
@@ -589,7 +596,7 @@ u8 gb_emu_execute_opcode(gb_emu_t* emu)
 		}
 
 		/* LD L, E */ case 0x6B: {
-			GB_REG_L(emu->cpu.regs) = GB_REG_D(emu->cpu.regs);
+			GB_REG_L(emu->cpu.regs) = GB_REG_E(emu->cpu.regs);
 			return 1;
 		}
 
@@ -671,7 +678,7 @@ u8 gb_emu_execute_opcode(gb_emu_t* emu)
 		}
 
 		/* LD A, E */ case 0x7B: {
-			GB_REG_A(emu->cpu.regs) = GB_REG_D(emu->cpu.regs);
+			GB_REG_A(emu->cpu.regs) = GB_REG_E(emu->cpu.regs);
 			return 1;
 		}
 
@@ -1266,7 +1273,8 @@ u8 gb_emu_execute_opcode(gb_emu_t* emu)
 		}
 
 		default: {
-			GB_FATAL("UNIMPLEMENTED OPCODE! 0x%X\n", opcode);
+			return 1;
+			//GB_FATAL("UNIMPLEMENTED OPCODE! 0x%X\n", opcode);
 			break;
 		}
 	}
@@ -1935,6 +1943,7 @@ static u8 gb_emu_execute_cb(gb_emu_t* emu)
 		}
 
 		default: {
+			return 2;
 			GB_FATAL("UNIMPLEMENTED CB OPCODE! 0x%X\n", opcode);
 			break;
 		}
