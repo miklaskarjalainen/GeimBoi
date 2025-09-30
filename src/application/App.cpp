@@ -126,7 +126,7 @@ void GeimBoi::App::run()
 		// Our rendering stuff :p
 		ImGui::Begin("PPU");
 		ImGui::Text("T-Cycles 0x%04X", m_Emulator->ppu.t_cycles);
-		ImGui::Text("Mode %u", m_Emulator->ppu.ppu_mode);
+		ImGui::Text("Mode %u", gb_emu_read_u8(m_Emulator, 0xFF41) & 0x3);
 		ImGui::Image(
 			(ImTextureID)(intptr_t)my_image_texture,
 			ImVec2(GB_LCD_WIDTH * 4, GB_LCD_HEIGHT * 4)

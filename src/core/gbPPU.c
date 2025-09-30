@@ -1,12 +1,22 @@
 #include "gbPPU.h"
 #include "gbEmu.h"
+#include "gbReg.h"
 #include "gbSM83.h"
 
 #include <stddef.h>
 #include <stdio.h>
 
+#define PPU_SET_MODE(ppu, mode) ((ppu)->stat = (u8)(((ppu)->stat & ~(0x3)) | (mode)))
+
+#define PPU_MODE_HBLANK 0
+#define PPU_MODE_VBLANK 1
+#define PPU_MODE_OAM 2
+#define PPU_MODE_RENDER 3
+
+
 void gb_ppu_init(gb_ppu_t* ppu, struct gb_sm83* cpu)
 {
+
     for (int y = 0; y < GB_LCD_HEIGHT; y++) {
         for (int x = 0; x < GB_LCD_WIDTH; x++) {
             ppu->frame[y][x][0] = (u8)(255);
@@ -14,8 +24,11 @@ void gb_ppu_init(gb_ppu_t* ppu, struct gb_sm83* cpu)
             ppu->frame[y][x][2] = (u8)(0);
         }
     }
+    ppu->ly = 0;
+    ppu->lyc = 0;
+    ppu->stat = 0;
+    ppu->lcdc = 0;
     ppu->t_cycles = 0;
-    ppu->ppu_mode = 2;
     ppu->cpu = cpu;
 }
 
@@ -25,8 +38,7 @@ struct gb_tile_data {
 
 struct gb_tile_data get_as_tile(u8* begin)
 {
-    (void)begin;
-    struct gb_tile_data d;
+    struct gb_tile_data d = { 0 };
 
     for (int y = 0; y < 8; y++)
     {
@@ -64,7 +76,6 @@ struct gb_tile_data get_as_tile(u8* begin)
 
                     break;
                 }
-
                 default: {
                     printf("?");
                 }
@@ -76,13 +87,103 @@ struct gb_tile_data get_as_tile(u8* begin)
     return d;
 }
 
-void gb_render_scanline(gb_ppu_t* ppu, u8 ly)
+void gb_render_scanline(gb_ppu_t* ppu)
 {
+    const u8 ly = ppu->ly;
+    if (ly >= 144) {
+        return;
+    }
+
+    // u16 tile = 0;
+    // u16 addr = (u16)(tile * 16);
+    struct gb_tile_data data = get_as_tile(&ppu->cpu->memory[0x0]);
+
     for (u8 lx = 0; lx < GB_LCD_WIDTH; lx++)
     {
-        ppu->frame[ly][lx][0] = 0;
+        if (ly < 8 && lx < 8) {
+            ppu->frame[ly][lx][0] = data.data[ly][lx][0];
+            ppu->frame[ly][lx][1] = data.data[ly][lx][1];
+            ppu->frame[ly][lx][2] = data.data[ly][lx][2];
+            continue;
+        }
+
+        ppu->frame[ly][lx][0] = 255;
         ppu->frame[ly][lx][1] = ly;
         ppu->frame[ly][lx][2] = lx;
+    }
+}
+
+static void clock_oam_scan(gb_ppu_t* ppu) {
+    if (ppu->t_cycles < 80) {
+        return;
+    }
+    ppu->t_cycles -= 80;
+    PPU_SET_MODE(ppu, PPU_MODE_RENDER);
+}
+
+static void clock_drawing(gb_ppu_t* ppu) {
+    if (ppu->t_cycles < 172) {
+        return;
+    }
+    ppu->t_cycles -= 172;
+    PPU_SET_MODE(ppu, PPU_MODE_HBLANK);
+    if (GB_IS_BIT(ppu->stat, 3)) {
+        gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
+    }
+}
+
+static void clock_hblank(gb_ppu_t* ppu) {
+    if (ppu->t_cycles < 204) {
+        return;
+    }
+    ppu->t_cycles -= 204;
+
+    if (ppu->ly != 143) {
+        PPU_SET_MODE(ppu, PPU_MODE_OAM);
+        if (GB_IS_BIT(ppu->stat, 5)) {
+            gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
+        }
+    }
+    else {
+        PPU_SET_MODE(ppu, PPU_MODE_VBLANK);
+        if (GB_IS_BIT(ppu->stat, 4)) {
+            gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
+        }
+    }
+
+    ppu->ly += 1;
+    ppu->stat &= (u8)~GB_BIT(2);
+    if (ppu->ly == ppu->lyc) {
+        ppu->stat |= GB_BIT(2);
+        if (GB_IS_BIT(ppu->stat, 2)) {
+            gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
+        }
+    }
+}
+
+static void clock_vblank(gb_ppu_t* ppu) {
+    if (ppu->t_cycles < 456) {
+        return;
+    }
+    ppu->t_cycles -= 456;
+
+    if (ppu->ly == 153) {
+        ppu->ly = 0;
+        PPU_SET_MODE(ppu, PPU_MODE_OAM);
+        if (GB_IS_BIT(ppu->stat, 3)) {
+            gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
+        }
+    }
+    else {
+        ppu->ly += 1;
+    }
+
+    ppu->stat &= (u8)~GB_BIT(2);
+    if (ppu->ly == ppu->lyc) {
+        ppu->stat |= GB_BIT(2);
+        if (GB_IS_BIT(ppu->stat, 2)) {
+            gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
+        }
     }
 }
 
@@ -90,56 +191,22 @@ void gb_ppu_clock(gb_ppu_t* ppu, u16 t_cycles)
 {
     for (u16 i = 0; i < t_cycles; i++ ) {
         ppu->t_cycles++;
-        switch (ppu->ppu_mode) {
-            // Horizontal blank
-            case 0: {
-                if (ppu->t_cycles < 204) {
-                    return;
-                }
-                ppu->t_cycles -= 204;
-                u8 ly = gb_cpu_read_u8(ppu->cpu, 0xFF44);
-                gb_render_scanline(ppu, ly);
-                if (ly == 143) {
-                    ppu->ppu_mode = 1;
-                    gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_VBLANK);
-                }
-                else {
-                    ppu->ppu_mode = 2;
-                }
-
-                gb_cpu_write_u8(ppu->cpu, 0xFF44, ly + 1);
+        switch (ppu->stat & 0x3) {
+            case PPU_MODE_HBLANK: {
+                clock_hblank(ppu);
+                gb_render_scanline(ppu);
                 break;
             }
-            case 1: {
-                if (ppu->t_cycles < 4560) {
-                    return;
-                }
-                ppu->t_cycles -= 4560;
-
-                u8 ly = gb_cpu_read_u8(ppu->cpu, 0xFF44);
-                if (ly == 153) {
-                    gb_cpu_write_u8(ppu->cpu, 0xFF44, 0);
-                    ppu->ppu_mode = 2;
-                }
-                else {
-                    gb_cpu_write_u8(ppu->cpu, 0xFF44, ly + 1);
-                }
+            case PPU_MODE_VBLANK: {
+                clock_vblank(ppu);
                 break;
             }
-            case 2: {
-                if (ppu->t_cycles < 80) {
-                    return;
-                }
-                ppu->t_cycles -= 80;
-                ppu->ppu_mode = 3;
+            case PPU_MODE_OAM: {
+                clock_oam_scan(ppu);
                 break;
             }
-            case 3: {
-                if (ppu->t_cycles < 172) {
-                    return;
-                }
-                ppu->t_cycles -= 172;
-                ppu->ppu_mode = 0;
+            case PPU_MODE_RENDER: {
+                clock_drawing(ppu);
                 break;
             }
         }

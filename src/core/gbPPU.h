@@ -9,7 +9,8 @@
 typedef struct gb_ppu {
     u8 frame[GB_LCD_HEIGHT][GB_LCD_WIDTH][3];
     u16 t_cycles;
-    u8 ppu_mode: 2;
+
+    u8 ly, lyc, stat, lcdc;
 
     struct gb_sm83* cpu;
 } gb_ppu_t;
