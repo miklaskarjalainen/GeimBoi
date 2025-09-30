@@ -33,6 +33,18 @@ gb_sm83_t gb_cpu_create(struct gb_emu* emu)
 
 u8 gb_cpu_read_u8(const gb_sm83_t* cpu, u16 addr)
 {
+   	if (addr == 0xFF40) {
+		return cpu->emu->ppu.lcdc;
+	}
+	if (addr == 0xFF41) {
+	    return cpu->emu->ppu.stat;
+	}
+	if (addr == 0xFF44) {
+	    return cpu->emu->ppu.ly;
+	}
+	if (addr == 0xFF45) {
+	    return cpu->emu->ppu.lyc;
+	}
 	return cpu->memory[addr - 0x8000];
 }
 
@@ -53,6 +65,28 @@ void gb_cpu_write_u8(gb_sm83_t* cpu, u16 addr, u8 data)
         cpu->m_cycles += 160;
         return;
     }
+
+   	if (addr == 0xFF44) {
+	    return;
+	}
+
+    if (addr == 0xFF00) {
+	    cpu->memory[addr - 0x8000] &= 0xF;
+        cpu->memory[addr - 0x8000] |= (u8)(data & ~(0xF));
+		return;
+	}
+	if (addr == 0xFF40) {
+	    cpu->emu->ppu.lcdc = data;
+		return;
+	}
+	if (addr == 0xFF41) {
+	    cpu->emu->ppu.stat = data & 0xF8;
+		return;
+	}
+	if (addr == 0xFF45) {
+	    cpu->emu->ppu.lyc = data;
+		return;
+	}
 
 	cpu->memory[addr - 0x8000] = data;
 }
