@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#define PPU_SET_MODE(ppu, mode) ((ppu)->stat = (u8)(((ppu)->stat & ~(0x3)) | (mode)))
+#define PPU_SET_MODE(ppu, mode) (ppu)->stat = ((ppu)->stat & 0xFC) | (mode)
 
 #define PPU_MODE_HBLANK 0
 #define PPU_MODE_VBLANK 1
@@ -132,6 +132,18 @@ static void clock_drawing(gb_ppu_t* ppu) {
     }
 }
 
+static inline void _gb_check_coinsidence_flag(gb_ppu_t* ppu) {
+    if (ppu->ly == ppu->lyc) {
+        ppu->stat |= GB_BIT(2);
+        if (GB_IS_BIT(ppu->stat, 6)) {
+            gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
+        }
+    }
+    else {
+        ppu->stat &= (u8)~GB_BIT(2);
+    }
+}
+
 static void clock_hblank(gb_ppu_t* ppu) {
     if (ppu->t_cycles < 204) {
         return;
@@ -149,16 +161,11 @@ static void clock_hblank(gb_ppu_t* ppu) {
         if (GB_IS_BIT(ppu->stat, 4)) {
             gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
         }
+        gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_VBLANK);
     }
 
     ppu->ly += 1;
-    ppu->stat &= (u8)~GB_BIT(2);
-    if (ppu->ly == ppu->lyc) {
-        ppu->stat |= GB_BIT(2);
-        if (GB_IS_BIT(ppu->stat, 2)) {
-            gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
-        }
-    }
+    _gb_check_coinsidence_flag(ppu);
 }
 
 static void clock_vblank(gb_ppu_t* ppu) {
@@ -178,17 +185,16 @@ static void clock_vblank(gb_ppu_t* ppu) {
         ppu->ly += 1;
     }
 
-    ppu->stat &= (u8)~GB_BIT(2);
-    if (ppu->ly == ppu->lyc) {
-        ppu->stat |= GB_BIT(2);
-        if (GB_IS_BIT(ppu->stat, 2)) {
-            gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
-        }
-    }
+    _gb_check_coinsidence_flag(ppu);
 }
 
 void gb_ppu_clock(gb_ppu_t* ppu, u16 t_cycles)
 {
+    if (!GB_IS_BIT(ppu->lcdc, 7)) {
+        ppu->ly = 0;
+        return;
+    }
+
     for (u16 i = 0; i < t_cycles; i++ ) {
         ppu->t_cycles++;
         switch (ppu->stat & 0x3) {

@@ -33,6 +33,22 @@ gb_sm83_t gb_cpu_create(struct gb_emu* emu)
 
 u8 gb_cpu_read_u8(const gb_sm83_t* cpu, u16 addr)
 {
+    if (addr == 0xFF04) {
+		return 0xFF;
+	}
+    if (addr == 0xFF05) {
+		return 0xFF;
+	}
+    if (addr == 0xFF06) {
+		return 0xFF;
+	}
+    if (addr == 0xFF07) {
+		return 0x07;
+	}
+
+    if (addr >= 0xFEA0 && addr <= 0xFEFF) {
+        return 0xFF;
+    }
    	if (addr == 0xFF40) {
 		return cpu->emu->ppu.lcdc;
 	}
@@ -81,6 +97,10 @@ void gb_cpu_write_u8(gb_sm83_t* cpu, u16 addr, u8 data)
 	}
 	if (addr == 0xFF41) {
 	    cpu->emu->ppu.stat = data & 0xF8;
+		return;
+	}
+	if (addr == 0xFF44) {
+	    cpu->emu->ppu.ly = 0;
 		return;
 	}
 	if (addr == 0xFF45) {
@@ -139,5 +159,7 @@ void gb_cpu_poll_interrupts(gb_sm83_t* cpu)
 
 void gb_cpu_request_interrupt(gb_sm83_t* cpu, u8 interrupt)
 {
-	gb_cpu_write_u8(cpu, GB_ADDR_IF, interrupt);
+
+    u8 unhandled = gb_cpu_read_u8(cpu, GB_ADDR_IF);
+	gb_cpu_write_u8(cpu, GB_ADDR_IF, unhandled | interrupt);
 }
