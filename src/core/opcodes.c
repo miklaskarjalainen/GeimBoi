@@ -64,21 +64,23 @@ static inline void _gb_adc(gb_sm83_t* cpu, u8 data)
 
 static inline void _gb_dec(gb_sm83_t* cpu, u8* data)
 {
+    u8 before = *data;
 	(*data) -= 1;
 
 	GB_REG_F(cpu->regs) &= (u8) ~(GB_FLAG_ZERO | GB_FLAG_HALF);
 	GB_REG_F(cpu->regs) |= GB_FLAG_SUBS;
 	GB_REG_F(cpu->regs) |= (*data == 0) ? GB_FLAG_ZERO : 0;
-	GB_REG_F(cpu->regs) |= GB_IS_BIT(*data, 3) ? GB_FLAG_HALF : 0;
+	GB_REG_F(cpu->regs) |= (before & 0xF) == 0 ? GB_FLAG_HALF : 0;
 }
 
 static inline void _gb_inc(gb_sm83_t* cpu, u8* data)
 {
+    u8 before = *data;
 	(*data) += 1;
 
 	GB_REG_F(cpu->regs) &= (u8) ~(GB_FLAG_ZERO | GB_FLAG_SUBS | GB_FLAG_HALF);
 	GB_REG_F(cpu->regs) |= (*data == 0) ? GB_FLAG_ZERO : 0;
-	GB_REG_F(cpu->regs) |= GB_IS_BIT(*data, 3) ? GB_FLAG_HALF : 0;
+	GB_REG_F(cpu->regs) |= (before & 0xF) == 0xF ? GB_FLAG_HALF : 0;
 }
 
 static inline void _gb_and(gb_sm83_t* cpu, u8 data)
@@ -91,20 +93,26 @@ static inline void _gb_and(gb_sm83_t* cpu, u8 data)
 
 static inline void _gb_sub(gb_sm83_t* cpu, u8 data)
 {
-	u8 result = GB_REG_A(cpu->regs) - data;
+    i16 signed_result = (i16)(GB_REG_A(cpu->regs) - data);
+    i16 signed_result_half = (i16)((GB_REG_A(cpu->regs) & 0xF) - (data & 0xF));
 
-	GB_REG_F(cpu->regs) = result == 0 ? GB_FLAG_ZERO : 0x0;
+	GB_REG_F(cpu->regs) = signed_result == 0 ? GB_FLAG_ZERO : 0x0;
 	GB_REG_F(cpu->regs) |= GB_FLAG_SUBS;
-	GB_REG_F(cpu->regs) |= (result & GB_BIT(3)) != 0 ? GB_FLAG_HALF : 0;
-	GB_REG_F(cpu->regs) |= (result & GB_BIT(7)) != 0 ? GB_FLAG_CARR : 0;
+	GB_REG_F(cpu->regs) |= signed_result < 0 ? GB_FLAG_CARR : 0;
+	GB_REG_F(cpu->regs) |= signed_result_half < 0 ? GB_FLAG_CARR : 0;
+
+	GB_REG_A(cpu->regs) = (u8)signed_result;
 }
 
 static inline void _gb_add_hl_u16(gb_sm83_t* cpu, u16 data)
 {
-	u16 result = GB_REG_HL(cpu->regs) + data;
+	u32 result = GB_REG_HL(cpu->regs) + data;
+	u32 half = (GB_REG_HL(cpu->regs) & 0xFFF) + (data & 0xFFF);
+
 	GB_REG_F(cpu->regs) &= (u8) ~(GB_FLAG_HALF | GB_FLAG_CARR | GB_FLAG_SUBS);
-	GB_REG_F(cpu->regs) |= (result & GB_BIT(11)) != 0 ? GB_FLAG_HALF : 0;
-	GB_REG_F(cpu->regs) |= (result & GB_BIT(15)) != 0 ? GB_FLAG_CARR : 0;
+	GB_REG_F(cpu->regs) |= (result & 0x10000) != 0 ? GB_FLAG_CARR : 0;
+	GB_REG_F(cpu->regs) |=  half > 0xFFF ? GB_FLAG_HALF : 0;
+	GB_REG_HL(cpu->regs) = (u16)result;
 }
 
 static inline void _gb_srl(gb_sm83_t* cpu, u8* reg)
