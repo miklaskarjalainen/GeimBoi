@@ -33,29 +33,41 @@
 		#define _GB_LOG_ERR stderr
 	#endif
 
-	#define GB_INFO(fmt, ...)                                                                      \
-		do {                                                                                       \
-			fprintf(_GB_LOG_OUT, GB_COLOR_CYAN "[INFO] " GB_COLOR_RESET fmt "\n", ##__VA_ARGS__);  \
+	#define GB_INFO(fmt, ...)                                                  \
+		do {                                                                   \
+			fprintf(                                                           \
+				_GB_LOG_OUT,                                                   \
+				GB_COLOR_CYAN "[INFO] " GB_COLOR_RESET fmt "\n",               \
+				__VA_ARGS__                                                    \
+			);                                                                 \
 		} while (0)
 
-	#define GB_WARN(fmt, ...)                                                                      \
-		do {                                                                                       \
-			fprintf(                                                                               \
-				_GB_LOG_OUT, GB_COLOR_YELLOW "[WARN] " fmt GB_COLOR_RESET "\n", ##__VA_ARGS__      \
-			);                                                                                     \
+	#define GB_WARN(fmt, ...)                                                  \
+		do {                                                                   \
+			fprintf(                                                           \
+				_GB_LOG_OUT,                                                   \
+				GB_COLOR_YELLOW "[WARN] " GB_COLOR_RESET fmt "\n",             \
+				__VA_ARGS__                                                    \
+			);                                                                 \
 		} while (0)
 
-	#define GB_ERROR(fmt, ...)                                                                     \
-		do {                                                                                       \
-			fprintf(_GB_LOG_ERR, GB_COLOR_RED "[ERROR] " fmt GB_COLOR_RESET "\n", ##__VA_ARGS__);  \
+	#define GB_ERROR(fmt, ...)                                                 \
+		do {                                                                   \
+			fprintf(                                                           \
+				_GB_LOG_ERR,                                                   \
+				GB_COLOR_RED "[ERROR] " fmt GB_COLOR_RESET "\n",               \
+				__VA_ARGS__                                                    \
+			);                                                                 \
 		} while (0)
 
-	#define GB_FATAL(fmt, ...)                                                                     \
-		do {                                                                                       \
-			fprintf(                                                                               \
-				_GB_LOG_ERR, GB_COLOR_BOLDRED "[FATAL] " GB_COLOR_RESET fmt "\n", ##__VA_ARGS__    \
-			);                                                                                     \
-			exit(EXIT_FAILURE);                                                                    \
+	#define GB_FATAL(fmt, ...)                                                 \
+		do {                                                                   \
+			fprintf(                                                           \
+				_GB_LOG_ERR,                                                   \
+				GB_COLOR_BOLDRED "[FATAL] " fmt GB_COLOR_RESET "\n",           \
+				__VA_ARGS__                                                    \
+			);                                                                 \
+			exit(EXIT_FAILURE);                                                \
 		} while (0)
 
 #endif
