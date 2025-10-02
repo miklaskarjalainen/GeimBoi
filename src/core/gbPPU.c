@@ -85,32 +85,69 @@ struct gb_tile_data get_as_tile(u8* begin)
     }
 
     return d;
+static inline u8 _gb_get_pixel_color(u8 color)
+{
+	switch (color) {
+		case 0x0: {
+			return 12;
+		}
+		case 0x1: {
+			return 102;
+		}
+		case 0x2: {
+			return 198;
+		}
+		case 0x3: {
+			return 255;
+		}
+		default: {
+			printf("?");
+		}
+	}
+}
+
+static inline _gb_render_background(gb_ppu_t* ppu)
+{
+	// Fetch the base address to read from.
+	const u16 tile_addr = GB_IS_BIT(ppu->lcdc, 4) ? 0x8000 : 0x8800;
+	const u16 bg_addr = GB_IS_BIT(ppu->lcdc, 3) ? 0x9C00 : 0x9800;
+	const u16 tile_row = (u16)(ppu->ly / 8 * 32);
+
+	for (u8 lx = 0; lx < 160; lx++) {
+		// Some magic to determine where to read the tile from.
+		const u16 tile_column = lx / 8;
+		const i16 tile_num =
+			gb_cpu_read_u8(ppu->cpu, bg_addr + tile_row + tile_column);
+		const u16 tile_location = tile_addr + (tile_num * 16);
+
+		// Fetch the row of pixels for the tile
+		const u8 tile_line = ppu->ly % 8;
+		const u8 data1 =
+			gb_cpu_read_u8(ppu->cpu, tile_location + (tile_line * 2));
+		const u8 data2 =
+			gb_cpu_read_u8(ppu->cpu, tile_location + (tile_line * 2) + 1);
+
+		// Get the color of the pixel
+		const u8 colour_bit = 7 - (lx % 8);
+		const u8 color_id = (((data2 >> colour_bit)) & 0b1) |
+							(((data1 >> colour_bit) & 0b1) << 1);
+		const u8 color = _gb_get_pixel_color(color_id);
+
+		// Draw the pixel
+		ppu->frame[ppu->ly][lx][0] = color;
+		ppu->frame[ppu->ly][lx][1] = color;
+		ppu->frame[ppu->ly][lx][2] = color;
+	}
 }
 
 void gb_render_scanline(gb_ppu_t* ppu)
 {
-    const u8 ly = ppu->ly;
-    if (ly >= 144) {
-        return;
-    }
+	const u8 ly = ppu->ly;
+	if (ly >= 144) {
+		return;
+	}
 
-    // u16 tile = 0;
-    // u16 addr = (u16)(tile * 16);
-    struct gb_tile_data data = get_as_tile(&ppu->cpu->memory[0x0]);
-
-    for (u8 lx = 0; lx < GB_LCD_WIDTH; lx++)
-    {
-        if (ly < 8 && lx < 8) {
-            ppu->frame[ly][lx][0] = data.data[ly][lx][0];
-            ppu->frame[ly][lx][1] = data.data[ly][lx][1];
-            ppu->frame[ly][lx][2] = data.data[ly][lx][2];
-            continue;
-        }
-
-        ppu->frame[ly][lx][0] = 255;
-        ppu->frame[ly][lx][1] = ly;
-        ppu->frame[ly][lx][2] = lx;
-    }
+	_gb_render_background(ppu);
 }
 
 static void clock_oam_scan(gb_ppu_t* ppu) {
