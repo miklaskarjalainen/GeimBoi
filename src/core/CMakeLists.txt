@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 4.1.1)
+cmake_minimum_required(VERSION 4.0.0)
 
 project(geimboi-core C)
 
 set(GEIMBOI_CORE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
 # Define the backend library
-add_library(${PROJECT_NAME} SHARED
+add_library(${PROJECT_NAME}
     gbCore.h
     gbCart.c gbCart.h
     gbEmu.c gbEmu.h

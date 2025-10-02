@@ -1,10 +1,9 @@
 include(FetchContent)
 
 FetchContent_Declare(
-     imgui
-     GIT_REPOSITORY https://github.com/ocornut/imgui.git
-     GIT_TAG origin/docking
-     OVERRIDE_FIND_PACKAGE
+	 imgui
+	 GIT_REPOSITORY https://github.com/ocornut/imgui.git
+	 GIT_TAG origin/docking
 )
 
 FetchContent_MakeAvailable(imgui)
@@ -33,4 +32,5 @@ set(
 )
 
 add_library(imgui ${IMGUI_SRCFILES})
-target_include_directories(imgui PUBLIC ${IMGUI_SRC_DIR} ${IMGUI_SRC_DIR}/backends)
+
+target_include_directories(imgui PUBLIC ${SDL3_INCLUDE_DIRS} ${IMGUI_SRC_DIR} ${IMGUI_SRC_DIR}/backends)

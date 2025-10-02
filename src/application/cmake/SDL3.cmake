@@ -8,6 +8,10 @@ FetchContent_Declare(
     SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG origin/main
-    OVERRIDE_FIND_PACKAGE
 )
+
 FetchContent_MakeAvailable(SDL3)
+FetchContent_GetProperties(SDL3 SOURCE_DIR SDL3_INCLUDE_DIRS)
+
+set(SDL3_INCLUDE_DIRS ${SDL3_INCLUDE_DIRS}/include)
+

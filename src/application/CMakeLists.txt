@@ -18,4 +18,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${GEIMBOI_CORE_INCLUDE_DIRS}
     ${IMGUI_CLUB_SRC_DIR}/imgui_memory_editor/
 )
-target_link_libraries(${PROJECT_NAME} PUBLIC SDL3::SDL3-static imgui GL)
+
+if(MSVC)
+	target_link_libraries(${PROJECT_NAME} PUBLIC SDL3::SDL3-static imgui opengl32)
+else()
+	target_link_libraries(${PROJECT_NAME} PUBLIC SDL3::SDL3-static imgui GL)
+endif()
