@@ -37,78 +37,78 @@ gb_sm83_t gb_cpu_create(struct gb_emu* emu)
 
 u8 gb_cpu_read_u8(const gb_sm83_t* cpu, u16 addr)
 {
-    if (addr == 0xFF04) {
+	if (addr == 0xFF04) {
 		return 0xFF;
 	}
-    if (addr == 0xFF05) {
+	if (addr == 0xFF05) {
 		return 0xFF;
 	}
-    if (addr == 0xFF06) {
+	if (addr == 0xFF06) {
 		return 0xFF;
 	}
-    if (addr == 0xFF07) {
+	if (addr == 0xFF07) {
 		return 0x07;
 	}
 
-    if (addr >= 0xFEA0 && addr <= 0xFEFF) {
-        return 0xFF;
-    }
-   	if (addr == 0xFF40) {
+	if (addr >= 0xFEA0 && addr <= 0xFEFF) {
+		return 0xFF;
+	}
+	if (addr == 0xFF40) {
 		return cpu->emu->ppu.lcdc;
 	}
 	if (addr == 0xFF41) {
-	    return cpu->emu->ppu.stat;
+		return cpu->emu->ppu.stat;
 	}
 	if (addr == 0xFF44) {
-	    return cpu->emu->ppu.ly;
+		return cpu->emu->ppu.ly;
 	}
 	if (addr == 0xFF45) {
-	    return cpu->emu->ppu.lyc;
+		return cpu->emu->ppu.lyc;
 	}
 	return cpu->memory[addr - 0x8000];
 }
 
 void gb_cpu_write_u8(gb_sm83_t* cpu, u16 addr, u8 data)
 {
-    if (addr == 0xFF02 && data == 0x81) {
+	if (addr == 0xFF02 && data == 0x81) {
 		// printf("%c", gb_cpu_read_u8(cpu, 0xFF01));
 		return;
 	}
 
-    // DMA transfer
-    if (addr == 0xFF46) {
-        const u16 src = (u16)(data << 8);
-        const u16 dst = 0xFE00 - 0x8000;
-        for (u8 i = 0; i < 160; i++) {
-            cpu->memory[dst + i] = gb_emu_read_u8(cpu->emu, src + i);
-        }
-        cpu->m_cycles += 160;
-        return;
-    }
-
-   	if (addr == 0xFF44) {
-	    return;
+	// DMA transfer
+	if (addr == 0xFF46) {
+		const u16 src = (u16)(data << 8);
+		const u16 dst = 0xFE00 - 0x8000;
+		for (u8 i = 0; i < 160; i++) {
+			cpu->memory[dst + i] = gb_emu_read_u8(cpu->emu, src + i);
+		}
+		cpu->m_cycles += 160;
+		return;
 	}
 
-    if (addr == 0xFF00) {
-	    cpu->memory[addr - 0x8000] &= 0xF;
-        cpu->memory[addr - 0x8000] |= (u8)(data & ~(0xF));
+	if (addr == 0xFF44) {
+		return;
+	}
+
+	if (addr == 0xFF00) {
+		cpu->memory[addr - 0x8000] &= 0xF;
+		cpu->memory[addr - 0x8000] |= (u8)(data & ~(0xF));
 		return;
 	}
 	if (addr == 0xFF40) {
-	    cpu->emu->ppu.lcdc = data;
+		cpu->emu->ppu.lcdc = data;
 		return;
 	}
 	if (addr == 0xFF41) {
-	    cpu->emu->ppu.stat = data & 0xF8;
+		cpu->emu->ppu.stat = data & 0xF8;
 		return;
 	}
 	if (addr == 0xFF44) {
-	    cpu->emu->ppu.ly = 0;
+		cpu->emu->ppu.ly = 0;
 		return;
 	}
 	if (addr == 0xFF45) {
-	    cpu->emu->ppu.lyc = data;
+		cpu->emu->ppu.lyc = data;
 		return;
 	}
 
@@ -164,6 +164,6 @@ void gb_cpu_poll_interrupts(gb_sm83_t* cpu)
 void gb_cpu_request_interrupt(gb_sm83_t* cpu, u8 interrupt)
 {
 
-    u8 unhandled = gb_cpu_read_u8(cpu, GB_ADDR_IF);
+	u8 unhandled = gb_cpu_read_u8(cpu, GB_ADDR_IF);
 	gb_cpu_write_u8(cpu, GB_ADDR_IF, unhandled | interrupt);
 }

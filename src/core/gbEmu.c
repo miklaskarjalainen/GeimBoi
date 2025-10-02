@@ -21,10 +21,11 @@ void gb_emu_delete(gb_emu_t* emu)
 	free(emu);
 }
 
-void gb_emu_init(gb_emu_t* emu) {
-    memset((void*)emu, 0, sizeof(gb_emu_t));
-    emu->cpu = gb_cpu_create(emu);
-    gb_ppu_init(&emu->ppu, &emu->cpu);
+void gb_emu_init(gb_emu_t* emu)
+{
+	memset((void*)emu, 0, sizeof(gb_emu_t));
+	emu->cpu = gb_cpu_create(emu);
+	gb_ppu_init(&emu->ppu, &emu->cpu);
 }
 
 void gb_emu_deinit(gb_emu_t* emu) { gb_cart_delete(&emu->cart); }
@@ -65,11 +66,11 @@ bool gb_emu_load_rom_file(gb_emu_t* emu, const char* fpath)
 
 void gb_emu_advance_frame(gb_emu_t* emu) { (void)emu; }
 
-void gb_emu_advance_opcode(gb_emu_t *emu)
+void gb_emu_advance_opcode(gb_emu_t* emu)
 {
-    gb_cpu_poll_interrupts(&emu->cpu);
-    u8 cycles = gb_emu_execute_opcode(emu);
-    gb_ppu_clock(&emu->ppu, cycles * 4);
+	gb_cpu_poll_interrupts(&emu->cpu);
+	u8 cycles = gb_emu_execute_opcode(emu);
+	gb_ppu_clock(&emu->ppu, cycles * 4);
 }
 
 u16 gb_emu_read_u16(const gb_emu_t* emu, u16 addr)
