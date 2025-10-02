@@ -28,6 +28,10 @@ gb_sm83_t gb_cpu_create(struct gb_emu* emu)
 
 	GB_REG_SP(cpu.regs) = 0xFFFE;
 	GB_REG_PC(cpu.regs) = 0x0100;
+
+	cpu.memory[0xFF00 - 0x8000] = 0x0F;
+	cpu.memory[0xFFFF - 0x8000] = 0xFF;
+
 	return cpu;
 }
 
