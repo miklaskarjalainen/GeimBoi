@@ -101,9 +101,10 @@ static inline u8 _gb_get_pixel_color(u8 color)
 			printf("?");
 		}
 	}
+	return 0;
 }
 
-static inline _gb_render_background(gb_ppu_t* ppu)
+static inline void _gb_render_background(gb_ppu_t* ppu)
 {
 	// Fetch the base address to read from.
 	const u16 tile_addr = GB_IS_BIT(ppu->lcdc, 4) ? 0x8000 : 0x8800;
@@ -115,7 +116,7 @@ static inline _gb_render_background(gb_ppu_t* ppu)
 		const u16 tile_column = lx / 8;
 		const i16 tile_num =
 			gb_cpu_read_u8(ppu->cpu, bg_addr + tile_row + tile_column);
-		const u16 tile_location = tile_addr + (tile_num * 16);
+		const u16 tile_location = (u16)(tile_addr + (tile_num * 16));
 
 		// Fetch the row of pixels for the tile
 		const u8 tile_line = ppu->ly % 8;
@@ -126,8 +127,8 @@ static inline _gb_render_background(gb_ppu_t* ppu)
 
 		// Get the color of the pixel
 		const u8 colour_bit = 7 - (lx % 8);
-		const u8 color_id = (((data2 >> colour_bit)) & 0b1) |
-							(((data1 >> colour_bit) & 0b1) << 1);
+		const u8 color_id = (u8)((((data2 >> colour_bit)) & 0x1) |
+							(((data1 >> colour_bit) & 0x1) << 1));
 		const u8 color = _gb_get_pixel_color(color_id);
 
 		// Draw the pixel
