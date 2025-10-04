@@ -1,4 +1,5 @@
 #include "gbSM83.h"
+
 #include "gbEmu.h"
 #include "log.h"
 
@@ -7,32 +8,31 @@
 
 #define CGB_MODE 0
 
-gb_sm83_t gb_cpu_create(struct gb_mmu* mmu)
+void gb_cpu_init(gb_sm83_t* cpu, struct gb_mmu* mmu)
 {
-	gb_sm83_t cpu = {.interrupt_enable = 0, .mmu = mmu};
+    *cpu = (gb_sm83_t){ 0 };
+    cpu->mmu = mmu;
 
-	// CFB initial values
+    // CFB initial values
 	if (CGB_MODE) {
-		GB_REG_AF(cpu.regs) = 0x1180;
-		GB_REG_BC(cpu.regs) = 0x0000;
-		GB_REG_DE(cpu.regs) = 0xFF56;
-		GB_REG_HL(cpu.regs) = 0x000D;
+		GB_REG_AF(cpu->regs) = 0x1180;
+		GB_REG_BC(cpu->regs) = 0x0000;
+		GB_REG_DE(cpu->regs) = 0xFF56;
+		GB_REG_HL(cpu->regs) = 0x000D;
 	}
 	// DMG intial values
 	else {
-		GB_REG_AF(cpu.regs) = 0x01B0;
-		GB_REG_BC(cpu.regs) = 0x0013;
-		GB_REG_DE(cpu.regs) = 0x00D8;
-		GB_REG_HL(cpu.regs) = 0x014D;
+		GB_REG_AF(cpu->regs) = 0x01B0;
+		GB_REG_BC(cpu->regs) = 0x0013;
+		GB_REG_DE(cpu->regs) = 0x00D8;
+		GB_REG_HL(cpu->regs) = 0x014D;
 	}
 
-	GB_REG_SP(cpu.regs) = 0xFFFE;
-	GB_REG_PC(cpu.regs) = 0x0100;
+	GB_REG_SP(cpu->regs) = 0xFFFE;
+	GB_REG_PC(cpu->regs) = 0x0100;
 
-	cpu.memory[0xFF00 - 0x8000] = 0x0F;
-	cpu.memory[0xFFFF - 0x8000] = 0xFF;
-
-	return cpu;
+	cpu->memory[0xFF00 - 0x8000] = 0x0F;
+	cpu->memory[0xFFFF - 0x8000] = 0xFF;
 }
 
 /**

@@ -39,10 +39,7 @@ typedef struct gb_sm83 {
 	struct gb_mmu* mmu;
 } gb_sm83_t;
 
-gb_sm83_t gb_cpu_create(struct gb_mmu* mmu);
-
-// u8 gb_cpu_read_u8(const gb_sm83_t* cpu, u16 addr);
-// void gb_cpu_write_u8(gb_sm83_t* cpu, u16 addr, u8 data);
+void gb_cpu_init(gb_sm83_t* cpu, struct gb_mmu* mmu);
 
 /**
  * @brief jumps to an interrupt handler, if an interrupt can be served.
