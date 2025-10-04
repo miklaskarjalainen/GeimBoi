@@ -1,5 +1,6 @@
 #include "gbPPU.h"
 #include "gbEmu.h"
+#include "gbMMU.h"
 #include "gbReg.h"
 #include "gbSM83.h"
 
@@ -12,6 +13,8 @@
 #define PPU_MODE_VBLANK 1
 #define PPU_MODE_OAM 2
 #define PPU_MODE_RENDER 3
+
+#define GB_ADDR_BG_PALETTE (0xFF47)
 
 void gb_ppu_init(gb_ppu_t* ppu, struct gb_mmu* mmu)
 {
@@ -26,7 +29,7 @@ void gb_ppu_init(gb_ppu_t* ppu, struct gb_mmu* mmu)
 	ppu->ly = 0;
 	ppu->lyc = 0;
 	ppu->stat = 0;
-	ppu->lcdc = 0;
+	ppu->lcdc = 0x80;
 	ppu->t_cycles = 0;
 	ppu->mmu = mmu;
 }
@@ -82,26 +85,24 @@ struct gb_tile_data get_as_tile(u8* begin)
 	return d;
 }
 
-static inline u8 _gb_get_pixel_color(u8 color)
+typedef struct gb_color {
+	u8 r, g, b;
+} gb_color_t;
+
+static inline gb_color_t
+_gb_bg_pixel_color(const gb_ppu_t* ppu, u8 palette_index)
 {
-	switch (color) {
-		case 0x0: {
-			return 12;
-		}
-		case 0x1: {
-			return 102;
-		}
-		case 0x2: {
-			return 198;
-		}
-		case 0x3: {
-			return 255;
-		}
-		default: {
-			printf("?");
-		}
-	}
-	return 0;
+	static gb_color_t s_Colors[4] = {
+		{.r = 0x84, .g = 0x96, .b = 0x00}, // White
+		{.r = 0x4A, .g = 0x69, .b = 0x00},
+		{.r = 0x29, .g = 0x55, .b = 0x00},
+		{.r = 0x10, .g = 0x41, .b = 0x00}, // Black
+	};
+
+	const u8 bg_palette = gb_mmu_read_u8(ppu->mmu, GB_ADDR_BG_PALETTE);
+	const u8 shift = palette_index * 2;
+	const u8 color = (u8)((bg_palette >> shift) & 0x3);
+	return s_Colors[color];
 }
 
 static inline void _gb_render_background(gb_ppu_t* ppu)
@@ -116,7 +117,9 @@ static inline void _gb_render_background(gb_ppu_t* ppu)
 		const u16 tile_column = lx / 8;
 		const i16 tile_num =
 			gb_mmu_read_u8(ppu->mmu, bg_addr + tile_row + tile_column);
-		const u16 tile_location = (u16)(tile_addr + (tile_num * 16));
+		const u16 tile_location = GB_IS_BIT(ppu->lcdc, 4)
+									  ? (u16)(tile_addr + (tile_num * 16))
+									  : (u16)(tile_addr + ((tile_num + 128) * 16));
 
 		// Fetch the row of pixels for the tile
 		const u8 tile_line = ppu->ly % 8;
@@ -128,13 +131,13 @@ static inline void _gb_render_background(gb_ppu_t* ppu)
 		// Get the color of the pixel
 		const u8 colour_bit = 7 - (lx % 8);
 		const u8 color_id = (u8)((((data2 >> colour_bit)) & 0x1) |
-							(((data1 >> colour_bit) & 0x1) << 1));
-		const u8 color = _gb_get_pixel_color(color_id);
+								 (((data1 >> colour_bit) & 0x1) << 1));
+		const gb_color_t color = _gb_bg_pixel_color(ppu, color_id);
 
 		// Draw the pixel
-		ppu->frame[ppu->ly][lx][0] = color;
-		ppu->frame[ppu->ly][lx][1] = color;
-		ppu->frame[ppu->ly][lx][2] = color;
+		ppu->frame[ppu->ly][lx][0] = color.r;
+		ppu->frame[ppu->ly][lx][1] = color.g;
+		ppu->frame[ppu->ly][lx][2] = color.b;
 	}
 }
 
