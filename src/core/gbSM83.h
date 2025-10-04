@@ -36,19 +36,22 @@ typedef struct gb_sm83 {
 
 	u32 m_cycles; // Machine cycles
 
-	/* a-bit hacky, but needed in interrupt handling */
-	struct gb_emu* emu;
+	struct gb_mmu* mmu;
 } gb_sm83_t;
 
-gb_sm83_t gb_cpu_create(struct gb_emu* emu);
+gb_sm83_t gb_cpu_create(struct gb_mmu* mmu);
 
-u8 gb_cpu_read_u8(const gb_sm83_t* cpu, u16 addr);
-void gb_cpu_write_u8(gb_sm83_t* cpu, u16 addr, u8 data);
+// u8 gb_cpu_read_u8(const gb_sm83_t* cpu, u16 addr);
+// void gb_cpu_write_u8(gb_sm83_t* cpu, u16 addr, u8 data);
 
 /**
  * @brief jumps to an interrupt handler, if an interrupt can be served.
  */
 void gb_cpu_poll_interrupts(gb_sm83_t* cpu);
 void gb_cpu_request_interrupt(gb_sm83_t* cpu, u8 interrupt);
+/**
+ * @note returns the amount of m-cycles used.
+ */
+u8 gb_cpu_execute_opcode(gb_sm83_t* emu);
 
 #endif

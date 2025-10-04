@@ -13,7 +13,7 @@
 #define PPU_MODE_OAM 2
 #define PPU_MODE_RENDER 3
 
-void gb_ppu_init(gb_ppu_t* ppu, struct gb_sm83* cpu)
+void gb_ppu_init(gb_ppu_t* ppu, struct gb_mmu* mmu)
 {
 
 	for (int y = 0; y < GB_LCD_HEIGHT; y++) {
@@ -28,7 +28,7 @@ void gb_ppu_init(gb_ppu_t* ppu, struct gb_sm83* cpu)
 	ppu->stat = 0;
 	ppu->lcdc = 0;
 	ppu->t_cycles = 0;
-	ppu->cpu = cpu;
+	ppu->mmu = mmu;
 }
 
 struct gb_tile_data {
@@ -115,15 +115,15 @@ static inline void _gb_render_background(gb_ppu_t* ppu)
 		// Some magic to determine where to read the tile from.
 		const u16 tile_column = lx / 8;
 		const i16 tile_num =
-			gb_cpu_read_u8(ppu->cpu, bg_addr + tile_row + tile_column);
+			gb_mmu_read_u8(ppu->mmu, bg_addr + tile_row + tile_column);
 		const u16 tile_location = (u16)(tile_addr + (tile_num * 16));
 
 		// Fetch the row of pixels for the tile
 		const u8 tile_line = ppu->ly % 8;
 		const u8 data1 =
-			gb_cpu_read_u8(ppu->cpu, tile_location + (tile_line * 2));
+			gb_mmu_read_u8(ppu->mmu, tile_location + (tile_line * 2));
 		const u8 data2 =
-			gb_cpu_read_u8(ppu->cpu, tile_location + (tile_line * 2) + 1);
+			gb_mmu_read_u8(ppu->mmu, tile_location + (tile_line * 2) + 1);
 
 		// Get the color of the pixel
 		const u8 colour_bit = 7 - (lx % 8);
@@ -165,7 +165,7 @@ static void clock_drawing(gb_ppu_t* ppu)
 	ppu->t_cycles -= 172;
 	PPU_SET_MODE(ppu, PPU_MODE_HBLANK);
 	if (GB_IS_BIT(ppu->stat, 3)) {
-		gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
+		gb_cpu_request_interrupt(ppu->mmu->cpu, GB_INTERRUPT_LCD);
 	}
 }
 
@@ -174,7 +174,7 @@ static inline void _gb_check_coinsidence_flag(gb_ppu_t* ppu)
 	if (ppu->ly == ppu->lyc) {
 		ppu->stat |= GB_BIT(2);
 		if (GB_IS_BIT(ppu->stat, 6)) {
-			gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
+			gb_cpu_request_interrupt(ppu->mmu->cpu, GB_INTERRUPT_LCD);
 		}
 	}
 	else {
@@ -192,15 +192,15 @@ static void clock_hblank(gb_ppu_t* ppu)
 	if (ppu->ly != 143) {
 		PPU_SET_MODE(ppu, PPU_MODE_OAM);
 		if (GB_IS_BIT(ppu->stat, 5)) {
-			gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
+			gb_cpu_request_interrupt(ppu->mmu->cpu, GB_INTERRUPT_LCD);
 		}
 	}
 	else {
 		PPU_SET_MODE(ppu, PPU_MODE_VBLANK);
 		if (GB_IS_BIT(ppu->stat, 4)) {
-			gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
+			gb_cpu_request_interrupt(ppu->mmu->cpu, GB_INTERRUPT_LCD);
 		}
-		gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_VBLANK);
+		gb_cpu_request_interrupt(ppu->mmu->cpu, GB_INTERRUPT_VBLANK);
 	}
 
 	ppu->ly += 1;
@@ -218,7 +218,7 @@ static void clock_vblank(gb_ppu_t* ppu)
 		ppu->ly = 0;
 		PPU_SET_MODE(ppu, PPU_MODE_OAM);
 		if (GB_IS_BIT(ppu->stat, 3)) {
-			gb_cpu_request_interrupt(ppu->cpu, GB_INTERRUPT_LCD);
+			gb_cpu_request_interrupt(ppu->mmu->cpu, GB_INTERRUPT_LCD);
 		}
 	}
 	else {

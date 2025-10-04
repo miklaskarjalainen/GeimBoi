@@ -12,10 +12,10 @@ typedef struct gb_ppu {
 
     u8 ly, lyc, stat, lcdc;
 
-    struct gb_sm83* cpu;
+    struct gb_mmu* mmu;
 } gb_ppu_t;
 
-void gb_ppu_init(gb_ppu_t* ppu, struct gb_sm83* cpu);
+void gb_ppu_init(gb_ppu_t* ppu, struct gb_mmu* mmu);
 void gb_ppu_clock(gb_ppu_t* ppu, u16 t_cycles);
 
 #endif

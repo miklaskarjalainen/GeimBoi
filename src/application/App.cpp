@@ -64,7 +64,7 @@ void GeimBoi::App::run()
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	auto text_opcode = [&](uint16_t addr) -> int {
-		uint8_t opcode = gb_emu_read_u8(m_Emulator, addr);
+		uint8_t opcode = gb_mmu_read_u8(&m_Emulator->mmu, addr);
 		uint8_t opcode_size = gb_opcode_size(opcode);
 
 		switch (opcode_size) {
@@ -73,7 +73,7 @@ void GeimBoi::App::run()
 					"[0x%04X] %s (0x%04X)",
 					addr,
 					gb_opcode_asm(opcode),
-					gb_emu_read_u16(m_Emulator, addr + 1)
+					gb_mmu_read_u16(&m_Emulator->mmu, addr + 1)
 				);
 				break;
 			}
@@ -82,7 +82,7 @@ void GeimBoi::App::run()
 					"[0x%04X] %s (0x%02X)",
 					addr,
 					gb_opcode_asm(opcode),
-					gb_emu_read_u8(m_Emulator, addr + 1)
+					gb_mmu_read_u8(&m_Emulator->mmu, addr + 1)
 				);
 				break;
 			}
@@ -126,7 +126,7 @@ void GeimBoi::App::run()
 		// Our rendering stuff :p
 		ImGui::Begin("PPU");
 		ImGui::Text("T-Cycles 0x%04X", m_Emulator->ppu.t_cycles);
-		ImGui::Text("Mode %u", gb_emu_read_u8(m_Emulator, 0xFF41) & 0x3);
+		ImGui::Text("Mode %u", gb_mmu_read_u8(&m_Emulator->mmu, 0xFF41) & 0x3);
 		ImGui::Image(
 			(ImTextureID)(intptr_t)my_image_texture,
 			ImVec2(GB_LCD_WIDTH * 4, GB_LCD_HEIGHT * 4)
@@ -145,12 +145,12 @@ void GeimBoi::App::run()
 		ImGui::Text(
 			"SP 0x%04X [0x%04X]",
 			GB_REG_SP(m_Emulator->cpu.regs),
-			gb_emu_read_u16(m_Emulator, GB_REG_SP(m_Emulator->cpu.regs))
+			gb_mmu_read_u16(&m_Emulator->mmu, GB_REG_SP(m_Emulator->cpu.regs))
 		);
 		ImGui::Text(
 			"PC 0x%04X [0x%04X]",
 			GB_REG_PC(m_Emulator->cpu.regs),
-			gb_emu_read_u16(m_Emulator, GB_REG_PC(m_Emulator->cpu.regs))
+			gb_mmu_read_u16(&m_Emulator->mmu, GB_REG_PC(m_Emulator->cpu.regs))
 		);
 
 		ImGui::Text(
@@ -207,7 +207,7 @@ void GeimBoi::App::run()
 		if (ImGui::Button("Execute 10000x ops")) {
 			for (int i = 0; i < 9999; i++) {
 				uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
-				if (gb_emu_read_u8(m_Emulator, addr) == 0xFB) {
+				if (gb_mmu_read_u8(&m_Emulator->mmu, addr) == 0xFB) {
 					break;
 				}
 				gb_emu_advance_opcode(m_Emulator);
@@ -227,11 +227,11 @@ void GeimBoi::App::run()
 			mem.UserData = (void*)m_Emulator;
 			mem.ReadFn = [](auto, size_t addr, void* void_emu) -> ImU8 {
 				const gb_emu_t* emu = (const gb_emu_t*)void_emu;
-				return gb_emu_read_u8(emu, (uint16_t)addr);
+				return gb_mmu_read_u8(&emu->mmu, (uint16_t)addr);
 			};
 			mem.WriteFn = [](auto, size_t addr, ImU8 byte, void* void_emu) {
 				gb_emu_t* emu = (gb_emu_t*)void_emu;
-				gb_emu_write_u8(emu, (uint16_t)addr, (u8)byte);
+				gb_mmu_write_u8(&emu->mmu, (uint16_t)addr, (u8)byte);
 			};
 			return mem;
 		}();

@@ -7,6 +7,7 @@ extern "C" {
 
 #include "gbCart.h"
 #include "gbEmu.h"
+#include "gbMMU.h"
 #include "gbReg.h"
 #include "gbSM83.h"
 #include "gbDisassembler.h"
