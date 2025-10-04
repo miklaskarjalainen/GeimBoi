@@ -104,7 +104,7 @@ static inline void _gb_sub(gb_sm83_t* cpu, u8 data)
 	GB_REG_A(cpu->regs) = (u8)signed_result;
 }
 
-static inline void _gb_add_hl_u16(gb_sm83_t* cpu, u16 data)
+static inline void _gb_add_u16(gb_sm83_t* cpu, u16* src, u16 data)
 {
 	u32 result = GB_REG_HL(cpu->regs) + data;
 	u32 half = (GB_REG_HL(cpu->regs) & 0xFFF) + (data & 0xFFF);
@@ -112,7 +112,7 @@ static inline void _gb_add_hl_u16(gb_sm83_t* cpu, u16 data)
 	GB_REG_F(cpu->regs) &= (u8) ~(GB_FLAG_HALF | GB_FLAG_CARR | GB_FLAG_SUBS);
 	GB_REG_F(cpu->regs) |= (result & 0x10000) != 0 ? GB_FLAG_CARR : 0;
 	GB_REG_F(cpu->regs) |= half > 0xFFF ? GB_FLAG_HALF : 0;
-	GB_REG_HL(cpu->regs) = (u16)result;
+	*src = (u16)result;
 }
 
 static inline void _gb_rr(gb_sm83_t* cpu, u8* reg) {
@@ -1103,6 +1103,24 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			return 2;
 		}
 
+		/* ADD SP, s8 */ case 0xE8: {
+		    GB_REG_F(cpu->regs) = 0;
+		    u16 imm = (u16)(i16)(i8)gb_mmu_read_u8(cpu->mmu, GB_REG_PC(cpu->regs));
+			GB_REG_PC(cpu->regs) += 1;
+			_gb_add_u16(cpu, &imm, GB_REG_SP(cpu->regs));
+			GB_REG_SP(cpu->regs) = imm;
+			return 4;
+		}
+
+		/* LD HL, (SP+s8) */ case 0xF8: {
+		    GB_REG_F(cpu->regs) = 0;
+		    u16 imm = (u16)(i16)(i8)gb_mmu_read_u8(cpu->mmu, GB_REG_PC(cpu->regs));
+			GB_REG_PC(cpu->regs) += 1;
+			_gb_add_u16(cpu, &imm, GB_REG_SP(cpu->regs));
+			GB_REG_HL(cpu->regs) = imm;
+			return 3;
+		}
+
 		/* ADD B */ case 0x80: {
 			_gb_add(cpu, GB_REG_B(cpu->regs));
 			return 1;
@@ -1221,19 +1239,19 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		}
 
 		/* ADD HL, BC */ case 0x09: {
-			_gb_add_hl_u16(cpu, GB_REG_BC(cpu->regs));
+			_gb_add_u16(cpu, &GB_REG_HL(cpu->regs), GB_REG_BC(cpu->regs));
 			return 2;
 		}
 		/* ADD HL, DE */ case 0x19: {
-			_gb_add_hl_u16(cpu, GB_REG_DE(cpu->regs));
+			_gb_add_u16(cpu, &GB_REG_HL(cpu->regs), GB_REG_DE(cpu->regs));
 			return 2;
 		}
 		/* ADD HL, HL */ case 0x29: {
-			_gb_add_hl_u16(cpu, GB_REG_HL(cpu->regs));
+			_gb_add_u16(cpu, &GB_REG_HL(cpu->regs), GB_REG_HL(cpu->regs));
 			return 2;
 		}
 		/* ADD HL, SP */ case 0x39: {
-			_gb_add_hl_u16(cpu, GB_REG_SP(cpu->regs));
+			_gb_add_u16(cpu, &GB_REG_HL(cpu->regs), GB_REG_SP(cpu->regs));
 			return 2;
 		}
 
@@ -1338,7 +1356,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		}
 
 		default: {
-			GB_WARN("UNIMPLEMENTED OPCODE! 0x%X\n", opcode);
+			GB_FATAL("UNIMPLEMENTED OPCODE! 0x%X\n", opcode);
 			return 1;
 			break;
 		}
@@ -2043,7 +2061,7 @@ static u8 _gb_emu_execute_cb(gb_sm83_t* cpu)
 		}
 
 		default: {
-			GB_WARN("UNIMPLEMENTED CB OPCODE! 0x%X\n", opcode);
+			GB_FATAL("UNIMPLEMENTED CB OPCODE! 0x%X\n", opcode);
 			return 2;
 			break;
 		}
