@@ -810,6 +810,24 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			return 3;
 		}
 
+		/* JP NZ, a16 */ case 0xD2: {
+			if (!(GB_REG_F(cpu->regs) & GB_FLAG_ZERO)) {
+				GB_REG_PC(cpu->regs) =
+					gb_mmu_read_u16(cpu->mmu, GB_REG_PC(cpu->regs));
+				return 4;
+			}
+			return 3;
+		}
+
+		/* JP NC, a16 */ case 0xD3: {
+			if (!(GB_REG_F(cpu->regs) & GB_FLAG_CARR)) {
+				GB_REG_PC(cpu->regs) =
+					gb_mmu_read_u16(cpu->mmu, GB_REG_PC(cpu->regs));
+				return 4;
+			}
+			return 3;
+		}
+
 		/* CALL NZ, a16 */ case 0xC4: {
 			if (!(GB_REG_F(cpu->regs) & GB_FLAG_ZERO)) {
 				_gb_call(cpu);
@@ -881,7 +899,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		/* JR s8 */ case 0x18: {
 			const i8 d = gb_mmu_read_i8(cpu->mmu, GB_REG_PC(cpu->regs));
 			GB_REG_PC(cpu->regs)++;
-			GB_REG_PC(cpu->regs) += (u16)(i16)d;
+			GB_REG_PC(cpu->regs) += d;
 			return 3;
 		}
 		/* JR Z, s8 */ case 0x28: {
@@ -1418,7 +1436,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			return 3;
 		}
 		/* POP AF */ case 0xF1: {
-			GB_REG_AF(cpu->regs) = gb_mmu_pop_u16(cpu->mmu) & 0xFFF0;
+			GB_REG_AF(cpu->regs) = gb_mmu_pop_u16(cpu->mmu);
 			return 3;
 		}
 
@@ -1435,7 +1453,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			return 4;
 		}
 		/* PUSH AF */ case 0xF5: {
-			gb_mmu_push_u16(cpu->mmu, GB_REG_AF(cpu->regs) & 0xFFF0);
+			gb_mmu_push_u16(cpu->mmu, GB_REG_AF(cpu->regs));
 			return 4;
 		}
 
