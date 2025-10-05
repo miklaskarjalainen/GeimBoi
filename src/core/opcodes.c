@@ -464,7 +464,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			/* LOAD C, X */
 
 		/* LD C, B */ case 0x48: {
-			GB_REG_B(cpu->regs) = GB_REG_C(cpu->regs);
+			GB_REG_C(cpu->regs) = GB_REG_B(cpu->regs);
 			return 1;
 		}
 
