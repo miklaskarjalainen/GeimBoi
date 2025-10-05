@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 4.0.0)
 project(geimboi-core C)
 
 set(GEIMBOI_CORE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+option(GB_TESTS on)
 
 # Define the backend library
 add_library(${PROJECT_NAME}
@@ -28,18 +29,31 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+#
+if (GB_TESTS)
+    include(cmake/unity.cmake)
+    add_executable(tests_core tests/test_main.c tests/opcodes/test_sp.c)
+
+    set_property(TARGET tests_core PROPERTY C_STANDARD 99)
+    set_property(TARGET tests_core PROPERTY C_STANDARD_REQUIRED ON)
+    set_property(TARGET tests_core PROPERTY C_EXTENSIONS OFF)
+
+    target_include_directories(tests_core PRIVATE ./)
+    target_link_libraries(tests_core PRIVATE unity ${PROJECT_NAME})
+endif()
+
 # Compiler warnings
 if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     message(WARNING "clang")
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wshadow -Wconversion -Wpedantic -Werror)
-    if (BS_TESTS)
-        target_compile_options(tests PRIVATE -Wall -Wextra -Wshadow -Wconversion -Wpedantic -Werror)
+    if (GB_TESTS)
+        target_compile_options(tests_core PRIVATE -Wall -Wextra -Wshadow -Wconversion -Wpedantic -Werror)
     endif()
 elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     message(WARNING "gnu")
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wshadow -Wconversion -Wpedantic -Werror)
-    if (BS_TESTS)
-        target_compile_options(tests PRIVATE -Wall -Wextra -Wshadow -Wconversion -Wpedantic -Werror)
+    if (GB_TESTS)
+        target_compile_options(tests_core PRIVATE -Wall -Wextra -Wshadow -Wconversion -Wpedantic -Werror)
     endif()
 elseif (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     # @TODO
