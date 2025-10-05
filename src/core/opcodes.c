@@ -116,11 +116,13 @@ static inline void _gb_add_u16(gb_sm83_t* cpu, u16 data)
 }
 
 static inline void _gb_rr(gb_sm83_t* cpu, u8* reg) {
-    const u8 prev = *reg;
-    *reg >>= 1;
+    const u8 carry = (GB_REG_F(cpu->regs) & GB_FLAG_CARR) != 0;
+    GB_REG_F(cpu->regs) = GB_IS_BIT(*reg, 0) ? GB_FLAG_CARR : 0;
 
-    GB_REG_F(cpu->regs) = *reg == 0 ? GB_FLAG_ZERO : 0;
-    GB_REG_F(cpu->regs) = GB_IS_BIT(prev, 0) ? GB_FLAG_CARR : 0;
+    *reg >>= 1;
+    *reg |= (carry << 7);
+
+    GB_REG_F(cpu->regs) |= *reg == 0 ? GB_FLAG_ZERO : 0;
 }
 
 static inline void _gb_srl(gb_sm83_t* cpu, u8* reg)
