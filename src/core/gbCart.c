@@ -10,21 +10,20 @@ static u16 gb_cart_read_u16_be(const gb_cart_t* cart, u16 addr)
 	return (u16)((low) | (high << 8));
 }
 
-/**
- * @brief
- * @note Takes ownership
- */
-gb_cart_t gb_cart_create(u8* rom, size_t len)
+void gb_cart_load(gb_cart_t* cart, const u8* rom, size_t len)
 {
-	gb_cart_t cart = {.rom = rom, .len = len};
-	return cart;
-}
+    size_t i = 0;
 
-void gb_cart_delete(gb_cart_t* cart)
-{
-	free(cart->rom);
-	cart->rom = NULL;
-	cart->len = 0;
+    for (; i < len && i < GB_MAX_CARTSIZE; i++)
+    {
+        cart->rom[i] = rom[i];
+    }
+
+    for (; i < GB_MAX_CARTSIZE; i++)
+    {
+        cart->rom[i] = 0x00;
+    }
+    return;
 }
 
 u8 gb_cart_read_u8(const gb_cart_t* cart, u16 addr) { return cart->rom[addr]; }
@@ -57,7 +56,7 @@ const char* gb_cart_get_name(const gb_cart_t* cart)
 static bool _gb_verify_global(const gb_cart_t* cart)
 {
 	u16 sum = 0;
-	for (size_t i = 0; i < cart->len; i++) {
+	for (size_t i = 0; i < GB_MAX_CARTSIZE; i++) {
 		if (i == 0x14E || i == 0x14F) {
 			continue;
 		}

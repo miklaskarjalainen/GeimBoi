@@ -6,20 +6,16 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#define GB_MAX_CARTSIZE 0x8000
+
 /**
  * @brief Represents the game cartridge.
  */
 typedef struct gb_cart {
-    u8* rom;
-    size_t len;
+    u8 rom[GB_MAX_CARTSIZE]; // TODO: MBCs
 } gb_cart_t;
 
-/**
- * @brief
- * @note Takes ownership
- */
-gb_cart_t gb_cart_create(u8* rom, size_t len);
-void gb_cart_delete(gb_cart_t* cart);
+void gb_cart_load(gb_cart_t* cart, const u8* rom, size_t len);
 
 u8 gb_cart_read_u8(const gb_cart_t* cart, u16 addr);
 void gb_cart_write_u8(gb_cart_t* cart, u16 addr, u8 data);

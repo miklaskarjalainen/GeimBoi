@@ -31,11 +31,11 @@ void gb_emu_init(gb_emu_t* emu)
 	gb_ppu_init(&emu->ppu, &emu->mmu);
 }
 
-void gb_emu_deinit(gb_emu_t* emu) { gb_cart_delete(&emu->cart); }
+void gb_emu_deinit(gb_emu_t* emu) { (void)emu; }
 
-bool gb_emu_load_rom_bytes(gb_emu_t* emu, u8* rom, size_t length)
+bool gb_emu_load_rom_bytes(gb_emu_t* emu, const u8* rom, size_t length)
 {
-	emu->cart = gb_cart_create(rom, length);
+    gb_cart_load(&emu->cart, rom, length);
 	return true;
 }
 
@@ -59,15 +59,23 @@ bool gb_emu_load_rom_file(gb_emu_t* emu, const char* fpath)
 	// Load & Close
 	bool r = gb_emu_load_rom_bytes(emu, buffer, file_len);
 	fclose(file);
+	free(buffer);
 
 	return r;
 }
 
-void gb_emu_advance_frame(gb_emu_t* emu) { (void)emu; }
+void gb_emu_advance_frame(gb_emu_t* emu) {
+    const int FrameCycles = 70221;
+    int cycles = 0;
+    while (cycles < FrameCycles) {
+        cycles += gb_emu_advance_opcode(emu) * 4;
+    }
+}
 
-void gb_emu_advance_opcode(gb_emu_t* emu)
+u8 gb_emu_advance_opcode(gb_emu_t* emu)
 {
 	gb_cpu_poll_interrupts(&emu->cpu);
 	u8 cycles = gb_cpu_execute_opcode(&emu->cpu);
 	gb_ppu_clock(&emu->ppu, cycles * 4);
+	return cycles;
 }
