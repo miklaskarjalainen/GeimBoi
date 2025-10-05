@@ -62,6 +62,20 @@ static inline void _gb_adc(gb_sm83_t* cpu, u8 data)
 	GB_REG_A(cpu->regs) = (u8)result;
 }
 
+static inline void _gb_sbc(gb_sm83_t* cpu, u8 data)
+{
+	const u8 sub_carry = GB_IS_BIT(GB_REG_F(cpu->regs), GB_FLAG_CARR_BIT);
+	const i16 result = (i16)(GB_REG_A(cpu->regs) - data - sub_carry);
+	const i16 result_half = (i16)((GB_REG_A(cpu->regs) & 0xF) - (data & 0xF) - sub_carry);
+
+	GB_REG_F(cpu->regs) = GB_FLAG_SUBS;
+	GB_REG_F(cpu->regs) |= result == 0 ? GB_FLAG_ZERO : 0;
+	GB_REG_F(cpu->regs) |= result_half > 0xF ? GB_FLAG_HALF : 0;
+	GB_REG_F(cpu->regs) |= result > 0xFF ? GB_FLAG_CARR : 0;
+
+	GB_REG_A(cpu->regs) = (u8)result;
+}
+
 static inline void _gb_dec(gb_sm83_t* cpu, u8* data)
 {
 	u8 before = *data;
@@ -1221,6 +1235,46 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			return 2;
 		}
 
+		/* SBC B */ case 0x98: {
+			_gb_sbc(cpu, GB_REG_B(cpu->regs));
+			return 1;
+		}
+		/* SBC C */ case 0x99: {
+			_gb_sbc(cpu, GB_REG_C(cpu->regs));
+			return 1;
+		}
+		/* SBC D */ case 0x9A: {
+			_gb_sbc(cpu, GB_REG_D(cpu->regs));
+			return 1;
+		}
+		/* SBC E */ case 0x9B: {
+			_gb_sbc(cpu, GB_REG_E(cpu->regs));
+			return 1;
+		}
+		/* SBC H */ case 0x9C: {
+			_gb_sbc(cpu, GB_REG_H(cpu->regs));
+			return 1;
+		}
+		/* SBC L */ case 0x9D: {
+			_gb_sbc(cpu, GB_REG_L(cpu->regs));
+			return 1;
+		}
+		/* SBC [HL] */ case 0x9E: {
+			const u8 d = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
+			_gb_sbc(cpu, d);
+			return 2;
+		}
+		/* SBC A */ case 0x9F: {
+			_gb_sbc(cpu, GB_REG_A(cpu->regs));
+			return 1;
+		}
+		/* SBC d8 */ case 0xDE: {
+			const u8 d = gb_mmu_read_u8(cpu->mmu, GB_REG_PC(cpu->regs));
+			GB_REG_PC(cpu->regs)++;
+			_gb_sbc(cpu, d);
+			return 2;
+		}
+
 		/* LD (a8), A */ case 0xE0: {
 			u16 addr = (u16)0xFF00 |
 					   (u16)gb_mmu_read_u8(cpu->mmu, GB_REG_PC(cpu->regs));
@@ -1251,6 +1305,39 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			return 4;
 		}
 
+		/* SUB B */ case 0x90: {
+			_gb_sub(cpu, GB_REG_B(cpu->regs));
+			return 1;
+		}
+		/* SUB C */ case 0x91: {
+			_gb_sub(cpu, GB_REG_C(cpu->regs));
+			return 1;
+		}
+		/* SUB D */ case 0x92: {
+			_gb_sbc(cpu, GB_REG_D(cpu->regs));
+			return 1;
+		}
+		/* SUB E */ case 0x93: {
+			_gb_sub(cpu, GB_REG_E(cpu->regs));
+			return 1;
+		}
+		/* SUB H */ case 0x94: {
+			_gb_sub(cpu, GB_REG_H(cpu->regs));
+			return 1;
+		}
+		/* SUB L */ case 0x95: {
+			_gb_sub(cpu, GB_REG_L(cpu->regs));
+			return 1;
+		}
+		/* SUB [HL] */ case 0x96: {
+			const u8 d = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
+			_gb_sub(cpu, d);
+			return 2;
+		}
+		/* SUB A */ case 0x97: {
+			_gb_sub(cpu, GB_REG_A(cpu->regs));
+			return 1;
+		}
 		/* SUB d8 */ case 0xD6: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_PC(cpu->regs));
 			GB_REG_PC(cpu->regs)++;
