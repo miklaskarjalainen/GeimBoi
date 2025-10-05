@@ -224,6 +224,51 @@ static inline void _gb_call(gb_sm83_t* cpu)
 	GB_REG_PC(cpu->regs) = gb_mmu_read_u16(cpu->mmu, GB_REG_PC(cpu->regs));
 }
 
+static inline void _gb_daa(gb_sm83_t* cpu)
+{
+    const u8 flags = GB_REG_F(cpu->regs);
+    u16 reg_a = GB_REG_A(cpu->regs);
+
+    // Handle addition
+    if ( !(GB_IS_BIT(flags, GB_FLAG_SUBS_BIT)) )
+    {
+        if ( GB_IS_BIT(flags, GB_FLAG_HALF_BIT) || ((reg_a & 0xF) > 9))
+        {
+            reg_a += 0x6;
+        }
+
+        if ( GB_IS_BIT(flags, GB_FLAG_CARR_BIT) || (reg_a > 0x9F))
+        {
+            reg_a += 0x60;
+            GB_REG_F(cpu->regs) |= GB_FLAG_CARR;
+        }
+    }
+    // Substract
+    else
+    {
+        if ( GB_IS_BIT(flags, GB_FLAG_HALF_BIT) )
+        {
+            reg_a -= 0x6;
+        }
+
+        if ( GB_IS_BIT(flags, GB_FLAG_CARR_BIT) )
+        {
+            reg_a -= 0x60;
+        }
+    }
+
+    // Reset Flags
+    GB_REG_F(cpu->regs) &= ~(GB_FLAG_ZERO);
+    GB_REG_F(cpu->regs) &= ~(GB_FLAG_HALF);
+
+    if ( (reg_a & 0xFF) == 0U)
+    {
+        GB_REG_F(cpu->regs) |= GB_FLAG_ZERO;
+    }
+
+    GB_REG_A(cpu->regs) = (u8)reg_a;
+}
+
 static u8 _gb_emu_execute_cb(gb_sm83_t* cpu);
 
 u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
@@ -796,7 +841,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			return 4;
 		}
 
-		/* jp, (HL) */ case 0xE9: {
+		/* jp, HL */ case 0xE9: {
 			GB_REG_PC(cpu->regs) = GB_REG_HL(cpu->regs);
 			return 4;
 		}
@@ -810,7 +855,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			return 3;
 		}
 
-		/* JP NZ, a16 */ case 0xD2: {
+		/* JP NZ, a16 */ case 0xC2: {
 			if (!(GB_REG_F(cpu->regs) & GB_FLAG_ZERO)) {
 				GB_REG_PC(cpu->regs) =
 					gb_mmu_read_u16(cpu->mmu, GB_REG_PC(cpu->regs));
@@ -819,7 +864,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			return 3;
 		}
 
-		/* JP NC, a16 */ case 0xD3: {
+		/* JP NC, a16 */ case 0xD2: {
 			if (!(GB_REG_F(cpu->regs) & GB_FLAG_CARR)) {
 				GB_REG_PC(cpu->regs) =
 					gb_mmu_read_u16(cpu->mmu, GB_REG_PC(cpu->regs));
@@ -1517,6 +1562,11 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			u16 addr = 0xFF00 | GB_REG_C(cpu->regs);
 			GB_REG_A(cpu->regs) = gb_mmu_read_u8(cpu->mmu, addr);
 			return 2;
+		}
+
+		/* DAA */ case 0x27: {
+		    _gb_daa(cpu);
+		    return 2;
 		}
 
 		/* CB PREFIX */ case 0xCB: {

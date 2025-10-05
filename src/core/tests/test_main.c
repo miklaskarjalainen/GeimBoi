@@ -3,6 +3,7 @@
 extern void test_opcode_bits(void);
 extern void test_opcode_jp(void);
 extern void test_opcode_sp(void);
+extern void test_opcode_special(void);
 
 void setUp(void) {
     // set stuff up here
@@ -18,5 +19,6 @@ int main(void) {
     RUN_TEST(test_opcode_bits);
     RUN_TEST(test_opcode_jp);
     RUN_TEST(test_opcode_sp);
+    RUN_TEST(test_opcode_special);
     return UNITY_END();
 }

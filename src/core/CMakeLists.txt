@@ -32,7 +32,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 #
 if (GB_TESTS)
     include(cmake/unity.cmake)
-    add_executable(tests_core tests/test_main.c tests/opcodes/test_sp.c tests/opcodes/test_bits.c tests/opcodes/test_jp.c)
+    add_executable(tests_core
+        tests/test_main.c
+        tests/opcodes/test_bits.c
+        tests/opcodes/test_jp.c
+        tests/opcodes/test_sp.c
+        tests/opcodes/test_special.c
+    )
 
     set_property(TARGET tests_core PROPERTY C_STANDARD 99)
     set_property(TARGET tests_core PROPERTY C_STANDARD_REQUIRED ON)
