@@ -936,7 +936,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			GB_REG_HL(cpu->regs) = d;
 			return 3;
 		}
-		/* LD HL, d16 */ case 0x31: {
+		/* LD SP, d16 */ case 0x31: {
 			const u16 d = gb_mmu_read_u16(cpu->mmu, GB_REG_PC(cpu->regs));
 			GB_REG_PC(cpu->regs) += 2;
 			GB_REG_SP(cpu->regs) = d;
