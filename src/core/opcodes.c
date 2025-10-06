@@ -39,7 +39,7 @@ static inline void _gb_add(gb_sm83_t* cpu, u8 data)
 	const u8 half = ((data & 0xF) + (GB_REG_A(cpu->regs) & 0xF)) > 0xF;
 	const u8 carry = result > 0xFF;
 
-	GB_REG_F(cpu->regs) = result ? 0 : GB_FLAG_ZERO;
+	GB_REG_F(cpu->regs) = (result & 0xFF) ? 0 : GB_FLAG_ZERO;
 	GB_REG_F(cpu->regs) |= half ? GB_FLAG_HALF : 0;
 	GB_REG_F(cpu->regs) |= carry ? GB_FLAG_CARR : 0;
 
@@ -55,7 +55,7 @@ static inline void _gb_adc(gb_sm83_t* cpu, u8 data)
 		((data & 0xF) + (GB_REG_A(cpu->regs) & 0xF) + add_carry) > 0xF;
 	const u8 carry = result > 0xFF;
 
-	GB_REG_F(cpu->regs) = result ? 0 : GB_FLAG_ZERO;
+	GB_REG_F(cpu->regs) = (result & 0xFF) ? 0 : GB_FLAG_ZERO;
 	GB_REG_F(cpu->regs) |= half ? GB_FLAG_HALF : 0;
 	GB_REG_F(cpu->regs) |= carry ? GB_FLAG_CARR : 0;
 
@@ -64,14 +64,17 @@ static inline void _gb_adc(gb_sm83_t* cpu, u8 data)
 
 static inline void _gb_sbc(gb_sm83_t* cpu, u8 data)
 {
-	const u8 sub_carry = GB_IS_BIT(GB_REG_F(cpu->regs), GB_FLAG_CARR_BIT);
-	const i16 result = (i16)(GB_REG_A(cpu->regs) - data - sub_carry);
-	const i16 result_half = (i16)((GB_REG_A(cpu->regs) & 0xF) - (data & 0xF) - sub_carry);
+    const u8 sub_carry = GB_IS_BIT(GB_REG_F(cpu->regs), GB_FLAG_CARR_BIT);
+	const u16 sub_amount = (u16)data + sub_carry;
+	const u16 result = (u16)GB_REG_A(cpu->regs) - sub_amount;
+
+	const u8 half  = (GB_REG_A(cpu->regs) & 0xF) < ((data & 0xF) + sub_carry);
+	const u8 carry = GB_REG_A(cpu->regs) < sub_amount;
 
 	GB_REG_F(cpu->regs) = GB_FLAG_SUBS;
-	GB_REG_F(cpu->regs) |= result == 0 ? GB_FLAG_ZERO : 0;
-	GB_REG_F(cpu->regs) |= result_half > 0xF ? GB_FLAG_HALF : 0;
-	GB_REG_F(cpu->regs) |= result > 0xFF ? GB_FLAG_CARR : 0;
+	GB_REG_F(cpu->regs) |= (result & 0xFF) == 0 ? GB_FLAG_ZERO : 0;
+	GB_REG_F(cpu->regs) |= half ? GB_FLAG_HALF : 0;
+	GB_REG_F(cpu->regs) |= carry ? GB_FLAG_CARR : 0;
 
 	GB_REG_A(cpu->regs) = (u8)result;
 }
@@ -107,15 +110,16 @@ static inline void _gb_and(gb_sm83_t* cpu, u8 data)
 
 static inline void _gb_sub(gb_sm83_t* cpu, u8 data)
 {
-	i16 signed_result = (i16)(GB_REG_A(cpu->regs) - data);
-	i16 signed_result_half = (i16)((GB_REG_A(cpu->regs) & 0xF) - (data & 0xF));
+	const u16 result = (u16)GB_REG_A(cpu->regs) - data;
+	const u8 half  = (GB_REG_A(cpu->regs) & 0xF) < ((data & 0xF));
+	const u8 carry = GB_REG_A(cpu->regs) < data;
 
-	GB_REG_F(cpu->regs) = signed_result == 0 ? GB_FLAG_ZERO : 0x0;
-	GB_REG_F(cpu->regs) |= GB_FLAG_SUBS;
-	GB_REG_F(cpu->regs) |= signed_result < 0 ? GB_FLAG_CARR : 0;
-	GB_REG_F(cpu->regs) |= signed_result_half < 0 ? GB_FLAG_CARR : 0;
+	GB_REG_F(cpu->regs) = GB_FLAG_SUBS;
+	GB_REG_F(cpu->regs) |= (result & 0xFF) == 0 ? GB_FLAG_ZERO : 0;
+	GB_REG_F(cpu->regs) |= half ? GB_FLAG_HALF : 0;
+	GB_REG_F(cpu->regs) |= carry ? GB_FLAG_CARR : 0;
 
-	GB_REG_A(cpu->regs) = (u8)signed_result;
+	GB_REG_A(cpu->regs) = (u8)result;
 }
 
 static inline void _gb_add_u16(gb_sm83_t* cpu, u16 data)
@@ -1488,7 +1492,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			return 3;
 		}
 		/* POP AF */ case 0xF1: {
-			GB_REG_AF(cpu->regs) = gb_mmu_pop_u16(cpu->mmu);
+			GB_REG_AF(cpu->regs) = gb_mmu_pop_u16(cpu->mmu) & 0xFFF0;
 			return 3;
 		}
 
