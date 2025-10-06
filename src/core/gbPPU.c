@@ -3,6 +3,7 @@
 #include "gbMMU.h"
 #include "gbReg.h"
 #include "gbSM83.h"
+#include "log.h"
 
 #include <stddef.h>
 #include <stdio.h>
@@ -98,6 +99,7 @@ _gb_bg_pixel_color(u8 palette_index, u8 bg_palette)
 		{.r = 0x29, .g = 0x55, .b = 0x00},
 		{.r = 0x10, .g = 0x41, .b = 0x00}, // Black
 	};
+	GB_ASSERT(palette_index < 4, "invalid palette index");
 
 	const u8 shift = palette_index * 2;
 	const u8 color = (u8)((bg_palette >> shift) & 0x3);
