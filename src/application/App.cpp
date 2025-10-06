@@ -1,5 +1,4 @@
 #include "App.hpp"
-#include "gbPPU.h"
 
 extern "C" {
 #include "gbCore.h"
@@ -100,6 +99,8 @@ void GeimBoi::App::run()
 		LoadTextureFromMemory(GB_LCD_WIDTH, GB_LCD_HEIGHT, &my_image_texture);
 	IM_ASSERT(ret);
 
+	bool paused = false;
+
 	while (!done) {
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
@@ -109,12 +110,21 @@ void GeimBoi::App::run()
 			if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED &&
 				event.window.windowID == SDL_GetWindowID(m_Window))
 				done = true;
+			if (event.type == SDL_EVENT_DROP_FILE) {
+			    const char* fpath = event.drop.data;
+				reset();
+				gb_emu_load_rom_file(m_Emulator, fpath);
+			}
 		}
 
 		// Start the Dear ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplSDL3_NewFrame();
 		ImGui::NewFrame();
+
+		if (!paused) {
+            gb_emu_advance_frame(m_Emulator);
+		}
 
 		UpdateTexture(
 			my_image_texture,
@@ -126,6 +136,7 @@ void GeimBoi::App::run()
 		// Our rendering stuff :p
 		ImGui::Begin("PPU");
 		ImGui::Text("T-Cycles 0x%04X", m_Emulator->ppu.t_cycles);
+		ImGui::Text("Enabled: %X", GB_IS_BIT(m_Emulator->ppu.lcdc, 7));
 		ImGui::Text("Mode %u", gb_mmu_read_u8(&m_Emulator->mmu, 0xFF41) & 0x3);
 		ImGui::Image(
 			(ImTextureID)(intptr_t)my_image_texture,
@@ -134,6 +145,8 @@ void GeimBoi::App::run()
 		ImGui::End();
 
 		ImGui::Begin("CPU State");
+
+		ImGui::Checkbox("Is paused?`", &paused);
 
 		ImGui::SeparatorText("Registers");
 		ImGui::Text("AF 0x%04X", GB_REG_AF(m_Emulator->cpu.regs));
@@ -168,6 +181,10 @@ void GeimBoi::App::run()
 		ImGui::Text(
 			"InterruptEnable: %s",
 			m_Emulator->cpu.interrupt_enable ? "true" : "false"
+		);
+		ImGui::Text(
+			"Is halted: %s",
+			m_Emulator->cpu.is_halted ? "true" : "false"
 		);
 
 		ImGui::Text("Last Executed Opcode: ");
@@ -216,6 +233,25 @@ void GeimBoi::App::run()
 			m_LastExecutedOpcode = addr;
 			gb_emu_advance_opcode(m_Emulator);
 		}
+		static int run_cycles = 0;
+		ImGui::InputInt("RUN CYCLES", &run_cycles);
+		if (ImGui::Button("RUN")) {
+            for (int i = 0; i < (run_cycles-1); i++) {
+     			uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
+     			if (gb_mmu_read_u8(&m_Emulator->mmu, addr) == 0xFB) {
+        				break;
+     			}
+     			gb_emu_advance_opcode(m_Emulator);
+      		}
+      		uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
+      		m_LastExecutedOpcode = addr;
+      		gb_emu_advance_opcode(m_Emulator);
+		}
+
+		if (ImGui::Button("reset")) {
+		    reset();
+		}
+
 		if (ImGui::Button("INT VBLANK")) {
 			gb_cpu_request_interrupt(&m_Emulator->cpu, GB_INTERRUPT_VBLANK);
 		}
@@ -364,7 +400,15 @@ GeimBoi::App::App()
 	ImGui_ImplSDL3_InitForOpenGL(m_Window, m_GL);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
-	m_Emulator = gb_emu_create();
+	reset();
+}
+
+void GeimBoi::App::reset() {
+    if (m_Emulator) {
+        gb_emu_delete(m_Emulator);
+    }
+
+    m_Emulator = gb_emu_create();
 	gb_emu_load_rom_file(
 		m_Emulator, "/home/giffi/Downloads/Tetris (World) (Rev 1).gb"
 	);
@@ -372,7 +416,9 @@ GeimBoi::App::App()
 
 GeimBoi::App::~App()
 {
-	gb_emu_delete(m_Emulator);
+    if (m_Emulator) {
+        gb_emu_delete(m_Emulator);
+    }
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL3_Shutdown();

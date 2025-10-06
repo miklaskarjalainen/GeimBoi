@@ -21,6 +21,7 @@ namespace GeimBoi {
         App();
         ~App();
 
+        void reset();
         void run();
     };
 
