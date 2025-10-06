@@ -111,12 +111,14 @@ static inline void _gb_render_background(gb_ppu_t* ppu)
 	// Fetch the base address to read from.
 	const u16 tile_addr = GB_IS_BIT(ppu->lcdc, 4) ? 0x8000 : 0x8800;
 	const u16 bg_addr = GB_IS_BIT(ppu->lcdc, 3) ? 0x9C00 : 0x9800;
-	const u16 tile_row = (u16)(ppu->ly / 8 * 32);
 	const u8 bg_palette = gb_mmu_read_u8(ppu->mmu, GB_ADDR_BG_PALETTE);
+	const u8 scroll_y = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_SCY) + ppu->ly;
+	const u16 tile_row = (u16)(scroll_y / 8 * 32);
 
 	for (u8 lx = 0; lx < 160; lx++) {
 		// Some magic to determine where to read the tile from.
-		const u16 tile_column = lx / 8;
+		const u8 scroll_x = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_SCX) + lx;
+		const u16 tile_column = scroll_x / 8;
 		const i16 tile_num =
 			gb_mmu_read_u8(ppu->mmu, bg_addr + tile_row + tile_column);
 		const u16 tile_location = GB_IS_BIT(ppu->lcdc, 4)
@@ -124,14 +126,14 @@ static inline void _gb_render_background(gb_ppu_t* ppu)
 									  : (u16)(tile_addr + ((tile_num + 128) * 16));
 
 		// Fetch the row of pixels for the tile
-		const u8 tile_line = ppu->ly % 8;
+		const u8 tile_line = scroll_y % 8;
 		const u8 data1 =
 			gb_mmu_read_u8(ppu->mmu, tile_location + (tile_line * 2));
 		const u8 data2 =
 			gb_mmu_read_u8(ppu->mmu, tile_location + (tile_line * 2) + 1);
 
 		// Get the color of the pixel
-		const u8 colour_bit = 7 - (lx & 7);
+		const u8 colour_bit = 7 - (scroll_x & 7);
         const u8 color_id = (u8)((((data2 >> colour_bit)) & 0x1) |
             (((data1 >> colour_bit) & 0x1) << 1));
 		const gb_color_t color = _gb_bg_pixel_color(color_id, bg_palette);
