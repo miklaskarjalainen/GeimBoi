@@ -1441,7 +1441,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			return 1;
 		}
 		/* SUB D */ case 0x92: {
-			_gb_sbc(cpu, GB_REG_D(cpu->regs));
+			_gb_sub(cpu, GB_REG_D(cpu->regs));
 			return 1;
 		}
 		/* SUB E */ case 0x93: {
