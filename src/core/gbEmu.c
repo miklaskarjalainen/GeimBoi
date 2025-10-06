@@ -75,7 +75,10 @@ void gb_emu_advance_frame(gb_emu_t* emu) {
 u8 gb_emu_advance_opcode(gb_emu_t* emu)
 {
 	gb_cpu_poll_interrupts(&emu->cpu);
-	u8 cycles = gb_cpu_execute_opcode(&emu->cpu);
+
+	const u8 cycles = emu->cpu.is_halted ? 4 : gb_cpu_execute_opcode(&emu->cpu);
+	gb_cpu_clock_timers(&emu->cpu, cycles);
 	gb_ppu_clock(&emu->ppu, cycles * 4);
+
 	return cycles;
 }

@@ -11,7 +11,7 @@ void gb_cpu_init(gb_sm83_t* cpu, struct gb_mmu* mmu)
     *cpu = (gb_sm83_t){ 0 };
     cpu->mmu = mmu;
 
-    // CFB initial values
+    // CGB initial values
 	if (CGB_MODE) {
 		GB_REG_AF(cpu->regs) = 0x1180;
 		GB_REG_BC(cpu->regs) = 0x0000;
@@ -119,7 +119,7 @@ void gb_cpu_clock_timers(gb_sm83_t* cpu, u8 m_cycles)
 
         if (cpu->timer_tima_increment >= increment) {
             u8* tima = &cpu->memory[GB_ADDR_TIMA - 0x8000];
-            cpu->timer_tima_increment -= 1;
+            cpu->timer_tima_increment -= increment;
 
             if (*tima != 0xFF) {
                 *tima += 1;
