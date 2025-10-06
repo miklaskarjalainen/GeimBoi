@@ -26,6 +26,19 @@ u8 gb_mmu_read_u8(const gb_mmu_t* mmu, u16 addr)
 		return gb_cart_read_u8(mmu->cart, addr);
 	}
 
+	// Joypad
+	if (addr == GB_ADDR_P1) {
+		const u8 joy = GB_CPU_MEM(mmu->cpu, GB_ADDR_P1);
+		u8 buttons = 0xF;
+        if (GB_IS_BIT(joy, 5)) {
+            buttons &= mmu->cpu->keys_down;
+		}
+        if (GB_IS_BIT(joy, 4)) {
+            buttons &= mmu->cpu->keys_down >> 4;
+		}
+		return joy | buttons;
+	}
+
 	if (addr >= 0xFEA0 && addr <= 0xFEFF) {
 		return 0xFF;
 	}
@@ -68,6 +81,12 @@ void gb_mmu_write_u8(gb_mmu_t* mmu, u16 addr, u8 data)
 		return;
 	}
 
+	// Joypad
+	if (addr == GB_ADDR_P1) {
+		GB_CPU_MEM(mmu->cpu, GB_ADDR_P1) = (u8)(data & 0xF0);
+		return;
+	}
+
 	// Serial
 	if (addr == 0xFF02 && data == 0x81) {
 		printf("%c", gb_mmu_read_u8(mmu, 0xFF01));
@@ -95,11 +114,6 @@ void gb_mmu_write_u8(gb_mmu_t* mmu, u16 addr, u8 data)
 		return;
 	}
 
-	if (addr == 0xFF00) {
-		mmu->cpu->memory[addr - 0x8000] &= 0xF;
-		mmu->cpu->memory[addr - 0x8000] |= (u8)(data & ~(0xF));
-		return;
-	}
 	if (addr == 0xFF40) {
 		mmu->cpu->mmu->ppu->lcdc = data;
 		return;

@@ -8,6 +8,7 @@ void gb_cpu_init(gb_sm83_t* cpu, struct gb_mmu* mmu)
 {
     *cpu = (gb_sm83_t){ 0 };
     cpu->mmu = mmu;
+    cpu->keys_down = 0xFF;
 
     // CGB initial values
 	if (CGB_MODE) {

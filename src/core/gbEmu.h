@@ -9,6 +9,20 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+/**
+ * @see gb_emu_press_input, gb_emu_release_input
+ */
+typedef enum gb_input {
+    GB_INPUT_RIGHT = GB_BIT(0),
+    GB_INPUT_LEFT = GB_BIT(1),
+    GB_INPUT_UP = GB_BIT(2),
+    GB_INPUT_DOWN = GB_BIT(3),
+    GB_INPUT_A = GB_BIT(4),
+    GB_INPUT_B = GB_BIT(5),
+    GB_INPUT_SELECT = GB_BIT(6),
+    GB_INPUT_START = GB_BIT(7)
+} gb_input_e;
+
 typedef struct gb_emu {
     gb_sm83_t cpu;
     gb_cart_t cart;
@@ -38,6 +52,17 @@ void gb_emu_init(gb_emu_t* emu);
  * @see gb_emu_delete
  */
 void gb_emu_deinit(gb_emu_t* emu);
+
+/**
+ * @brief Presses down the given key.
+ * @see gb_emu_release_key
+ */
+void gb_emu_press_key(gb_emu_t* emu, gb_input_e input);
+/**
+ * @brief Releases the given key.
+ * @see gb_emu_press_key
+ */
+void gb_emu_release_key(gb_emu_t* emu, gb_input_e input);
 
 /**
  * @brief Copies the bytes to be used for the emulator.

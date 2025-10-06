@@ -115,6 +115,34 @@ void GeimBoi::App::run()
 				reset();
 				gb_emu_load_rom_file(m_Emulator, fpath);
 			}
+			if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP) {
+			    auto fn = event.type == SDL_EVENT_KEY_UP ? gb_emu_release_key : gb_emu_press_key;
+                if (event.key.key == SDLK_W) {
+                    fn(m_Emulator, GB_INPUT_UP);
+                }
+                if (event.key.key == SDLK_S) {
+                    fn(m_Emulator, GB_INPUT_DOWN);
+                }
+                if (event.key.key == SDLK_A) {
+                    fn(m_Emulator, GB_INPUT_LEFT);
+                }
+                if (event.key.key == SDLK_D) {
+                    fn(m_Emulator, GB_INPUT_RIGHT);
+                }
+
+                if (event.key.key == SDLK_J) {
+                    fn(m_Emulator, GB_INPUT_B);
+                }
+                if (event.key.key == SDLK_K) {
+                    fn(m_Emulator, GB_INPUT_A);
+                }
+                if (event.key.key == SDLK_RETURN) {
+                    fn(m_Emulator, GB_INPUT_START);
+                }
+                if (event.key.key == SDLK_BACKSPACE) {
+                    fn(m_Emulator, GB_INPUT_SELECT);
+                }
+			}
 		}
 
 		// Start the Dear ImGui frame
