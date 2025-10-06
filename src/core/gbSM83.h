@@ -34,6 +34,9 @@ typedef struct gb_sm83 {
 	u8 interrupt_enable:1;
 	u8 is_halted:1;
 
+	u16 timer_div_increment;
+	u16 timer_tima_increment;
+
 	u32 m_cycles; // Machine cycles
 
 	struct gb_mmu* mmu;
@@ -50,5 +53,6 @@ void gb_cpu_request_interrupt(gb_sm83_t* cpu, u8 interrupt);
  * @note returns the amount of m-cycles used.
  */
 u8 gb_cpu_execute_opcode(gb_sm83_t* emu);
+void gb_cpu_clock_timers(gb_sm83_t* emu, u8 m_cycles);
 
 #endif

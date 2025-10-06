@@ -74,6 +74,13 @@ void gb_mmu_write_u8(gb_mmu_t* mmu, u16 addr, u8 data)
 		return;
 	}
 
+	// Timer registers
+	if (addr == GB_ADDR_DIV) {
+	    mmu->cpu->timer_div_increment = 0;
+		mmu->cpu->memory[GB_ADDR_DIV - 0x8000] = 0;
+		return;
+	}
+
 	// DMA transfer
 	if (addr == 0xFF46) {
 		const u16 src = (u16)(data << 8);

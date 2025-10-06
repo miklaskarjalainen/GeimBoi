@@ -1,12 +1,10 @@
 #include "gbSM83.h"
-
 #include "gbEmu.h"
 #include "log.h"
 
-#define GB_ADDR_IE (0xFFFF) // Interrupt Enable
-#define GB_ADDR_IF (0xFF0F) // Interrupt Flag
-
 #define CGB_MODE 0
+
+#define CPU_READ_U8(cpu, addr) (cpu->memory[addr - 0x8000])
 
 void gb_cpu_init(gb_sm83_t* cpu, struct gb_mmu* mmu)
 {
@@ -85,4 +83,51 @@ void gb_cpu_request_interrupt(gb_sm83_t* cpu, u8 interrupt)
 {
 	u8 unhandled = cpu->memory[GB_ADDR_IF - 0x8000];
 	cpu->memory[GB_ADDR_IF - 0x8000] = interrupt | unhandled;
+}
+
+// Hz
+#define MACHINE_CLOCK 1048576U
+#define TIMER_CLOCK 16384U
+
+void gb_cpu_clock_timers(gb_sm83_t* cpu, u8 m_cycles)
+{
+    // Increment internal timers
+    {
+        cpu->timer_div_increment += m_cycles;
+        cpu->timer_tima_increment += m_cycles;
+    }
+
+    // Handle DIV register
+    {
+        const u8 increment_rate = MACHINE_CLOCK / TIMER_CLOCK;
+        if (cpu->timer_div_increment >= increment_rate) {
+            cpu->timer_div_increment -= 1;
+            cpu->memory[GB_ADDR_DIV - 0x8000] += 1;
+        }
+    }
+
+    // Handle TIMA register
+    {
+        const u8 TAC = cpu->memory[GB_ADDR_TAC - 0x8000];
+        if (!GB_IS_BIT(TAC, 2)) {
+            return;
+        }
+
+        // How often the TIMA should be incremented (m-cycles)
+        static const u16 TIMA_increment[4] = {256, 4, 16, 64};
+        const u16 increment = TIMA_increment[TAC & 0x3];
+
+        if (cpu->timer_tima_increment >= increment) {
+            u8* tima = &cpu->memory[GB_ADDR_TIMA - 0x8000];
+            cpu->timer_tima_increment -= 1;
+
+            if (*tima != 0xFF) {
+                *tima += 1;
+                return;
+            }
+
+            *tima = cpu->memory[GB_ADDR_TMA - 0x8000];
+            gb_cpu_request_interrupt(cpu, GB_INTERRUPT_TIMER);
+        }
+    }
 }

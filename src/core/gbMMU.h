@@ -3,6 +3,13 @@
 
 #include "gbReg.h"
 
+#define GB_ADDR_DIV (0xFF04) // Divider register
+#define GB_ADDR_TIMA (0xFF05) // Timer counter
+#define GB_ADDR_TMA (0xFF06) // Timer modulo
+#define GB_ADDR_TAC (0xFF07) // Timer control
+#define GB_ADDR_IF (0xFF0F) // Interrupt Flag
+#define GB_ADDR_IE (0xFFFF) // Interrupt Enable
+
 /*
  * @brief Maps gameboy's 16-bit address space to the correct components.
  */
