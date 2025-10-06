@@ -278,7 +278,9 @@ static u8 _gb_emu_execute_cb(gb_sm83_t* cpu);
 u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 {
 	u8 opcode = gb_mmu_read_u8(cpu->mmu, GB_REG_PC(cpu->regs));
-	GB_REG_PC(cpu->regs)++;
+	GB_REG_PC(cpu->regs) += !cpu->halt_bugged;
+	cpu->halt_bugged = 0;
+
 	switch (opcode) {
 		/* LD B, B */ case 0x40:
 		/* LD C, C */ case 0x49:
@@ -1574,6 +1576,16 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		}
 
 		/* HALT */ case 0x76: {
+		    // Halt bug?
+		    if (!cpu->interrupt_enable) {
+				const u8 IE = GB_CPU_MEM(cpu, GB_ADDR_IE);
+				const u8 IF = GB_CPU_MEM(cpu, GB_ADDR_IF);
+				if ((IE & IF) != 0) {
+				    cpu->halt_bugged = 1;
+				    return 1;
+				}
+			}
+
 		    cpu->is_halted = 1;
 		    return 1;
 		}

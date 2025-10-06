@@ -37,6 +37,7 @@ typedef struct gb_sm83 {
 
 	u8 interrupt_enable:1;
 	u8 is_halted:1;
+	u8 halt_bugged:1;
 
 	u16 timer_div_increment;
 	u16 timer_tima_increment;
