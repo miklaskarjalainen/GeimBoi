@@ -3,6 +3,10 @@
 
 #include "gbReg.h"
 
+#define GB_ADDR_OEM_BEGIN (0xFE00)
+#define GB_ADDR_OBP0 (0xFF48) // Obj palette0
+#define GB_ADDR_OBP1 (0xFF49) // Obj palette1
+
 #define GB_ADDR_P1 (0xFF00) // Joypad input
 #define GB_ADDR_DIV (0xFF04) // Divider register
 #define GB_ADDR_TIMA (0xFF05) // Timer counter
