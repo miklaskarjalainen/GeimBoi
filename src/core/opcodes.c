@@ -1580,7 +1580,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		    if (!cpu->interrupt_enable) {
 				const u8 IE = GB_CPU_MEM(cpu, GB_ADDR_IE);
 				const u8 IF = GB_CPU_MEM(cpu, GB_ADDR_IF);
-				if ((IE & IF) != 0) {
+				if ((IE & IF & GB_INTERRUPT_MASK) != 0) {
 				    cpu->halt_bugged = 1;
 				    return 1;
 				}

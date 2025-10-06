@@ -65,22 +65,21 @@ bool gb_emu_load_rom_file(gb_emu_t* emu, const char* fpath)
 }
 
 void gb_emu_advance_frame(gb_emu_t* emu) {
-    const int FrameCycles = 70221;
-    int cycles = 0;
-    while (cycles < FrameCycles) {
-        cycles += gb_emu_advance_opcode(emu) * 4;
+    const u32 FrameCycles = 70221 / 4;
+    while (emu->cpu.m_cycles < FrameCycles) {
+        gb_emu_advance_opcode(emu);
     }
+    emu->cpu.m_cycles -= FrameCycles;
 }
 
-u8 gb_emu_advance_opcode(gb_emu_t* emu)
+void gb_emu_advance_opcode(gb_emu_t* emu)
 {
 	gb_cpu_poll_interrupts(&emu->cpu);
 
-	const u8 cycles = emu->cpu.is_halted ? 4 : gb_cpu_execute_opcode(&emu->cpu);
+	const u8 cycles = emu->cpu.is_halted ? 1 : gb_cpu_execute_opcode(&emu->cpu);
 	gb_cpu_clock_timers(&emu->cpu, cycles);
 	gb_ppu_clock(&emu->ppu, cycles * 4);
-
-	return cycles;
+	emu->cpu.m_cycles += cycles;
 }
 
 void gb_emu_press_key(gb_emu_t* emu, gb_input_e input)
