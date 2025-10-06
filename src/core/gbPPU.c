@@ -108,7 +108,9 @@ _gb_bg_pixel_color(u8 palette_index, u8 bg_palette)
 
 static inline void _gb_render_background(gb_ppu_t* ppu)
 {
-	// Fetch the base address to read from.
+
+    // Fetch the base address to read from.
+    const u8 bg_enabled = GB_IS_BIT(ppu->lcdc, 0);
 	const u16 tile_addr = GB_IS_BIT(ppu->lcdc, 4) ? 0x8000 : 0x8800;
 	const u16 bg_addr = GB_IS_BIT(ppu->lcdc, 3) ? 0x9C00 : 0x9800;
 	const u8 bg_palette = gb_mmu_read_u8(ppu->mmu, GB_ADDR_BG_PALETTE);
@@ -116,6 +118,16 @@ static inline void _gb_render_background(gb_ppu_t* ppu)
 	const u16 tile_row = (u16)(scroll_y / 8 * 32);
 
 	for (u8 lx = 0; lx < 160; lx++) {
+	    if (!bg_enabled) {
+			const gb_color_t color = _gb_bg_pixel_color(0, 0);
+
+			// Draw the pixel
+			ppu->frame[ppu->ly][lx][0] = color.r;
+			ppu->frame[ppu->ly][lx][1] = color.g;
+			ppu->frame[ppu->ly][lx][2] = color.b;
+			continue;
+		}
+
 		// Some magic to determine where to read the tile from.
 		const u8 scroll_x = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_SCX) + lx;
 		const u16 tile_column = scroll_x / 8;
