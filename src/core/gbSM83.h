@@ -29,7 +29,7 @@
 
 // USE SPARINGLY! Meant for addresses over 0x8000, which can be directly accessed. Like IE,IF.
 // Any address which has a "side effect" is no go, so no echo ram or anything.
-#define GB_CPU_READ_U8(cpu, addr) (cpu->memory[addr - 0x8000])
+#define GB_CPU_MEM(cpu, addr) (cpu->memory[addr - 0x8000])
 
 typedef struct gb_sm83 {
 	gb_reg16_t regs[GB_REG_COUNT];
@@ -44,6 +44,12 @@ typedef struct gb_sm83 {
 	u32 m_cycles; // Machine cycles
 
 	struct gb_mmu* mmu;
+
+    /*
+     * !Don't modify directly.
+     * Use gb_emu_press_input, gb_emu_release_input so interrupts are triggered correctly.
+     */
+    u8 keys_down;
 } gb_sm83_t;
 
 void gb_cpu_init(gb_sm83_t* cpu, struct gb_mmu* mmu);

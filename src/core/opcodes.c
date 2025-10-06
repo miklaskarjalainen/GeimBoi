@@ -1581,8 +1581,8 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		/* STOP */ case 0x10: {
 		    // @TODO: CGB
 
-			const u8 IE = GB_CPU_READ_U8(cpu, GB_ADDR_IE);
-			const u8 IF = GB_CPU_READ_U8(cpu, GB_ADDR_IF);
+			const u8 IE = GB_CPU_MEM(cpu, GB_ADDR_IE);
+			const u8 IF = GB_CPU_MEM(cpu, GB_ADDR_IF);
 			// reset timers
 			gb_mmu_write_u8(cpu->mmu, GB_ADDR_DIV, 0x00);
 			cpu->is_halted = 1; // @TODO: proper "stop mode"
