@@ -170,6 +170,7 @@ static void clock_drawing(gb_ppu_t* ppu)
 	if (GB_IS_BIT(ppu->stat, 3)) {
 		gb_cpu_request_interrupt(ppu->mmu->cpu, GB_INTERRUPT_LCD);
 	}
+	gb_render_scanline(ppu);
 }
 
 static inline void _gb_check_coinsidence_flag(gb_ppu_t* ppu)
@@ -243,7 +244,6 @@ void gb_ppu_clock(gb_ppu_t* ppu, u16 t_cycles)
 		switch (ppu->stat & 0x3) {
 			case PPU_MODE_HBLANK: {
 				clock_hblank(ppu);
-				gb_render_scanline(ppu);
 				break;
 			}
 			case PPU_MODE_VBLANK: {
