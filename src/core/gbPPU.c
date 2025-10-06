@@ -236,6 +236,8 @@ void gb_ppu_clock(gb_ppu_t* ppu, u16 t_cycles)
 {
 	if (!GB_IS_BIT(ppu->lcdc, 7)) {
 		ppu->ly = 0;
+		ppu->t_cycles = 0;
+		PPU_SET_MODE(ppu, PPU_MODE_OAM);
 		return;
 	}
 
