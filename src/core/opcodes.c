@@ -860,6 +860,16 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			return 3;
 		}
 
+		/* JP C, a16 */ case 0xDA: {
+			if (GB_REG_F(cpu->regs) & GB_FLAG_CARR) {
+				GB_REG_PC(cpu->regs) =
+					gb_mmu_read_u16(cpu->mmu, GB_REG_PC(cpu->regs));
+				return 4;
+			}
+			GB_REG_PC(cpu->regs) += 2;
+			return 3;
+		}
+
 		/* JP NZ, a16 */ case 0xC2: {
 			if (!(GB_REG_F(cpu->regs) & GB_FLAG_ZERO)) {
 				GB_REG_PC(cpu->regs) =
