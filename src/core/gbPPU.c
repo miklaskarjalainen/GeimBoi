@@ -90,7 +90,7 @@ typedef struct gb_color {
 } gb_color_t;
 
 static inline gb_color_t
-_gb_bg_pixel_color(const gb_ppu_t* ppu, u8 palette_index)
+_gb_bg_pixel_color(u8 palette_index, u8 bg_palette)
 {
 	static gb_color_t s_Colors[4] = {
 		{.r = 0x84, .g = 0x96, .b = 0x00}, // White
@@ -99,7 +99,6 @@ _gb_bg_pixel_color(const gb_ppu_t* ppu, u8 palette_index)
 		{.r = 0x10, .g = 0x41, .b = 0x00}, // Black
 	};
 
-	const u8 bg_palette = gb_mmu_read_u8(ppu->mmu, GB_ADDR_BG_PALETTE);
 	const u8 shift = palette_index * 2;
 	const u8 color = (u8)((bg_palette >> shift) & 0x3);
 	return s_Colors[color];
@@ -111,6 +110,7 @@ static inline void _gb_render_background(gb_ppu_t* ppu)
 	const u16 tile_addr = GB_IS_BIT(ppu->lcdc, 4) ? 0x8000 : 0x8800;
 	const u16 bg_addr = GB_IS_BIT(ppu->lcdc, 3) ? 0x9C00 : 0x9800;
 	const u16 tile_row = (u16)(ppu->ly / 8 * 32);
+	const u8 bg_palette = gb_mmu_read_u8(ppu->mmu, GB_ADDR_BG_PALETTE);
 
 	for (u8 lx = 0; lx < 160; lx++) {
 		// Some magic to determine where to read the tile from.
