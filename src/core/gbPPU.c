@@ -178,21 +178,31 @@ static inline void _gb_render_objects(gb_ppu_t* ppu)
     for (u8 i = 0; i < oem_entry_count; i++)
     {
         struct gb_oam_entry oam = _gb_get_oam(ppu, i);
+        const u8 visible_ly = ppu->ly + 16;
 
         // visible?
-        if ((ppu->ly + 16) < oam.pos_y || (ppu->ly + 16) >= (oam.pos_y + sprite_height) ) {
+        if ((visible_ly < oam.pos_y) || visible_ly >= (oam.pos_y + sprite_height) ) {
             continue;
         }
         if (!oam.pos_x || oam.pos_x >= 168) {
             continue;
         }
 
-        const i32 tile_y = ppu->ly - oam.pos_y + 16;
-        const u32 tile_index = oam.tile_idx * 16;
-        GB_ASSERT(tile_y >= 0 && tile_y < 8, "%i %i %i", ppu->ly, oam.pos_y, tile_y);
+        if (sprite_height == 16) {
+            oam.tile_idx &= ~(0x1);
+        }
 
-        const u8 data1 = obj_tiles[tile_index + (2 * tile_y)];
-        const u8 data2 = obj_tiles[tile_index + (2 * tile_y) + 1];
+        const u8 flip_x = GB_IS_BIT(oam.flags, 5);
+        const u8 flip_y = GB_IS_BIT(oam.flags, 6);
+        i32 tile_y = visible_ly - oam.pos_y;
+        if (flip_y) {
+            tile_y = sprite_height - tile_y;
+        }
+        tile_y *= 2;
+
+        const u32 tile_index = oam.tile_idx * 16;
+        const u8 data1 = obj_tiles[tile_index + tile_y];
+        const u8 data2 = obj_tiles[tile_index + tile_y + 1];
         const u8 palette = GB_IS_BIT(oam.flags, 4) ? palette1 : palette0;
 
         for (u8 sprite_x = 0; sprite_x < 8; sprite_x++) {
@@ -202,9 +212,13 @@ static inline void _gb_render_objects(gb_ppu_t* ppu)
             }
 
             // Get the color of the pixel
-            const u8 color_index = 7 - sprite_x;
+            const u8 color_index = flip_x ? sprite_x : (7 - sprite_x);
             const u8 color_id = (u8)((((data2 >> color_index)) & 0x1) |
                 (((data1 >> color_index) & 0x1) << 1));
+
+            if (!color_id) {
+                continue;
+            }
 
             const gb_color_t color = _gb_bg_pixel_color(color_id, palette);
 
