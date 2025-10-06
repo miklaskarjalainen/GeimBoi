@@ -43,19 +43,6 @@ u8 gb_mmu_read_u8(const gb_mmu_t* mmu, u16 addr)
 		return 0xFF;
 	}
 
-	if (addr == 0xFF04) {
-		return 0xFF;
-	}
-	if (addr == 0xFF05) {
-		return 0xFF;
-	}
-	if (addr == 0xFF06) {
-		return 0xFF;
-	}
-	if (addr == 0xFF07) {
-		return 0x07;
-	}
-
 	if (addr == 0xFF40) {
 		return mmu->ppu->lcdc;
 	}
