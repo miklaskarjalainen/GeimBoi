@@ -17,11 +17,15 @@
 	#define GB_COLOR_BOLDRED "\x1b[1;31m"
 #endif
 
+#define GB_STR(s) #s
+#define GB_XSTR(s) GB_STR(s)
+
 #if defined(_GB_DISABLE_STDLIB) || defined(_GB_DISABLE_PRINT)
 	#define GB_INFO(...)
 	#define GB_WARN(...)
 	#define GB_ERROR(...)
 	#define GB_FATAL(...)
+	#define GB_ASSERT(...)
 #else
 	#include <stdio.h>
 	#include <stdlib.h>
@@ -70,6 +74,17 @@
 			exit(EXIT_FAILURE);                                                \
 		} while (0)
 
+	#define GB_ASSERT(expr, ...)                                               \
+		if (!(expr)) {                                                         \
+			fprintf(                                                           \
+				_GB_LOG_ERR,                                                   \
+				GB_COLOR_BOLDRED                                               \
+				"[ASSERTION] " __FILE__                                        \
+				":" GB_XSTR(__LINE__) ":  " GB_COLOR_RESET __VA_ARGS__          \
+			);                                                                 \
+			fprintf(_GB_LOG_ERR, "\n");                                        \
+			exit(EXIT_FAILURE);                                                \
+		}
 #endif
 
 #endif
