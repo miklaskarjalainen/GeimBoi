@@ -27,6 +27,10 @@
 #define GB_INTERRUPT_VBLANK GB_BIT(0)
 #define GB_INTERRUPT_MASK (0x1F)
 
+// USE SPARINGLY! Meant for addresses over 0x8000, which can be directly accessed. Like IE,IF.
+// Any address which has a "side effect" is no go, so no echo ram or anything.
+#define GB_CPU_READ_U8(cpu, addr) (cpu->memory[addr - 0x8000])
+
 typedef struct gb_sm83 {
 	gb_reg16_t regs[GB_REG_COUNT];
 	u8 memory[0x8000]; // 0x8000 - 0xFFFF

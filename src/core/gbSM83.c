@@ -4,8 +4,6 @@
 
 #define CGB_MODE 0
 
-#define CPU_READ_U8(cpu, addr) (cpu->memory[addr - 0x8000])
-
 void gb_cpu_init(gb_sm83_t* cpu, struct gb_mmu* mmu)
 {
     *cpu = (gb_sm83_t){ 0 };
