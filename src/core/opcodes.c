@@ -847,7 +847,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 
 		/* jp, HL */ case 0xE9: {
 			GB_REG_PC(cpu->regs) = GB_REG_HL(cpu->regs);
-			return 4;
+			return 1;
 		}
 
 		/* JP Z, a16 */ case 0xCA: {
@@ -1587,7 +1587,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 
 		/* DAA */ case 0x27: {
 		    _gb_daa(cpu);
-		    return 2;
+		    return 1;
 		}
 
 		/* CB PREFIX */ case 0xCB: {
@@ -1635,11 +1635,11 @@ static u8 _gb_emu_execute_cb(gb_sm83_t* cpu)
 			u8 value = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
 			_gb_swap(cpu, &value);
 			gb_mmu_write_u8(cpu->mmu, GB_REG_HL(cpu->regs), value);
-			return 2;
+			return 4;
 		}
 		/* SWAP A */ case 0x37: {
 			_gb_swap(cpu, &GB_REG_A(cpu->regs));
-			return 4;
+			return 2;
 		}
 
 		/* RLC B */ case 0x00: {
@@ -1914,7 +1914,7 @@ static u8 _gb_emu_execute_cb(gb_sm83_t* cpu)
 		/* BIT 0, (HL) */ case 0x46: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
 			_gb_get_bit(cpu, data, 0);
-			return 4;
+			return 3;
 		}
 		/* BIT 0, A */ case 0x47: {
 			_gb_get_bit(cpu, GB_REG_A(cpu->regs), 0);
@@ -1948,7 +1948,7 @@ static u8 _gb_emu_execute_cb(gb_sm83_t* cpu)
 		/* BIT 1, (HL) */ case 0x4E: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
 			_gb_get_bit(cpu, data, 1);
-			return 4;
+			return 3;
 		}
 		/* BIT 1, A */ case 0x4F: {
 			_gb_get_bit(cpu, GB_REG_A(cpu->regs), 1);
@@ -1982,7 +1982,7 @@ static u8 _gb_emu_execute_cb(gb_sm83_t* cpu)
 		/* BIT 2, (HL) */ case 0x56: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
 			_gb_get_bit(cpu, data, 2);
-			return 4;
+			return 3;
 		}
 		/* BIT 2, A */ case 0x57: {
 			_gb_get_bit(cpu, GB_REG_A(cpu->regs), 2);
@@ -2016,7 +2016,7 @@ static u8 _gb_emu_execute_cb(gb_sm83_t* cpu)
 		/* BIT 3, (HL) */ case 0x5E: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
 			_gb_get_bit(cpu, data, 3);
-			return 4;
+			return 3;
 		}
 		/* BIT 3, A */ case 0x5F: {
 			_gb_get_bit(cpu, GB_REG_A(cpu->regs), 3);
@@ -2050,7 +2050,7 @@ static u8 _gb_emu_execute_cb(gb_sm83_t* cpu)
 		/* BIT 4, (HL) */ case 0x66: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
 			_gb_get_bit(cpu, data, 4);
-			return 4;
+			return 3;
 		}
 		/* BIT 4, A */ case 0x67: {
 			_gb_get_bit(cpu, GB_REG_A(cpu->regs), 4);
@@ -2084,7 +2084,7 @@ static u8 _gb_emu_execute_cb(gb_sm83_t* cpu)
 		/* BIT 5, (HL) */ case 0x6E: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
 			_gb_get_bit(cpu, data, 5);
-			return 4;
+			return 3;
 		}
 		/* BIT 5, A */ case 0x6F: {
 			_gb_get_bit(cpu, GB_REG_A(cpu->regs), 5);
@@ -2118,7 +2118,7 @@ static u8 _gb_emu_execute_cb(gb_sm83_t* cpu)
 		/* BIT 6, (HL) */ case 0x76: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
 			_gb_get_bit(cpu, data, 6);
-			return 4;
+			return 3;
 		}
 		/* BIT 6, A */ case 0x77: {
 			_gb_get_bit(cpu, GB_REG_A(cpu->regs), 6);
@@ -2152,7 +2152,7 @@ static u8 _gb_emu_execute_cb(gb_sm83_t* cpu)
 		/* BIT 7, (HL) */ case 0x7E: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
 			_gb_get_bit(cpu, data, 7);
-			return 4;
+			return 3;
 		}
 		/* BIT 7, A */ case 0x7F: {
 			_gb_get_bit(cpu, GB_REG_A(cpu->regs), 7);
