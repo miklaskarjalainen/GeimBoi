@@ -212,7 +212,7 @@ static inline void _gb_swap(gb_sm83_t* cpu, u8* reg)
 	GB_REG_F(cpu->regs) = *reg == 0 ? GB_FLAG_ZERO : 0;
 }
 
-static inline void _gb_call_addr(gb_sm83_t* cpu, u16 addr)
+static inline void _gb_rst(gb_sm83_t* cpu, u16 addr)
 {
 	gb_mmu_push_u16(cpu->mmu, GB_REG_PC(cpu->regs));
 	GB_REG_PC(cpu->regs) = addr;
@@ -852,6 +852,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 					gb_mmu_read_u16(cpu->mmu, GB_REG_PC(cpu->regs));
 				return 4;
 			}
+			GB_REG_PC(cpu->regs) += 2;
 			return 3;
 		}
 
@@ -861,6 +862,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 					gb_mmu_read_u16(cpu->mmu, GB_REG_PC(cpu->regs));
 				return 4;
 			}
+			GB_REG_PC(cpu->regs) += 2;
 			return 3;
 		}
 
@@ -870,6 +872,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 					gb_mmu_read_u16(cpu->mmu, GB_REG_PC(cpu->regs));
 				return 4;
 			}
+			GB_REG_PC(cpu->regs) += 2;
 			return 3;
 		}
 
@@ -878,6 +881,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 				_gb_call(cpu);
 				return 6;
 			}
+			GB_REG_PC(cpu->regs) += 2;
 			return 3;
 		}
 		/* CALL NC, a16 */ case 0xD4: {
@@ -885,6 +889,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 				_gb_call(cpu);
 				return 6;
 			}
+			GB_REG_PC(cpu->regs) += 2;
 			return 3;
 		}
 
@@ -893,6 +898,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 				_gb_call(cpu);
 				return 6;
 			}
+			GB_REG_PC(cpu->regs) += 2;
 			return 3;
 		}
 		/* CALL C, a16 */ case 0xDC: {
@@ -900,6 +906,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 				_gb_call(cpu);
 				return 6;
 			}
+			GB_REG_PC(cpu->regs) += 2;
 			return 3;
 		}
 
@@ -1503,36 +1510,36 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		}
 
 		/* RST 0x00 */ case 0xC7: {
-			_gb_call_addr(cpu, 0x00);
+			_gb_rst(cpu, 0x00);
 			return 4;
 		}
 		/* RST 0x10 */ case 0xD7: {
-			_gb_call_addr(cpu, 0x10);
+			_gb_rst(cpu, 0x10);
 			return 4;
 		}
 		/* RST 0x20 */ case 0xE7: {
-			_gb_call_addr(cpu, 0x20);
+			_gb_rst(cpu, 0x20);
 			return 4;
 		}
 		/* RST 0x30 */ case 0xF7: {
-			_gb_call_addr(cpu, 0x30);
+			_gb_rst(cpu, 0x30);
 			return 4;
 		}
 
 		/* RST 0x08 */ case 0xCF: {
-			_gb_call_addr(cpu, 0x08);
+			_gb_rst(cpu, 0x08);
 			return 4;
 		}
 		/* RST 0x18 */ case 0xDF: {
-			_gb_call_addr(cpu, 0x18);
+			_gb_rst(cpu, 0x18);
 			return 4;
 		}
 		/* RST 0x18 */ case 0xEF: {
-			_gb_call_addr(cpu, 0x28);
+			_gb_rst(cpu, 0x28);
 			return 4;
 		}
 		/* RST 0x18 */ case 0xFF: {
-			_gb_call_addr(cpu, 0x38);
+			_gb_rst(cpu, 0x38);
 			return 4;
 		}
 

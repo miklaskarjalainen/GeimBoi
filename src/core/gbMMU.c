@@ -126,8 +126,8 @@ void gb_mmu_push_u8(gb_mmu_t* mmu, u8 data)
 
 void gb_mmu_push_u16(gb_mmu_t* mmu, u16 data)
 {
-	gb_mmu_push_u8(mmu, (u8)data);
-	gb_mmu_push_u8(mmu, (u8)(data >> 8));
+    gb_mmu_push_u8(mmu, (u8)(data >> 8));
+    gb_mmu_push_u8(mmu, (u8)(data & 0xFF));
 }
 
 u8 gb_mmu_pop_u8(gb_mmu_t* mmu)
@@ -139,5 +139,5 @@ u8 gb_mmu_pop_u8(gb_mmu_t* mmu)
 
 u16 gb_mmu_pop_u16(gb_mmu_t* mmu)
 {
-	return (u16)((gb_mmu_pop_u8(mmu) << 8) | gb_mmu_pop_u8(mmu));
+	return (u16)((gb_mmu_pop_u8(mmu)) | gb_mmu_pop_u8(mmu) << 8);
 }
