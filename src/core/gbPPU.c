@@ -175,6 +175,59 @@ struct gb_oam_entry _gb_get_oam(gb_ppu_t* ppu, u8 entry)
     };
 }
 
+static inline void _gb_render_window(gb_ppu_t* ppu)
+{
+    const u8 window_x = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_WX);
+    const u8 window_y = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_WY);
+
+    {
+        const u8 bg_enable = GB_IS_BIT(ppu->lcdc, 0);
+        const u8 window_enable = GB_IS_BIT(ppu->lcdc, 5);
+
+        if (!bg_enable || !window_enable || window_y > ppu->ly) {
+            return;
+        }
+    }
+
+    const u16 tile_addr = GB_IS_BIT(ppu->lcdc, 4) ? 0x8000 : 0x8800;
+    const u16 bg_addr = GB_IS_BIT(ppu->lcdc, 6) ? 0x9C00 : 0x9800;
+
+    const u8 bg_palette = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_BG_PALETTE);
+    const u8 unsig = GB_IS_BIT(ppu->lcdc, 4);
+    const u8 y_pos = ppu->ly - window_y;
+    const u16 tile_row = (u16)(y_pos / 8 * 32);
+
+    for (u8 lx = window_x; lx < 160; lx++)
+    {
+        const u8 x_pixel = lx - window_x;
+        const u16 tile_column = x_pixel / 8;
+
+		const i16 tile_num =
+			gb_mmu_read_u8(ppu->mmu, bg_addr + tile_row + tile_column);
+		const u16 tile_location = unsig
+									  ? (u16)(tile_addr + (tile_num * 16))
+									  : (u16)(tile_addr + ((tile_num + 128) * 16));
+
+        // Fetch the row of pixels for the tile
+        const u8 tile_line = y_pos % 8;
+        const u8 data1 =
+       	gb_mmu_read_u8(ppu->mmu, tile_location + (tile_line * 2));
+        const u8 data2 =
+       	gb_mmu_read_u8(ppu->mmu, tile_location + (tile_line * 2) + 1);
+
+        // Get the color of the pixel
+        const u8 colour_bit = 7 - (x_pixel & 7);
+        const u8 color_id = (u8)((((data2 >> colour_bit)) & 0x1) |
+        (((data1 >> colour_bit) & 0x1) << 1));
+        const gb_color_t color = _gb_bg_pixel_color(color_id, bg_palette);
+
+        // Draw the pixel
+        ppu->frame[ppu->ly][lx][0] = color.r;
+        ppu->frame[ppu->ly][lx][1] = color.g;
+        ppu->frame[ppu->ly][lx][2] = color.b;
+    }
+}
+
 static inline void _gb_render_objects(gb_ppu_t* ppu)
 {
     const u8 oem_entry_count = 40;
@@ -260,6 +313,7 @@ static inline void _gb_render_scanline(gb_ppu_t* ppu)
 	}
 
 	_gb_render_background(ppu);
+	_gb_render_window(ppu);
 	_gb_render_objects(ppu);
 }
 

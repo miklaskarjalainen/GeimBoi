@@ -8,7 +8,8 @@
 #define GB_ADDR_OBP1 (0xFF49) // Obj palette1
 #define GB_ADDR_SCY (0xFF42) // Scroll Y
 #define GB_ADDR_SCX (0xFF43) // Scroll X
-
+#define GB_ADDR_WY (0xFF4A) // Window Y
+#define GB_ADDR_WX (0xFF4B) // Window X
 
 #define GB_ADDR_P1 (0xFF00) // Joypad input
 #define GB_ADDR_DIV (0xFF04) // Divider register
