@@ -94,10 +94,10 @@ static inline gb_color_t
 _gb_bg_pixel_color(u8 palette_index, u8 bg_palette)
 {
 	static gb_color_t s_Colors[4] = {
-		{.r = 0x84, .g = 0x96, .b = 0x00}, // White
-		{.r = 0x4A, .g = 0x69, .b = 0x00},
-		{.r = 0x29, .g = 0x55, .b = 0x00},
-		{.r = 0x10, .g = 0x41, .b = 0x00}, // Black
+		{.r = 0xFF, .g = 0xFF, .b = 0xFF}, // Black
+		{.r = 0x55, .g = 0x55, .b = 0x55},
+		{.r = 0xAA, .g = 0xAA, .b = 0xAA},
+		{.r = 0x00, .g = 0x00, .b = 0x00}, // White
 	};
 	GB_ASSERT(palette_index < 4, "invalid palette index");
 
