@@ -64,13 +64,13 @@
 			);                                                                 \
 		} while (0)
 
-	#define GB_FATAL(fmt, ...)                                                 \
+	#define GB_FATAL(...)                                                      \
 		do {                                                                   \
 			fprintf(                                                           \
 				_GB_LOG_ERR,                                                   \
-				GB_COLOR_BOLDRED "[FATAL] " fmt GB_COLOR_RESET "\n",           \
-				__VA_ARGS__                                                    \
+				GB_COLOR_BOLDRED "[FATAL] " GB_COLOR_RESET __VA_ARGS__         \
 			);                                                                 \
+			fprintf(_GB_LOG_ERR, "\n");                                        \
 			exit(EXIT_FAILURE);                                                \
 		} while (0)
 
@@ -80,7 +80,7 @@
 				_GB_LOG_ERR,                                                   \
 				GB_COLOR_BOLDRED                                               \
 				"[ASSERTION] " __FILE__                                        \
-				":" GB_XSTR(__LINE__) ":  " GB_COLOR_RESET __VA_ARGS__          \
+				":" GB_XSTR(__LINE__) ":  " GB_COLOR_RESET __VA_ARGS__         \
 			);                                                                 \
 			fprintf(_GB_LOG_ERR, "\n");                                        \
 			exit(EXIT_FAILURE);                                                \
