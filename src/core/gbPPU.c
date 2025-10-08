@@ -132,7 +132,7 @@ static inline void _gb_render_background(gb_ppu_t* ppu)
 		const u8 scroll_x = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_SCX) + lx;
 		const u16 tile_column = scroll_x / 8;
 		const i16 tile_num =
-			gb_mmu_read_u8(ppu->mmu, bg_addr + tile_row + tile_column);
+			gb_mmu_read_u8(ppu->mmu, (u16)(bg_addr + tile_row + tile_column));
 		const u16 tile_location = GB_IS_BIT(ppu->lcdc, 4)
 									  ? (u16)(tile_addr + (tile_num * 16))
 									  : (u16)(tile_addr + ((tile_num + 128) * 16));
@@ -140,9 +140,9 @@ static inline void _gb_render_background(gb_ppu_t* ppu)
 		// Fetch the row of pixels for the tile
 		const u8 tile_line = scroll_y % 8;
 		const u8 data1 =
-			gb_mmu_read_u8(ppu->mmu, tile_location + (tile_line * 2));
+			gb_mmu_read_u8(ppu->mmu, (u16) (tile_location + (tile_line * 2)));
 		const u8 data2 =
-			gb_mmu_read_u8(ppu->mmu, tile_location + (tile_line * 2) + 1);
+			gb_mmu_read_u8(ppu->mmu, (u16) (tile_location + (tile_line * 2) + 1));
 
 		// Get the color of the pixel
 		const u8 colour_bit = 7 - (scroll_x & 7);
@@ -203,7 +203,7 @@ static inline void _gb_render_window(gb_ppu_t* ppu)
         const u16 tile_column = x_pixel / 8;
 
 		const i16 tile_num =
-			gb_mmu_read_u8(ppu->mmu, bg_addr + tile_row + tile_column);
+			gb_mmu_read_u8(ppu->mmu, (u8)(bg_addr + tile_row + tile_column));
 		const u16 tile_location = unsig
 									  ? (u16)(tile_addr + (tile_num * 16))
 									  : (u16)(tile_addr + ((tile_num + 128) * 16));
@@ -211,9 +211,9 @@ static inline void _gb_render_window(gb_ppu_t* ppu)
         // Fetch the row of pixels for the tile
         const u8 tile_line = y_pos % 8;
         const u8 data1 =
-       	gb_mmu_read_u8(ppu->mmu, tile_location + (tile_line * 2));
+       	gb_mmu_read_u8(ppu->mmu, (u8)(tile_location + (tile_line * 2)));
         const u8 data2 =
-       	gb_mmu_read_u8(ppu->mmu, tile_location + (tile_line * 2) + 1);
+       	gb_mmu_read_u8(ppu->mmu, (u8)(tile_location + (tile_line * 2) + 1));
 
         // Get the color of the pixel
         const u8 colour_bit = 7 - (x_pixel & 7);
@@ -263,7 +263,7 @@ static inline void _gb_render_objects(gb_ppu_t* ppu)
 
 
         if (sprite_height == 16) {
-            oam.tile_idx &= ~(0x1);
+            oam.tile_idx &= (u8)~(0x1);
         }
 
         const u8 flip_x = GB_IS_BIT(oam.flags, 5);
@@ -280,7 +280,7 @@ static inline void _gb_render_objects(gb_ppu_t* ppu)
         const u8 palette = GB_IS_BIT(oam.flags, 4) ? palette1 : palette0;
 
         for (u8 sprite_x = 0; sprite_x < 8; sprite_x++) {
-            const i16 lx = oam.pos_x + sprite_x - 8;
+            const i16 lx = (i16)(oam.pos_x + sprite_x - 8);
             if (lx < 0 || lx >= 160) {
                 continue;
             }

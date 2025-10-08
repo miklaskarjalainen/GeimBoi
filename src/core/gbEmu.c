@@ -95,7 +95,7 @@ void gb_emu_press_key(gb_emu_t* emu, gb_input_e input)
     const u8 p1 = gb_mmu_read_u8(&emu->mmu, GB_ADDR_P1);
     const u8 is_dpad = (input & 0x0F) != 0;
     const u8 is_action = (input & 0xF0) != 0;
-    emu->cpu.keys_down &= ~input;
+    emu->cpu.keys_down &= (u8)~input;
 
     if (GB_IS_BIT(p1, 5) && is_dpad) {
         gb_cpu_request_interrupt(&emu->cpu, GB_INTERRUPT_JOYPAD);
@@ -109,5 +109,5 @@ void gb_emu_release_key(gb_emu_t* emu, gb_input_e input)
 {
     // 0 -> pressed (the same way it works on the gameboy)
     // 1 -> unpressed
-    emu->cpu.keys_down |= input;
+    emu->cpu.keys_down |= (u8)input;
 }

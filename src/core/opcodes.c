@@ -262,8 +262,8 @@ static inline void _gb_daa(gb_sm83_t* cpu)
     }
 
     // Reset Flags
-    GB_REG_F(cpu->regs) &= ~(GB_FLAG_ZERO);
-    GB_REG_F(cpu->regs) &= ~(GB_FLAG_HALF);
+    GB_REG_F(cpu->regs) &= (u8)~(GB_FLAG_ZERO);
+    GB_REG_F(cpu->regs) &= (u8)~(GB_FLAG_HALF);
 
     if ( (reg_a & 0xFF) == 0U)
     {
@@ -278,7 +278,7 @@ static u8 _gb_emu_execute_cb(gb_sm83_t* cpu);
 u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 {
 	u8 opcode = gb_mmu_read_u8(cpu->mmu, GB_REG_PC(cpu->regs));
-	GB_REG_PC(cpu->regs) += !cpu->halt_bugged;
+	GB_REG_PC(cpu->regs) = (u16)(GB_REG_PC(cpu->regs) + !cpu->halt_bugged);
 	cpu->halt_bugged = 0;
 
 	switch (opcode) {
@@ -472,8 +472,8 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		/* LD (a16), SP */ case 0x08: {
 		    u16 addr = gb_mmu_read_u16(cpu->mmu, GB_REG_PC(cpu->regs));
 			GB_REG_PC(cpu->regs) += 2;
-			gb_mmu_write_u8(cpu->mmu, addr, GB_REG_SP(cpu->regs) & 0xFF);
-			gb_mmu_write_u8(cpu->mmu, addr + 1, (GB_REG_SP(cpu->regs) >> 8) & 0xFF);
+			gb_mmu_write_u8(cpu->mmu, addr, (u8)GB_REG_SP(cpu->regs));
+			gb_mmu_write_u8(cpu->mmu, addr + 1, (u8)(GB_REG_SP(cpu->regs) >> 8));
 			return 5;
 		}
 
@@ -967,7 +967,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		/* JR s8 */ case 0x18: {
 			const i8 d = gb_mmu_read_i8(cpu->mmu, GB_REG_PC(cpu->regs));
 			GB_REG_PC(cpu->regs)++;
-			GB_REG_PC(cpu->regs) += d;
+			GB_REG_PC(cpu->regs) += (u16)(i16)d;
 			return 3;
 		}
 		/* JR Z, s8 */ case 0x28: {
@@ -2471,282 +2471,282 @@ static u8 _gb_emu_execute_cb(gb_sm83_t* cpu)
 		}
 
 		/* RES 0, B */ case 0x80: {
-			GB_REG_B(cpu->regs) &= ~GB_BIT(0);
+			GB_REG_B(cpu->regs) &= (u8)~GB_BIT(0);
 			return 2;
 		}
 		/* RES 0, C */ case 0x81: {
-			GB_REG_C(cpu->regs) &= ~GB_BIT(0);
+			GB_REG_C(cpu->regs) &= (u8)~GB_BIT(0);
 			return 2;
 		}
 		/* RES 0, D */ case 0x82: {
-			GB_REG_D(cpu->regs) &= ~GB_BIT(0);
+			GB_REG_D(cpu->regs) &= (u8)~GB_BIT(0);
 			return 2;
 		}
 		/* RES 0, E */ case 0x83: {
-			GB_REG_E(cpu->regs) &= ~GB_BIT(0);
+			GB_REG_E(cpu->regs) &= (u8)~GB_BIT(0);
 			return 2;
 		}
 		/* RES 0, H */ case 0x84: {
-			GB_REG_H(cpu->regs) &= ~GB_BIT(0);
+			GB_REG_H(cpu->regs) &= (u8)~GB_BIT(0);
 			return 2;
 		}
 		/* RES 0, L */ case 0x85: {
-			GB_REG_L(cpu->regs) &= ~GB_BIT(0);
+			GB_REG_L(cpu->regs) &= (u8)~GB_BIT(0);
 			return 2;
 		}
 		/* RES 0, (HL) */ case 0x86: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
-			data &= ~GB_BIT(0);
+			data &= (u8)~GB_BIT(0);
 			gb_mmu_write_u8(cpu->mmu, GB_REG_HL(cpu->regs), data);
 			return 4;
 		}
 		/* RES 0, A */ case 0x87: {
-			GB_REG_A(cpu->regs) &= ~GB_BIT(0);
+			GB_REG_A(cpu->regs) &= (u8)~GB_BIT(0);
 			return 2;
 		}
 
 		/* RES 1, B */ case 0x88: {
-			GB_REG_B(cpu->regs) &= ~GB_BIT(1);
+			GB_REG_B(cpu->regs) &= (u8)~GB_BIT(1);
 			return 2;
 		}
 		/* RES 1, C */ case 0x89: {
-			GB_REG_C(cpu->regs) &= ~GB_BIT(1);
+			GB_REG_C(cpu->regs) &= (u8)~GB_BIT(1);
 			return 2;
 		}
 		/* RES 1, D */ case 0x8A: {
-			GB_REG_D(cpu->regs) &= ~GB_BIT(1);
+			GB_REG_D(cpu->regs) &= (u8)~GB_BIT(1);
 			return 2;
 		}
 		/* RES 1, E */ case 0x8B: {
-			GB_REG_E(cpu->regs) &= ~GB_BIT(1);
+			GB_REG_E(cpu->regs) &= (u8)~GB_BIT(1);
 			return 2;
 		}
 		/* RES 1, H */ case 0x8C: {
-			GB_REG_H(cpu->regs) &= ~GB_BIT(1);
+			GB_REG_H(cpu->regs) &= (u8)~GB_BIT(1);
 			return 2;
 		}
 		/* RES 1, L */ case 0x8D: {
-			GB_REG_L(cpu->regs) &= ~GB_BIT(1);
+			GB_REG_L(cpu->regs) &= (u8)~GB_BIT(1);
 			return 2;
 		}
 		/* RES 1, (HL) */ case 0x8E: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
-			data &= ~GB_BIT(1);
+			data &= (u8)~GB_BIT(1);
 			gb_mmu_write_u8(cpu->mmu, GB_REG_HL(cpu->regs), data);
 			return 4;
 		}
 		/* RES 1, A */ case 0x8F: {
-			GB_REG_A(cpu->regs) &= ~GB_BIT(1);
+			GB_REG_A(cpu->regs) &= (u8)~GB_BIT(1);
 			return 2;
 		}
 
 		/* RES 2, B */ case 0x90: {
-			GB_REG_B(cpu->regs) &= ~GB_BIT(2);
+			GB_REG_B(cpu->regs) &= (u8)~GB_BIT(2);
 			return 2;
 		}
 		/* RES 2, C */ case 0x91: {
-			GB_REG_C(cpu->regs) &= ~GB_BIT(2);
+			GB_REG_C(cpu->regs) &= (u8)~GB_BIT(2);
 			return 2;
 		}
 		/* RES 2, D */ case 0x92: {
-			GB_REG_D(cpu->regs) &= ~GB_BIT(2);
+			GB_REG_D(cpu->regs) &= (u8)~GB_BIT(2);
 			return 2;
 		}
 		/* RES 2, E */ case 0x93: {
-			GB_REG_E(cpu->regs) &= ~GB_BIT(2);
+			GB_REG_E(cpu->regs) &= (u8)~GB_BIT(2);
 			return 2;
 		}
 		/* RES 2, H */ case 0x94: {
-			GB_REG_H(cpu->regs) &= ~GB_BIT(2);
+			GB_REG_H(cpu->regs) &= (u8)~GB_BIT(2);
 			return 2;
 		}
 		/* RES 2, L */ case 0x95: {
-			GB_REG_L(cpu->regs) &= ~GB_BIT(2);
+			GB_REG_L(cpu->regs) &= (u8)~GB_BIT(2);
 			return 2;
 		}
 		/* RES 2, (HL) */ case 0x96: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
-			data &= ~GB_BIT(2);
+			data &= (u8)~GB_BIT(2);
 			gb_mmu_write_u8(cpu->mmu, GB_REG_HL(cpu->regs), data);
 			return 4;
 		}
 		/* RES 2, A */ case 0x97: {
-			GB_REG_A(cpu->regs) &= ~GB_BIT(2);
+			GB_REG_A(cpu->regs) &= (u8)~GB_BIT(2);
 			return 2;
 		}
 
 		/* RES 3, B */ case 0x98: {
-			GB_REG_B(cpu->regs) &= ~GB_BIT(3);
+			GB_REG_B(cpu->regs) &= (u8)~GB_BIT(3);
 			return 2;
 		}
 		/* RES 3, C */ case 0x99: {
-			GB_REG_C(cpu->regs) &= ~GB_BIT(3);
+			GB_REG_C(cpu->regs) &= (u8)~GB_BIT(3);
 			return 2;
 		}
 		/* RES 3, D */ case 0x9A: {
-			GB_REG_D(cpu->regs) &= ~GB_BIT(3);
+			GB_REG_D(cpu->regs) &= (u8)~GB_BIT(3);
 			return 2;
 		}
 		/* RES 3, E */ case 0x9B: {
-			GB_REG_E(cpu->regs) &= ~GB_BIT(3);
+			GB_REG_E(cpu->regs) &= (u8)~GB_BIT(3);
 			return 2;
 		}
 		/* RES 3, H */ case 0x9C: {
-			GB_REG_H(cpu->regs) &= ~GB_BIT(3);
+			GB_REG_H(cpu->regs) &= (u8)~GB_BIT(3);
 			return 2;
 		}
 		/* RES 3, L */ case 0x9D: {
-			GB_REG_L(cpu->regs) &= ~GB_BIT(3);
+			GB_REG_L(cpu->regs) &= (u8)~GB_BIT(3);
 			return 2;
 		}
 		/* RES 3, (HL) */ case 0x9E: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
-			data &= ~GB_BIT(3);
+			data &= (u8)~GB_BIT(3);
 			gb_mmu_write_u8(cpu->mmu, GB_REG_HL(cpu->regs), data);
 			return 4;
 		}
 		/* RES 3, A */ case 0x9F: {
-			GB_REG_A(cpu->regs) &= ~GB_BIT(3);
+			GB_REG_A(cpu->regs) &= (u8)~GB_BIT(3);
 			return 2;
 		}
 
 		/* RES 4, B */ case 0xA0: {
-			GB_REG_B(cpu->regs) &= ~GB_BIT(4);
+			GB_REG_B(cpu->regs) &= (u8)~GB_BIT(4);
 			return 2;
 		}
 		/* RES 4, C */ case 0xA1: {
-			GB_REG_C(cpu->regs) &= ~GB_BIT(4);
+			GB_REG_C(cpu->regs) &= (u8)~GB_BIT(4);
 			return 2;
 		}
 		/* RES 4, D */ case 0xA2: {
-			GB_REG_D(cpu->regs) &= ~GB_BIT(4);
+			GB_REG_D(cpu->regs) &= (u8)~GB_BIT(4);
 			return 2;
 		}
 		/* RES 4, E */ case 0xA3: {
-			GB_REG_E(cpu->regs) &= ~GB_BIT(4);
+			GB_REG_E(cpu->regs) &= (u8)~GB_BIT(4);
 			return 2;
 		}
 		/* RES 4, H */ case 0xA4: {
-			GB_REG_H(cpu->regs) &= ~GB_BIT(4);
+			GB_REG_H(cpu->regs) &= (u8)~GB_BIT(4);
 			return 2;
 		}
 		/* RES 4, L */ case 0xA5: {
-			GB_REG_L(cpu->regs) &= ~GB_BIT(4);
+			GB_REG_L(cpu->regs) &= (u8)~GB_BIT(4);
 			return 2;
 		}
 		/* RES 4, (HL) */ case 0xA6: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
-			data &= ~GB_BIT(4);
+			data &= (u8)~GB_BIT(4);
 			gb_mmu_write_u8(cpu->mmu, GB_REG_HL(cpu->regs), data);
 			return 4;
 		}
 		/* RES 4, A */ case 0xA7: {
-			GB_REG_A(cpu->regs) &= ~GB_BIT(4);
+			GB_REG_A(cpu->regs) &= (u8)~GB_BIT(4);
 			return 2;
 		}
 
 		/* RES 5, B */ case 0xA8: {
-			GB_REG_B(cpu->regs) &= ~GB_BIT(5);
+			GB_REG_B(cpu->regs) &= (u8)~GB_BIT(5);
 			return 2;
 		}
 		/* RES 5, C */ case 0xA9: {
-			GB_REG_C(cpu->regs) &= ~GB_BIT(5);
+			GB_REG_C(cpu->regs) &= (u8)~GB_BIT(5);
 			return 2;
 		}
 		/* RES 5, D */ case 0xAA: {
-			GB_REG_D(cpu->regs) &= ~GB_BIT(5);
+			GB_REG_D(cpu->regs) &= (u8)~GB_BIT(5);
 			return 2;
 		}
 		/* RES 5, E */ case 0xAB: {
-			GB_REG_E(cpu->regs) &= ~GB_BIT(5);
+			GB_REG_E(cpu->regs) &= (u8)~GB_BIT(5);
 			return 2;
 		}
 		/* RES 5, H */ case 0xAC: {
-			GB_REG_H(cpu->regs) &= ~GB_BIT(5);
+			GB_REG_H(cpu->regs) &= (u8)~GB_BIT(5);
 			return 2;
 		}
 		/* RES 5, L */ case 0xAD: {
-			GB_REG_L(cpu->regs) &= ~GB_BIT(5);
+			GB_REG_L(cpu->regs) &= (u8)~GB_BIT(5);
 			return 2;
 		}
 		/* RES 5, (HL) */ case 0xAE: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
-			data &= ~GB_BIT(5);
+			data &= (u8)~GB_BIT(5);
 			gb_mmu_write_u8(cpu->mmu, GB_REG_HL(cpu->regs), data);
 			return 4;
 		}
 		/* RES 5, A */ case 0xAF: {
-			GB_REG_A(cpu->regs) &= ~GB_BIT(5);
+			GB_REG_A(cpu->regs) &= (u8)~GB_BIT(5);
 			return 2;
 		}
 
 		/* RES 6, B */ case 0xB0: {
-			GB_REG_B(cpu->regs) &= ~GB_BIT(6);
+			GB_REG_B(cpu->regs) &= (u8)~GB_BIT(6);
 			return 2;
 		}
 		/* RES 6, C */ case 0xB1: {
-			GB_REG_C(cpu->regs) &= ~GB_BIT(6);
+			GB_REG_C(cpu->regs) &= (u8)~GB_BIT(6);
 			return 2;
 		}
 		/* RES 6, D */ case 0xB2: {
-			GB_REG_D(cpu->regs) &= ~GB_BIT(6);
+			GB_REG_D(cpu->regs) &= (u8)~GB_BIT(6);
 			return 2;
 		}
 		/* RES 6, E */ case 0xB3: {
-			GB_REG_E(cpu->regs) &= ~GB_BIT(6);
+			GB_REG_E(cpu->regs) &= (u8)~GB_BIT(6);
 			return 2;
 		}
 		/* RES 6, H */ case 0xB4: {
-			GB_REG_H(cpu->regs) &= ~GB_BIT(6);
+			GB_REG_H(cpu->regs) &= (u8)~GB_BIT(6);
 			return 2;
 		}
 		/* RES 6, L */ case 0xB5: {
-			GB_REG_L(cpu->regs) &= ~GB_BIT(6);
+			GB_REG_L(cpu->regs) &= (u8)~GB_BIT(6);
 			return 2;
 		}
 		/* RES 6, (HL) */ case 0xB6: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
-			data &= ~GB_BIT(6);
+			data &= (u8)~GB_BIT(6);
 			gb_mmu_write_u8(cpu->mmu, GB_REG_HL(cpu->regs), data);
 			return 4;
 		}
 		/* RES 6, A */ case 0xB7: {
-			GB_REG_A(cpu->regs) &= ~GB_BIT(6);
+			GB_REG_A(cpu->regs) &= (u8)~GB_BIT(6);
 			return 2;
 		}
 
 		/* RES 7, B */ case 0xB8: {
-			GB_REG_B(cpu->regs) &= ~GB_BIT(7);
+			GB_REG_B(cpu->regs) &= (u8)~GB_BIT(7);
 			return 2;
 		}
 		/* RES 7, C */ case 0xB9: {
-			GB_REG_C(cpu->regs) &= ~GB_BIT(7);
+			GB_REG_C(cpu->regs) &= (u8)~GB_BIT(7);
 			return 2;
 		}
 		/* RES 7, D */ case 0xBA: {
-			GB_REG_D(cpu->regs) &= ~GB_BIT(7);
+			GB_REG_D(cpu->regs) &= (u8)~GB_BIT(7);
 			return 2;
 		}
 		/* RES 7, E */ case 0xBB: {
-			GB_REG_E(cpu->regs) &= ~GB_BIT(7);
+			GB_REG_E(cpu->regs) &= (u8)~GB_BIT(7);
 			return 2;
 		}
 		/* RES 7, H */ case 0xBC: {
-			GB_REG_H(cpu->regs) &= ~GB_BIT(7);
+			GB_REG_H(cpu->regs) &= (u8)~GB_BIT(7);
 			return 2;
 		}
 		/* RES 7, L */ case 0xBD: {
-			GB_REG_L(cpu->regs) &= ~GB_BIT(7);
+			GB_REG_L(cpu->regs) &= (u8)~GB_BIT(7);
 			return 2;
 		}
 		/* RES 7, (HL) */ case 0xBE: {
 			u8 data = gb_mmu_read_u8(cpu->mmu, GB_REG_HL(cpu->regs));
-			data &= ~GB_BIT(7);
+			data &= (u8)~GB_BIT(7);
 			gb_mmu_write_u8(cpu->mmu, GB_REG_HL(cpu->regs), data);
 			return 4;
 		}
 		/* RES 7, A */ case 0xBF: {
-			GB_REG_A(cpu->regs) &= ~GB_BIT(7);
+			GB_REG_A(cpu->regs) &= (u8)~GB_BIT(7);
 			return 2;
 		}
 
