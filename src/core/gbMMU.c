@@ -2,6 +2,7 @@
 #include "gbPPU.h"
 #include "gbSM83.h"
 #include "gbCart.h"
+#include "log.h"
 
 void gb_mmu_init(
 	gb_mmu_t* mmu, struct gb_cart* cart, struct gb_sm83* cpu, struct gb_ppu* ppu
@@ -22,6 +23,8 @@ u16 gb_mmu_read_u16(const gb_mmu_t* mmu, u16 addr)
 
 u8 gb_mmu_read_u8(const gb_mmu_t* mmu, u16 addr)
 {
+	GB_ASSERT(mmu, "nullptr");
+	GB_ASSERT(mmu->cart, "nullptr");
 	if (addr < 0x8000) {
 		return gb_cart_read_u8(mmu->cart, addr);
 	}
@@ -65,6 +68,7 @@ u8 gb_mmu_read_u8(const gb_mmu_t* mmu, u16 addr)
 void gb_mmu_write_u8(gb_mmu_t* mmu, u16 addr, u8 data)
 {
 	if (addr < 0x8000) {
+	    mmu->cart->write(mmu->cart, addr, data);
 		return;
 	}
 

@@ -286,15 +286,24 @@ void GeimBoi::App::run()
 
 		ImGui::End();
 
+		ImGui::Begin("Cartridge");
+		ImGui::Text("Mapper: %u", gb_cart_mapper_type(&m_Emulator->cart));
+		ImGui::Text("Rom banks: %u", m_Emulator->cart.rom_banks);
+		ImGui::Text("Ram banks: %u", m_Emulator->cart.ram_banks);
+		ImGui::Text("MBC1 mode: %u", m_Emulator->cart.mapper_data.mbc1.banking_mode);
+		ImGui::Text("MBC1 bank (low): %u", m_Emulator->cart.mapper_data.mbc1.rom_bank_low);
+		ImGui::Text("MBC1 bank (high): %u", m_Emulator->cart.mapper_data.mbc1.rom_bank_high);
+		ImGui::End();
+
 		static MemoryEditor rom_memory = [&]() {
 			MemoryEditor mem;
 			mem.UserData = (void*)m_Emulator;
 			mem.ReadFn = [](auto, size_t addr, void* void_emu) -> ImU8 {
-				const gb_emu_t* emu = (const gb_emu_t*)void_emu;
+				const auto* emu = reinterpret_cast<const gb_emu_t*>(void_emu);
 				return gb_mmu_read_u8(&emu->mmu, (uint16_t)addr);
 			};
 			mem.WriteFn = [](auto, size_t addr, ImU8 byte, void* void_emu) {
-				gb_emu_t* emu = (gb_emu_t*)void_emu;
+			    auto* emu = reinterpret_cast<gb_emu_t*>(void_emu);
 				gb_mmu_write_u8(&emu->mmu, (uint16_t)addr, (u8)byte);
 			};
 			return mem;

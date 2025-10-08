@@ -3,6 +3,80 @@
 
 #include <stdlib.h>
 
+/* NO MBC */
+static inline u8 _gb_mbc0_read(const gb_cart_t* cart, u16 addr)
+{
+    GB_ASSERT(addr < 0x8000, "?");
+    return cart->rom[addr];
+}
+
+static inline void _gb_mbc0_write(gb_cart_t* cart, u16 addr, u8 data)
+{
+    (void)cart;
+    (void)addr;
+    (void)data;
+}
+
+static inline void _gb_mbc0_reset(gb_cart_t* cart) {
+    cart->write = _gb_mbc0_write;
+    cart->read = _gb_mbc0_read;
+}
+
+
+/* MBC1 */
+static inline u8 _gb_mbc1_read(const gb_cart_t* cart, u16 addr)
+{
+    if (addr < 0x4000) {
+        if (!cart->mapper_data.mbc1.banking_mode) {
+            return cart->rom[addr];
+        }
+        u16 bank = (u8)(cart->mapper_data.mbc1.rom_bank_high << 5);
+        bank &= cart->rom_banks - 1;
+        const u16 banked_addr = (u16)((0x4000 * bank) + addr);
+        return cart->rom[banked_addr];
+    }
+    if (addr < 0x8000) {
+        u16 bank = (u16)(cart->mapper_data.mbc1.rom_bank_low | (cart->mapper_data.mbc1.rom_bank_high << 5));
+        bank &= cart->rom_banks - 1;
+        u32 banked_addr = (u32)((addr - 0x4000) + (bank * 0x4000));
+        return cart->rom[banked_addr];
+    }
+    GB_FATAL("TODO RAM BANKING!");
+}
+
+static inline void _gb_mbc1_write(gb_cart_t* cart, u16 addr, u8 data)
+{
+    if (addr < 0x2000) { // RAM Enable
+        if (cart->ram_banks == 0) {
+            return;
+        }
+        cart->mapper_data.mbc1.ram_enable = (data & 0xF) == 0xA ? 1 : 0;
+    }
+    else if (addr < 0x4000) { // Change BANK1
+        u8 bank = data & 0x1F;
+        bank = bank ? bank : 1;
+        cart->mapper_data.mbc1.rom_bank_low = bank & 0x1FU;
+    }
+    else if (addr < 0x6000) { // Change BANK2
+        cart->mapper_data.mbc1.rom_bank_high &= data & 0x3U;
+    }
+    else if (addr < 0x8000) { // Banking Mode Select
+        cart->mapper_data.mbc1.banking_mode = data & 0x1U;
+    }
+    else if ((addr >= 0xA000) && addr < 0xC000) { // Ram bank
+        GB_FATAL("TODO");
+    }
+}
+
+static inline void _gb_mbc1_reset(gb_cart_t* cart) {
+    cart->mapper_data.mbc1.banking_mode = 0;
+    cart->mapper_data.mbc1.ram_enable = 0;
+    cart->mapper_data.mbc1.rom_bank_low = 0x01;
+    cart->mapper_data.mbc1.rom_bank_high = 0x00;
+    cart->write = _gb_mbc1_write;
+    cart->read = _gb_mbc1_read;
+}
+
 static u16 gb_cart_read_u16_be(const gb_cart_t* cart, u16 addr)
 {
 	const u16 low = gb_cart_read_u8(cart, addr + 1);
@@ -14,25 +88,105 @@ void gb_cart_load(gb_cart_t* cart, const u8* rom, size_t len)
 {
     size_t i = 0;
 
+    // Loads the contents of the rom
     for (; i < len && i < GB_MAX_CARTSIZE; i++)
     {
         cart->rom[i] = rom[i];
     }
-
+    // Zero initialize everything else.
     for (; i < GB_MAX_CARTSIZE; i++)
     {
         cart->rom[i] = 0x00;
     }
+
+    // Init variables
+    cart->rom_banks = (u16)(2 << cart->rom[0x148]);
+    switch (cart->rom[0x149]) {
+        case 0: {
+            cart->ram_banks = 0;
+            break;
+        }
+        /* 1 is unused */
+        case 2: {
+            cart->ram_banks = 1;
+            break;
+        }
+        case 3: {
+            cart->ram_banks = 4;
+            break;
+        }
+        case 4: {
+            cart->ram_banks = 16;
+            break;
+        }
+        case 5: {
+            cart->ram_banks = 8;
+            break;
+        }
+
+        default: {
+            GB_FATAL("invalid ram size! 0x%02X\n", cart->rom[0x149]);
+        }
+    }
+
+    switch(gb_cart_mapper_type(cart)) {
+        case GB_MAPPER_NONE: {
+            _gb_mbc0_reset(cart);
+            break;
+        }
+        case GB_MAPPER_MBC1: {
+            _gb_mbc1_reset(cart);
+            break;
+        }
+        default: {
+            GB_FATAL("Unsupported mapper! %i", cart->rom[0x147]);
+        }
+    }
+
     return;
 }
 
-u8 gb_cart_read_u8(const gb_cart_t* cart, u16 addr) { return cart->rom[addr]; }
-
-void gb_cart_write_u8(gb_cart_t* cart, u16 addr, u8 data)
+gb_cart_mapper_e gb_cart_mapper_type(const gb_cart_t* cart)
 {
-	(void)cart;
-	(void)addr;
-	(void)data;
+    const u8 cart_type = cart->rom[0x147];
+
+    switch(cart_type) {
+        case 0x00:
+        case 0x08:
+        case 0x09:
+            return GB_MAPPER_NONE;
+
+        case 0x01:
+        case 0x02:
+        case 0x03:
+            return GB_MAPPER_MBC1;
+        case 0x04:
+        case 0x05:
+            return GB_MAPPER_MBC2;
+        case 0x0F:
+        case 0x10:
+        case 0x11:
+        case 0x12:
+        case 0x13:
+            return GB_MAPPER_MBC3;
+
+        case 0x0B:
+        case 0x0C:
+        case 0x0D:
+            return GB_MAPPER_MMM01;
+
+        default: {
+            break;
+        }
+    }
+
+    return GB_MAPPER_NONE;
+}
+
+u8 gb_cart_read_u8(const gb_cart_t* cart, u16 addr) {
+    GB_ASSERT(addr < 0x8000, "write addr more than rom size")
+    // @TODO: RAM
+    return cart->read(cart, addr);
 }
 
 bool gb_cart_cgb_flag(const gb_cart_t* cart)
