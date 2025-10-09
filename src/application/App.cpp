@@ -297,13 +297,13 @@ void GeimBoi::App::run()
 
 		static MemoryEditor rom_memory = [&]() {
 			MemoryEditor mem;
-			mem.UserData = (void*)m_Emulator;
+			mem.UserData = reinterpret_cast<void*>(this);
 			mem.ReadFn = [](auto, size_t addr, void* void_emu) -> ImU8 {
-				const auto* emu = reinterpret_cast<const gb_emu_t*>(void_emu);
+				const auto* emu = reinterpret_cast<App*>(void_emu)->m_Emulator;
 				return gb_mmu_read_u8(&emu->mmu, (uint16_t)addr);
 			};
 			mem.WriteFn = [](auto, size_t addr, ImU8 byte, void* void_emu) {
-			    auto* emu = reinterpret_cast<gb_emu_t*>(void_emu);
+                auto* emu = reinterpret_cast<App*>(void_emu)->m_Emulator;
 				gb_mmu_write_u8(&emu->mmu, (uint16_t)addr, (u8)byte);
 			};
 			return mem;
