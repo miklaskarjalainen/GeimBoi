@@ -22,7 +22,6 @@ static inline void _gb_mbc0_reset(gb_cart_t* cart) {
     cart->read = _gb_mbc0_read;
 }
 
-
 /* MBC1 */
 static inline u8 _gb_mbc1_read(const gb_cart_t* cart, u16 addr)
 {
@@ -90,11 +89,15 @@ void gb_cart_init(gb_cart_t* cart)
 	for (size_t i = 0; i < GB_MAX_CARTSIZE; i++) {
 		cart->rom[i] = 0x00;
 	}
-	_gb_mbc0_reset(cart);
+
+	cart->read = _gb_mbc0_read;
+	cart->write = _gb_mbc0_write;
 }
 
 void gb_cart_load(gb_cart_t* cart, const u8* rom, size_t len)
 {
+    gb_cart_init(cart);
+
 	if (len >= GB_MAX_CARTSIZE) {
 		GB_WARN(
 			"Tried to open file which is larger than the maximum"
@@ -102,8 +105,6 @@ void gb_cart_load(gb_cart_t* cart, const u8* rom, size_t len)
 		);
 		return;
 	}
-
-	gb_cart_init(cart);
 
 	// Loads the contents of the rom
 	for (size_t i = 0; i < len; i++) {
