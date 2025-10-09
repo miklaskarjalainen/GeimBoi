@@ -12,8 +12,12 @@ typedef struct gb_ppu {
 	u8 priority[GB_LCD_WIDTH];
 
 	u16 t_cycles;
-
 	u8 ly, lyc, stat, lcdc;
+
+	// Window things
+	u8 window_visible : 1; // Is window visible this scanline?
+	u8 window_ly_eq : 1;   // Has window's ly ever been ly?
+	u8 window_scanline;
 
 	struct gb_mmu* mmu;
 } gb_ppu_t;

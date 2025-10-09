@@ -179,13 +179,12 @@ struct gb_oam_entry _gb_get_oam(gb_ppu_t* ppu, u8 entry)
 static inline void _gb_render_window(gb_ppu_t* ppu)
 {
 	const u8 window_x = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_WX) - 7;
-	const u8 window_y = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_WY);
-
 	{
 		const u8 bg_enable = GB_IS_BIT(ppu->lcdc, 0);
 		const u8 window_enable = GB_IS_BIT(ppu->lcdc, 5);
 
-		if (!bg_enable || !window_enable || window_y > ppu->ly) {
+		if (!window_enable || !ppu->window_ly_eq || !bg_enable ||
+			window_x >= 160) {
 			return;
 		}
 	}
@@ -194,11 +193,11 @@ static inline void _gb_render_window(gb_ppu_t* ppu)
 	const u16 bg_addr = GB_IS_BIT(ppu->lcdc, 6) ? 0x9C00 : 0x9800;
 
 	const u8 bg_palette = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_BG_PALETTE);
-	const u8 y_pos = ppu->ly - window_y;
-	const u16 tile_row = (u16)((y_pos / 8) * 32);
+	// const u8 y_pos = ppu->ly - window_y;
+	const u16 tile_row = (u16)((ppu->window_scanline / 8) * 32);
 
 	for (u8 lx = window_x; lx < 160; lx++) {
-		const u8 x_pixel = lx - window_x;
+		const u8 x_pixel = (u8)(lx - window_x);
 		const u16 tile_column = x_pixel / 8;
 
 		const i8 tile_num =
@@ -208,7 +207,7 @@ static inline void _gb_render_window(gb_ppu_t* ppu)
 									  : (u16)(tile_addr + (tile_num * 16));
 
 		// Fetch the row of pixels for the tile
-		const u8 tile_line = y_pos % 8;
+		const u8 tile_line = ppu->window_scanline % 8;
 		const u8 data1 =
 			gb_mmu_read_u8(ppu->mmu, (u16)(tile_location + (tile_line * 2)));
 		const u8 data2 = gb_mmu_read_u8(
@@ -227,6 +226,8 @@ static inline void _gb_render_window(gb_ppu_t* ppu)
 		ppu->frame[ppu->ly][lx][2] = color.b;
 		ppu->priority[lx] = color_id;
 	}
+
+	ppu->window_scanline += 1;
 }
 
 static inline void _gb_render_objects(gb_ppu_t* ppu)
@@ -368,6 +369,10 @@ static void clock_hblank(gb_ppu_t* ppu)
 		if (GB_IS_BIT(ppu->stat, 5)) {
 			gb_cpu_request_interrupt(ppu->mmu->cpu, GB_INTERRUPT_LCD);
 		}
+		if (GB_IS_BIT(ppu->lcdc, 5)) {
+			ppu->window_ly_eq |=
+				(u8)(ppu->ly + 1 == *GB_CPU_MEM(&ppu->mmu->cpu, GB_ADDR_WY));
+		}
 	}
 	else {
 		PPU_SET_MODE(ppu, PPU_MODE_VBLANK);
@@ -375,6 +380,8 @@ static void clock_hblank(gb_ppu_t* ppu)
 			gb_cpu_request_interrupt(ppu->mmu->cpu, GB_INTERRUPT_LCD);
 		}
 		gb_cpu_request_interrupt(ppu->mmu->cpu, GB_INTERRUPT_VBLANK);
+		ppu->window_ly_eq = 0;
+		ppu->window_scanline = 0;
 	}
 
 	ppu->ly += 1;
