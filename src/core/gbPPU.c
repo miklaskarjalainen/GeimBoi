@@ -232,7 +232,6 @@ static inline void _gb_render_window(gb_ppu_t* ppu)
 
 static inline void _gb_render_objects(gb_ppu_t* ppu)
 {
-	const u8 oem_entry_count = 40;
 	const u8 enable_obj = GB_IS_BIT(ppu->lcdc, 1);
 
 	if (!enable_obj) {
@@ -244,7 +243,13 @@ static inline void _gb_render_objects(gb_ppu_t* ppu)
 	const u8 palette1 = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_OBP1);
 	const u16 sprite_height = GB_IS_BIT(ppu->lcdc, 2) ? 16 : 8;
 
-	u8 objects_count = 11;
+	// Lower X-positions will be rendered with priority.
+	// If the X-positions are the same, lower oam_index has priority.
+	struct gb_oam_entry oam_visible[10] = {0};
+	u8 oam_visible_count = 0;
+
+	// Fetch all objects, that's visible this scanline.
+	const u8 oem_entry_count = 40;
 	for (u8 i = 0; i < oem_entry_count; i++) {
 		struct gb_oam_entry oam = _gb_get_oam(ppu, i);
 		const u8 visible_ly = ppu->ly + 16;
@@ -254,12 +259,37 @@ static inline void _gb_render_objects(gb_ppu_t* ppu)
 			visible_ly >= (oam.pos_y + sprite_height)) {
 			continue;
 		}
-		objects_count--;
+
+		// Now, the scanline can only render 10 objects.
+		// We got to resolve, which objects have more rights.
+		for (u8 j = 0; j < oam_visible_count; j++) {
+			if (oam.pos_x >= oam_visible[j].pos_x) {
+				continue;
+			}
+
+			// This object is has a lower x-position.
+			// So swap the places, but keep iterating
+			// to see if we find the spot for the replaced one.
+			struct gb_oam_entry hold = oam;
+			oam = oam_visible[j];
+			oam_visible[j] = hold;
+		}
+		// There is still room to append the leftover.
+		if (oam_visible_count < 10) {
+			oam_visible[oam_visible_count] = oam;
+			oam_visible_count += 1;
+		}
+	}
+
+	// Reverse iteration, because objects with most priority are in the front.
+	// This way the top most pixel is from the objects with more priority.
+	for (u8 i = GB_ARRAY_LEN(oam_visible); i-- != 0;) {
+		struct gb_oam_entry oam = oam_visible[i];
+		const u8 visible_ly = ppu->ly + 16;
+
+		// visible?
 		if (!oam.pos_x || oam.pos_x >= 168) {
 			continue;
-		}
-		if (!objects_count) {
-			return;
 		}
 
 		if (sprite_height == 16) {

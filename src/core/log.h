@@ -19,6 +19,7 @@
 
 #define GB_STR(s) #s
 #define GB_XSTR(s) GB_STR(s)
+#define GB_ARRAY_LEN(arr) (sizeof(arr) / sizeof(*arr))
 
 #if defined(_GB_DISABLE_STDLIB) || defined(_GB_DISABLE_PRINT)
 	#define GB_INFO(...)
