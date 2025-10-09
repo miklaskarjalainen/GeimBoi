@@ -244,7 +244,7 @@ static inline void _gb_render_objects(gb_ppu_t* ppu)
 	const u8 palette1 = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_OBP1);
 	const u16 sprite_height = GB_IS_BIT(ppu->lcdc, 2) ? 16 : 8;
 
-	u8 objects_count = 10;
+	u8 objects_count = 11;
 	for (u8 i = 0; i < oem_entry_count; i++) {
 		struct gb_oam_entry oam = _gb_get_oam(ppu, i);
 		const u8 visible_ly = ppu->ly + 16;
@@ -254,14 +254,13 @@ static inline void _gb_render_objects(gb_ppu_t* ppu)
 			visible_ly >= (oam.pos_y + sprite_height)) {
 			continue;
 		}
+		objects_count--;
 		if (!oam.pos_x || oam.pos_x >= 168) {
 			continue;
 		}
-
 		if (!objects_count) {
 			return;
 		}
-		objects_count--;
 
 		if (sprite_height == 16) {
 			oam.tile_idx &= (u8) ~(0x1);
