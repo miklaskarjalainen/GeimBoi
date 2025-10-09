@@ -90,8 +90,7 @@ typedef struct gb_color {
 	u8 r, g, b;
 } gb_color_t;
 
-static inline gb_color_t
-_gb_bg_pixel_color(u8 palette_index, u8 bg_palette)
+static inline gb_color_t _gb_bg_pixel_color(u8 palette_index, u8 bg_palette)
 {
 	static gb_color_t s_Colors[4] = {
 		{.r = 0xFF, .g = 0xFF, .b = 0xFF}, // Black
@@ -109,8 +108,8 @@ _gb_bg_pixel_color(u8 palette_index, u8 bg_palette)
 static inline void _gb_render_background(gb_ppu_t* ppu)
 {
 
-    // Fetch the base address to read from.
-    const u8 bg_enabled = GB_IS_BIT(ppu->lcdc, 0);
+	// Fetch the base address to read from.
+	const u8 bg_enabled = GB_IS_BIT(ppu->lcdc, 0);
 	const u16 tile_addr = GB_IS_BIT(ppu->lcdc, 4) ? 0x8000 : 0x8800;
 	const u16 bg_addr = GB_IS_BIT(ppu->lcdc, 3) ? 0x9C00 : 0x9800;
 	const u8 bg_palette = gb_mmu_read_u8(ppu->mmu, GB_ADDR_BG_PALETTE);
@@ -118,13 +117,14 @@ static inline void _gb_render_background(gb_ppu_t* ppu)
 	const u16 tile_row = (u16)(scroll_y / 8 * 32);
 
 	for (u8 lx = 0; lx < 160; lx++) {
-	    if (!bg_enabled) {
+		if (!bg_enabled) {
 			const gb_color_t color = _gb_bg_pixel_color(0, 0);
 
 			// Draw the pixel
 			ppu->frame[ppu->ly][lx][0] = color.r;
 			ppu->frame[ppu->ly][lx][1] = color.g;
 			ppu->frame[ppu->ly][lx][2] = color.b;
+			ppu->priority[lx] = 0;
 			continue;
 		}
 
@@ -133,176 +133,182 @@ static inline void _gb_render_background(gb_ppu_t* ppu)
 		const u16 tile_column = scroll_x / 8;
 		const i16 tile_num =
 			gb_mmu_read_u8(ppu->mmu, (u16)(bg_addr + tile_row + tile_column));
-		const u16 tile_location = GB_IS_BIT(ppu->lcdc, 4)
-									  ? (u16)(tile_addr + (tile_num * 16))
-									  : (u16)(tile_addr + ((tile_num + 128) * 16));
+		const u16 tile_location =
+			GB_IS_BIT(ppu->lcdc, 4)
+				? (u16)(tile_addr + (tile_num * 16))
+				: (u16)(tile_addr + ((tile_num + 128) * 16));
 
 		// Fetch the row of pixels for the tile
 		const u8 tile_line = scroll_y % 8;
 		const u8 data1 =
-			gb_mmu_read_u8(ppu->mmu, (u16) (tile_location + (tile_line * 2)));
-		const u8 data2 =
-			gb_mmu_read_u8(ppu->mmu, (u16) (tile_location + (tile_line * 2) + 1));
+			gb_mmu_read_u8(ppu->mmu, (u16)(tile_location + (tile_line * 2)));
+		const u8 data2 = gb_mmu_read_u8(
+			ppu->mmu, (u16)(tile_location + (tile_line * 2) + 1)
+		);
 
 		// Get the color of the pixel
 		const u8 colour_bit = 7 - (scroll_x & 7);
-        const u8 color_id = (u8)((((data2 >> colour_bit)) & 0x1) |
-            (((data1 >> colour_bit) & 0x1) << 1));
+		const u8 color_id = (u8)((((data2 >> colour_bit)) & 0x1) |
+								 (((data1 >> colour_bit) & 0x1) << 1));
 		const gb_color_t color = _gb_bg_pixel_color(color_id, bg_palette);
 
 		// Draw the pixel
 		ppu->frame[ppu->ly][lx][0] = color.r;
 		ppu->frame[ppu->ly][lx][1] = color.g;
 		ppu->frame[ppu->ly][lx][2] = color.b;
+		ppu->priority[lx] = color_id;
 	}
 }
 
 struct gb_oam_entry {
-    u8 pos_y, pos_x, tile_idx, flags;
+	u8 pos_y, pos_x, tile_idx, flags;
 };
 
 struct gb_oam_entry _gb_get_oam(gb_ppu_t* ppu, u8 entry)
 {
-    GB_ASSERT(entry < 40, "invalid entry");
+	GB_ASSERT(entry < 40, "invalid entry");
 
-    const u8* oem_entry = &GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_OEM_BEGIN + (entry * 4));
+	const u8* oem_entry =
+		&GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_OEM_BEGIN + (entry * 4));
 
-    return (struct gb_oam_entry) {
-        .pos_y = oem_entry[0],
-        .pos_x = oem_entry[1],
-        .tile_idx = oem_entry[2],
-        .flags = oem_entry[3]
-    };
+	return (struct gb_oam_entry){.pos_y = oem_entry[0],
+								 .pos_x = oem_entry[1],
+								 .tile_idx = oem_entry[2],
+								 .flags = oem_entry[3]};
 }
 
 static inline void _gb_render_window(gb_ppu_t* ppu)
 {
-    const u8 window_x = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_WX);
-    const u8 window_y = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_WY);
+	const u8 window_x = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_WX);
+	const u8 window_y = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_WY);
 
-    {
-        const u8 bg_enable = GB_IS_BIT(ppu->lcdc, 0);
-        const u8 window_enable = GB_IS_BIT(ppu->lcdc, 5);
+	{
+		const u8 bg_enable = GB_IS_BIT(ppu->lcdc, 0);
+		const u8 window_enable = GB_IS_BIT(ppu->lcdc, 5);
 
-        if (!bg_enable || !window_enable || window_y > ppu->ly) {
-            return;
-        }
-    }
+		if (!bg_enable || !window_enable || window_y > ppu->ly) {
+			return;
+		}
+	}
 
-    const u16 tile_addr = GB_IS_BIT(ppu->lcdc, 4) ? 0x8000 : 0x8800;
-    const u16 bg_addr = GB_IS_BIT(ppu->lcdc, 6) ? 0x9C00 : 0x9800;
+	const u16 tile_addr = GB_IS_BIT(ppu->lcdc, 4) ? 0x8000 : 0x8800;
+	const u16 bg_addr = GB_IS_BIT(ppu->lcdc, 6) ? 0x9C00 : 0x9800;
 
-    const u8 bg_palette = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_BG_PALETTE);
-    const u8 unsig = GB_IS_BIT(ppu->lcdc, 4);
-    const u8 y_pos = ppu->ly - window_y;
-    const u16 tile_row = (u16)(y_pos / 8 * 32);
+	const u8 bg_palette = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_BG_PALETTE);
+	const u8 unsig = GB_IS_BIT(ppu->lcdc, 4);
+	const u8 y_pos = ppu->ly - window_y;
+	const u16 tile_row = (u16)(y_pos / 8 * 32);
 
-    for (u8 lx = window_x; lx < 160; lx++)
-    {
-        const u8 x_pixel = lx - window_x;
-        const u16 tile_column = x_pixel / 8;
+	for (u8 lx = window_x; lx < 160; lx++) {
+		const u8 x_pixel = lx - window_x;
+		const u16 tile_column = x_pixel / 8;
 
 		const i16 tile_num =
 			gb_mmu_read_u8(ppu->mmu, (u8)(bg_addr + tile_row + tile_column));
-		const u16 tile_location = unsig
-									  ? (u16)(tile_addr + (tile_num * 16))
-									  : (u16)(tile_addr + ((tile_num + 128) * 16));
+		const u16 tile_location =
+			unsig ? (u16)(tile_addr + (tile_num * 16))
+				  : (u16)(tile_addr + ((tile_num + 128) * 16));
 
-        // Fetch the row of pixels for the tile
-        const u8 tile_line = y_pos % 8;
-        const u8 data1 =
-       	gb_mmu_read_u8(ppu->mmu, (u8)(tile_location + (tile_line * 2)));
-        const u8 data2 =
-       	gb_mmu_read_u8(ppu->mmu, (u8)(tile_location + (tile_line * 2) + 1));
+		// Fetch the row of pixels for the tile
+		const u8 tile_line = y_pos % 8;
+		const u8 data1 =
+			gb_mmu_read_u8(ppu->mmu, (u8)(tile_location + (tile_line * 2)));
+		const u8 data2 =
+			gb_mmu_read_u8(ppu->mmu, (u8)(tile_location + (tile_line * 2) + 1));
 
-        // Get the color of the pixel
-        const u8 colour_bit = 7 - (x_pixel & 7);
-        const u8 color_id = (u8)((((data2 >> colour_bit)) & 0x1) |
-        (((data1 >> colour_bit) & 0x1) << 1));
-        const gb_color_t color = _gb_bg_pixel_color(color_id, bg_palette);
+		// Get the color of the pixel
+		const u8 colour_bit = 7 - (x_pixel & 7);
+		const u8 color_id = (u8)((((data2 >> colour_bit)) & 0x1) |
+								 (((data1 >> colour_bit) & 0x1) << 1));
+		const gb_color_t color = _gb_bg_pixel_color(color_id, bg_palette);
 
-        // Draw the pixel
-        ppu->frame[ppu->ly][lx][0] = color.r;
-        ppu->frame[ppu->ly][lx][1] = color.g;
-        ppu->frame[ppu->ly][lx][2] = color.b;
-    }
+		// Draw the pixel
+		ppu->frame[ppu->ly][lx][0] = color.r;
+		ppu->frame[ppu->ly][lx][1] = color.g;
+		ppu->frame[ppu->ly][lx][2] = color.b;
+		ppu->priority[lx] = color_id;
+	}
+	ppu->window_ly++;
 }
 
 static inline void _gb_render_objects(gb_ppu_t* ppu)
 {
-    const u8 oem_entry_count = 40;
-    const u8 enable_obj = GB_IS_BIT(ppu->lcdc, 1);
+	const u8 oem_entry_count = 40;
+	const u8 enable_obj = GB_IS_BIT(ppu->lcdc, 1);
 
-    if (!enable_obj) {
-        return;
-    }
+	if (!enable_obj) {
+		return;
+	}
 
-    const u8* obj_tiles = &GB_CPU_MEM(ppu->mmu->cpu, 0x8000);
-    const u8 palette0 = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_OBP0);
-    const u8 palette1 = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_OBP1);
-    const u16 sprite_height = GB_IS_BIT(ppu->lcdc, 2) ? 16 : 8;
+	const u8* obj_tiles = &GB_CPU_MEM(ppu->mmu->cpu, 0x8000);
+	const u8 palette0 = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_OBP0);
+	const u8 palette1 = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_OBP1);
+	const u16 sprite_height = GB_IS_BIT(ppu->lcdc, 2) ? 16 : 8;
 
-    u8 objects_count = 10;
-    for (u8 i = 0; i < oem_entry_count; i++)
-    {
-        struct gb_oam_entry oam = _gb_get_oam(ppu, i);
-        const u8 visible_ly = ppu->ly + 16;
+	u8 objects_count = 10;
+	for (u8 i = 0; i < oem_entry_count; i++) {
+		struct gb_oam_entry oam = _gb_get_oam(ppu, i);
+		const u8 visible_ly = ppu->ly + 16;
 
-        // visible?
-        if ((visible_ly < oam.pos_y) || visible_ly >= (oam.pos_y + sprite_height) ) {
-            continue;
-        }
-        if (!oam.pos_x || oam.pos_x >= 168) {
-            continue;
-        }
+		// visible?
+		if ((visible_ly < oam.pos_y) ||
+			visible_ly >= (oam.pos_y + sprite_height)) {
+			continue;
+		}
+		if (!oam.pos_x || oam.pos_x >= 168) {
+			continue;
+		}
 
-        if (!objects_count) {
-            return;
-        }
-        objects_count--;
+		if (!objects_count) {
+			return;
+		}
+		objects_count--;
 
+		if (sprite_height == 16) {
+			oam.tile_idx &= (u8) ~(0x1);
+		}
 
-        if (sprite_height == 16) {
-            oam.tile_idx &= (u8)~(0x1);
-        }
+		const u8 flip_x = GB_IS_BIT(oam.flags, 5);
+		const u8 flip_y = GB_IS_BIT(oam.flags, 6);
+		i32 tile_y = visible_ly - oam.pos_y;
+		if (flip_y) {
+			tile_y = sprite_height - tile_y;
+		}
+		tile_y *= 2;
 
-        const u8 flip_x = GB_IS_BIT(oam.flags, 5);
-        const u8 flip_y = GB_IS_BIT(oam.flags, 6);
-        i32 tile_y = visible_ly - oam.pos_y;
-        if (flip_y) {
-            tile_y = sprite_height - tile_y;
-        }
-        tile_y *= 2;
+		const u32 tile_index = oam.tile_idx * 16;
+		const u8 data1 = obj_tiles[tile_index + tile_y];
+		const u8 data2 = obj_tiles[tile_index + tile_y + 1];
+		const u8 palette = GB_IS_BIT(oam.flags, 4) ? palette1 : palette0;
+		const u8 bg_priority = GB_IS_BIT(oam.flags, 7);
 
-        const u32 tile_index = oam.tile_idx * 16;
-        const u8 data1 = obj_tiles[tile_index + tile_y];
-        const u8 data2 = obj_tiles[tile_index + tile_y + 1];
-        const u8 palette = GB_IS_BIT(oam.flags, 4) ? palette1 : palette0;
+		for (u8 sprite_x = 0; sprite_x < 8; sprite_x++) {
+			const i16 lx = (i16)(oam.pos_x + sprite_x - 8);
+			if (lx < 0 || lx >= 160) {
+				continue;
+			}
 
-        for (u8 sprite_x = 0; sprite_x < 8; sprite_x++) {
-            const i16 lx = (i16)(oam.pos_x + sprite_x - 8);
-            if (lx < 0 || lx >= 160) {
-                continue;
-            }
+			if (bg_priority && ppu->priority[lx]) {
+				continue;
+			}
 
-            // Get the color of the pixel
-            const u8 color_index = flip_x ? sprite_x : (7 - sprite_x);
-            const u8 color_id = (u8)((((data2 >> color_index)) & 0x1) |
-                (((data1 >> color_index) & 0x1) << 1));
+			// Get the color of the pixel
+			const u8 color_index = flip_x ? sprite_x : (7 - sprite_x);
+			const u8 color_id = (u8)((((data2 >> color_index)) & 0x1) |
+									 (((data1 >> color_index) & 0x1) << 1));
 
-            if (!color_id) {
-                continue;
-            }
+			if (!color_id) {
+				continue;
+			}
 
-            const gb_color_t color = _gb_bg_pixel_color(color_id, palette);
+			const gb_color_t color = _gb_bg_pixel_color(color_id, palette);
 
-
-            // Draw the pixel
-           	ppu->frame[ppu->ly][lx][0] = color.r;
-           	ppu->frame[ppu->ly][lx][1] = color.g;
-           	ppu->frame[ppu->ly][lx][2] = color.b;
-        }
-    }
+			// Draw the pixel
+			ppu->frame[ppu->ly][lx][0] = color.r;
+			ppu->frame[ppu->ly][lx][1] = color.g;
+			ppu->frame[ppu->ly][lx][2] = color.b;
+		}
+	}
 }
 
 static inline void _gb_render_scanline(gb_ppu_t* ppu)

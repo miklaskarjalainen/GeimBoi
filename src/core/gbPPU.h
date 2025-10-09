@@ -7,12 +7,15 @@
 #define GB_LCD_WIDTH 160
 
 typedef struct gb_ppu {
-    u8 frame[GB_LCD_HEIGHT][GB_LCD_WIDTH][3];
-    u16 t_cycles;
+	u8 frame[GB_LCD_HEIGHT][GB_LCD_WIDTH][3];
+	// Which color-id was used by bg or window. Used for object pixel priority.
+	u8 priority[GB_LCD_WIDTH];
 
-    u8 ly, lyc, stat, lcdc;
+	u16 t_cycles;
 
-    struct gb_mmu* mmu;
+	u8 ly, lyc, stat, lcdc;
+
+	struct gb_mmu* mmu;
 } gb_ppu_t;
 
 void gb_ppu_init(gb_ppu_t* ppu, struct gb_mmu* mmu);
