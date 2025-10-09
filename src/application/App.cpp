@@ -111,9 +111,9 @@ void GeimBoi::App::run()
 				event.window.windowID == SDL_GetWindowID(m_Window))
 				done = true;
 			if (event.type == SDL_EVENT_DROP_FILE) {
-			    const char* fpath = event.drop.data;
+				const char* fpath = event.drop.data;
+				m_RomPath = fpath;
 				reset();
-				gb_emu_load_rom_file(m_Emulator, fpath);
 			}
 			if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP) {
 			    auto fn = event.type == SDL_EVENT_KEY_UP ? gb_emu_release_key : gb_emu_press_key;
@@ -150,8 +150,8 @@ void GeimBoi::App::run()
 		ImGui_ImplSDL3_NewFrame();
 		ImGui::NewFrame();
 
-		if (!paused) {
-            gb_emu_advance_frame(m_Emulator);
+		if (!paused && !m_RomPath.empty()) {
+			gb_emu_advance_frame(m_Emulator);
 		}
 
 		UpdateTexture(
@@ -440,15 +440,16 @@ GeimBoi::App::App()
 	reset();
 }
 
-void GeimBoi::App::reset() {
-    if (m_Emulator) {
-        gb_emu_delete(m_Emulator);
-    }
+void GeimBoi::App::reset()
+{
+	if (m_Emulator) {
+		gb_emu_delete(m_Emulator);
+	}
 
-    m_Emulator = gb_emu_create();
-	gb_emu_load_rom_file(
-		m_Emulator, "/home/giffi/Downloads/Tetris (World) (Rev 1).gb"
-	);
+	m_Emulator = gb_emu_create();
+	if (!m_RomPath.empty()) {
+		gb_emu_load_rom_file(m_Emulator, m_RomPath.c_str());
+	}
 }
 
 GeimBoi::App::~App()

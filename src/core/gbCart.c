@@ -79,71 +79,82 @@ static inline void _gb_mbc1_reset(gb_cart_t* cart) {
 
 static u16 gb_cart_read_u16_be(const gb_cart_t* cart, u16 addr)
 {
-	const u16 low = gb_cart_read_u8(cart, addr + 1);
-	const u16 high = gb_cart_read_u8(cart, addr);
+	const u16 low = cart->read(cart, addr + 1);
+	const u16 high = cart->read(cart, addr);
 	return (u16)((low) | (high << 8));
+}
+
+void gb_cart_init(gb_cart_t* cart)
+{
+	// Zero initialize
+	for (size_t i = 0; i < GB_MAX_CARTSIZE; i++) {
+		cart->rom[i] = 0x00;
+	}
+	_gb_mbc0_reset(cart);
 }
 
 void gb_cart_load(gb_cart_t* cart, const u8* rom, size_t len)
 {
-    size_t i = 0;
+	if (len >= GB_MAX_CARTSIZE) {
+		GB_WARN(
+			"Tried to open file which is larger than the maximum"
+			"of a size a rom! Stopped."
+		);
+		return;
+	}
 
-    // Loads the contents of the rom
-    for (; i < len && i < GB_MAX_CARTSIZE; i++)
-    {
-        cart->rom[i] = rom[i];
-    }
-    // Zero initialize everything else.
-    for (; i < GB_MAX_CARTSIZE; i++)
-    {
-        cart->rom[i] = 0x00;
-    }
+	gb_cart_init(cart);
 
-    // Init variables
-    cart->rom_banks = (u16)(2 << cart->rom[0x148]);
-    switch (cart->rom[0x149]) {
-        case 0: {
-            cart->ram_banks = 0;
-            break;
-        }
-        /* 1 is unused */
-        case 2: {
-            cart->ram_banks = 1;
-            break;
-        }
-        case 3: {
-            cart->ram_banks = 4;
-            break;
-        }
-        case 4: {
-            cart->ram_banks = 16;
-            break;
-        }
-        case 5: {
-            cart->ram_banks = 8;
-            break;
-        }
+	// Loads the contents of the rom
+	for (size_t i = 0; i < len; i++) {
+		cart->rom[i] = rom[i];
+	}
 
-        default: {
-            GB_FATAL("invalid ram size! 0x%02X\n", cart->rom[0x149]);
-        }
-    }
+	// Init variables
+	cart->rom_banks = (u16)(2 << cart->rom[0x148]);
+	switch (cart->rom[0x149]) {
+		case 0: {
+			cart->ram_banks = 0;
+			break;
+		}
+		/* 1 is unused */
+		case 2: {
+			cart->ram_banks = 1;
+			break;
+		}
+		case 3: {
+			cart->ram_banks = 4;
+			break;
+		}
+		case 4: {
+			cart->ram_banks = 16;
+			break;
+		}
+		case 5: {
+			cart->ram_banks = 8;
+			break;
+		}
 
-    switch(gb_cart_mapper_type(cart)) {
-        case GB_MAPPER_NONE: {
-            _gb_mbc0_reset(cart);
-            break;
-        }
-        case GB_MAPPER_MBC1: {
-            _gb_mbc1_reset(cart);
-            break;
-        }
-        default: {
-            GB_FATAL("Unsupported mapper! %i", cart->rom[0x147]);
-        }
-    }
+		default: {
+			GB_FATAL("invalid ram size! 0x%02X\n", cart->rom[0x149]);
+		}
+	}
 
-    return;
+	switch (gb_cart_mapper_type(cart)) {
+		case GB_MAPPER_NONE: {
+			_gb_mbc0_reset(cart);
+			break;
+		}
+		case GB_MAPPER_MBC1: {
+			_gb_mbc1_reset(cart);
+			break;
+		}
+		default: {
+			GB_FATAL("Unsupported mapper! %i", cart->rom[0x147]);
+		}
+	}
+
+	return;
 }
 
 gb_cart_mapper_e gb_cart_mapper_type(const gb_cart_t* cart)

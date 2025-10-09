@@ -26,7 +26,7 @@ u8 gb_mmu_read_u8(const gb_mmu_t* mmu, u16 addr)
 	GB_ASSERT(mmu, "nullptr");
 	GB_ASSERT(mmu->cart, "nullptr");
 	if (addr < 0x8000) {
-		return gb_cart_read_u8(mmu->cart, addr);
+		return mmu->cart->read(mmu->cart, addr);
 	}
 
 	// Joypad

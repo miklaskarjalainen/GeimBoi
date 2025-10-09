@@ -48,10 +48,9 @@ typedef enum gb_cart_mapper {
     GB_MAPPER_MMM01,
 } gb_cart_mapper_e;
 
+void gb_cart_init(gb_cart_t* cart);
 void gb_cart_load(gb_cart_t* cart, const u8* rom, size_t len);
 gb_cart_mapper_e gb_cart_mapper_type(const gb_cart_t* cart);
-
-u8 gb_cart_read_u8(const gb_cart_t* cart, u16 addr);
 
 /**
  * @brief null-terminated game name
