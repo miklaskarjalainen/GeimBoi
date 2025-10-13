@@ -134,7 +134,7 @@ Window::Window()
 	}
 
 	SDL_GL_MakeCurrent(m_Window, m_GL);
-	SDL_GL_SetSwapInterval(1); // Enable vsync
+	SDL_GL_SetSwapInterval(0); // Disable vsync
 	SDL_SetWindowPosition(
 		m_Window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED
 	);

@@ -1,4 +1,5 @@
 #include "App.hpp"
+#include "SDL3/SDL_timer.h"
 #include "Settings.hpp"
 #include "gui/GuiDebugger.hpp"
 
@@ -10,6 +11,7 @@ extern "C" {
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
+#include <chrono>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
@@ -105,6 +107,102 @@ void GeimBoi::App::process_event(const SDL_Event& ev) noexcept
 
 void GeimBoi::App::run()
 {
+	using Clock = std::chrono::high_resolution_clock;
+
+	auto debugger = GuiDebugger(m_Emulator.get());
+	auto rom_memory = [&]() -> MemoryEditor {
+		MemoryEditor mem;
+		mem.UserData = reinterpret_cast<void*>(this);
+		mem.ReadFn = [](auto, size_t addr, void* void_emu) -> ImU8 {
+			const auto* emu =
+				reinterpret_cast<App*>(void_emu)->m_Emulator.get();
+			return gb_mmu_read_u8(&emu->mmu, (uint16_t)addr);
+		};
+		mem.WriteFn = [](auto, size_t addr, ImU8 byte, void* void_emu) {
+			auto* emu = reinterpret_cast<App*>(void_emu)->m_Emulator.get();
+			gb_mmu_write_u8(&emu->mmu, (uint16_t)addr, (u8)byte);
+		};
+		return mem;
+	}();
+
+	constexpr double TARGET_FPS = 59.7275;
+	constexpr double FRAME_TIME_SEC = 1.0 / TARGET_FPS;
+
+	while (!m_Window.should_close()) {
+		uint64_t frame_time_begin = SDL_GetPerformanceCounter();
+
+		SDL_Event event;
+		while (SDL_PollEvent(&event)) {
+			ImGui_ImplSDL3_ProcessEvent(&event);
+			m_Window.process_event(event);
+			process_event(event);
+		}
+
+		if (!m_Paused && m_IsLoaded) {
+			gb_emu_advance_frame(m_Emulator.get());
+		}
+
+		UpdateTexture(
+			m_PpuTexture,
+			GB_LCD_WIDTH,
+			GB_LCD_HEIGHT,
+			(unsigned char*)m_Emulator->ppu.frame
+		);
+
+		m_Window.render_begin();
+
+		// GUIs
+		draw_control();
+		draw_display();
+		debugger.draw();
+		rom_memory.DrawWindow("GameBoy memory", nullptr, 0x10000);
+
+		m_Window.render_present();
+
+		// Limit FPS
+		const uint64_t frame_time_end = SDL_GetPerformanceCounter();
+		const double elapsed_sec =
+			static_cast<double>(frame_time_end - frame_time_begin) /
+			SDL_GetPerformanceFrequency();
+		const double delay_time_ms = (FRAME_TIME_SEC - elapsed_sec) * 1000.0;
+		if (delay_time_ms > 0 && m_LimitFPS) {
+			SDL_Delay(delay_time_ms);
+		}
+	}
+}
+
+void GeimBoi::App::open_rom(const char* fpath)
+{
+	GeimBoi::Settings::get().general.last_rompath = std::string(fpath);
+	reset();
+}
+
+void GeimBoi::App::reset()
+{
+	if (m_Emulator) {
+		gb_emu_deinit(m_Emulator.get());
+	}
+
+	gb_emu_init(m_Emulator.get());
+	const auto& rompath = Settings::get().general.last_rompath;
+	m_IsLoaded = false;
+	if (!rompath.empty()) {
+		m_IsLoaded = gb_emu_load_rom_file(m_Emulator.get(), rompath.c_str());
+	}
+}
+
+void GeimBoi::App::draw_display()
+{
+	ImGui::Begin("Display");
+	ImGui::Image(
+		(ImTextureID)(intptr_t)m_PpuTexture,
+		ImVec2(GB_LCD_WIDTH * 4, GB_LCD_HEIGHT * 4)
+	);
+	ImGui::End();
+}
+
+void GeimBoi::App::draw_control()
+{
 	auto text_opcode = [&](uint16_t addr) -> int {
 		uint8_t opcode = gb_mmu_read_u8(&m_Emulator->mmu, addr);
 		uint8_t opcode_size = gb_opcode_size(opcode);
@@ -137,112 +235,38 @@ void GeimBoi::App::run()
 		return opcode_size;
 	};
 
-	GLuint my_image_texture = 0;
-	bool ret =
-		LoadTextureFromMemory(GB_LCD_WIDTH, GB_LCD_HEIGHT, &my_image_texture);
-	IM_ASSERT(ret);
-
-	bool paused = false;
-
-	auto debugger = GuiDebugger(m_Emulator.get());
-
-	while (!m_Window.should_close()) {
-		SDL_Event event;
-		while (SDL_PollEvent(&event)) {
-			ImGui_ImplSDL3_ProcessEvent(&event);
-			m_Window.process_event(event);
-			process_event(event);
-		}
-
-		m_Window.render_begin();
-
-		if (!paused && m_IsLoaded) {
-			gb_emu_advance_frame(m_Emulator.get());
-		}
-
-		UpdateTexture(
-			my_image_texture,
-			GB_LCD_WIDTH,
-			GB_LCD_HEIGHT,
-			(unsigned char*)m_Emulator->ppu.frame
-		);
-
-		// GUIs
-		ImGui::Begin("Control");
-		ImGui::Text("Is Game Loaded: %s", m_IsLoaded ? "true" : "false");
-		ImGui::Checkbox("Is paused?`", &paused);
-		if (ImGui::Button("reset")) {
-			reset();
-		}
-
-		if (ImGui::Button("Execute opcode")) {
-			uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
-			m_LastExecutedOpcode = addr;
-			gb_emu_advance_opcode(m_Emulator.get());
-		}
-
-		ImGui::Text("Last Executed Opcode: ");
-		ImGui::SameLine();
-		text_opcode(m_LastExecutedOpcode);
-
-		ImGui::SeparatorText("Upcoming instructions");
-		int offset = 0;
-		for (int i = 0; i < 8; i++) {
-			uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs) + offset;
-			offset += text_opcode(addr);
-		}
-
-		ImGui::End();
-
-		ImGui::Begin("Display");
-		ImGui::Image(
-			(ImTextureID)(intptr_t)my_image_texture,
-			ImVec2(GB_LCD_WIDTH * 4, GB_LCD_HEIGHT * 4)
-		);
-		ImGui::End();
-
-		debugger.draw();
-
-		static MemoryEditor rom_memory = [&]() {
-			MemoryEditor mem;
-			mem.UserData = reinterpret_cast<void*>(this);
-			mem.ReadFn = [](auto, size_t addr, void* void_emu) -> ImU8 {
-				const auto* emu =
-					reinterpret_cast<App*>(void_emu)->m_Emulator.get();
-				return gb_mmu_read_u8(&emu->mmu, (uint16_t)addr);
-			};
-			mem.WriteFn = [](auto, size_t addr, ImU8 byte, void* void_emu) {
-				auto* emu = reinterpret_cast<App*>(void_emu)->m_Emulator.get();
-				gb_mmu_write_u8(&emu->mmu, (uint16_t)addr, (u8)byte);
-			};
-			return mem;
-		}();
-		rom_memory.DrawWindow("GameBoy memory", nullptr, 0x10000);
-
-		m_Window.render_present();
+	ImGui::Begin("Control");
+	ImGui::Text("Is Game Loaded: %s", m_IsLoaded ? "true" : "false");
+	ImGui::Checkbox("Is paused?", &m_Paused);
+	ImGui::Checkbox("Limit FPS?", &m_LimitFPS);
+	if (ImGui::Button("reset")) {
+		reset();
 	}
+
+	if (ImGui::Button("Execute opcode")) {
+		uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
+		m_LastExecutedOpcode = addr;
+		gb_emu_advance_opcode(m_Emulator.get());
+	}
+
+	ImGui::Text("Last Executed Opcode: ");
+	ImGui::SameLine();
+	text_opcode(m_LastExecutedOpcode);
+
+	ImGui::SeparatorText("Upcoming instructions");
+	int offset = 0;
+	for (int i = 0; i < 8; i++) {
+		uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs) + offset;
+		offset += text_opcode(addr);
+	}
+
+	ImGui::End();
 }
 
-GeimBoi::App::App() : m_Emulator(std::make_unique<gb_emu_t>()) { reset(); }
-
-void GeimBoi::App::open_rom(const char* fpath)
+GeimBoi::App::App() : m_Emulator(std::make_unique<gb_emu_t>())
 {
-	GeimBoi::Settings::get().general.last_rompath = std::string(fpath);
 	reset();
-}
-
-void GeimBoi::App::reset()
-{
-	if (m_Emulator) {
-		gb_emu_deinit(m_Emulator.get());
-	}
-
-	gb_emu_init(m_Emulator.get());
-	const auto& rompath = Settings::get().general.last_rompath;
-	m_IsLoaded = false;
-	if (!rompath.empty()) {
-		m_IsLoaded = gb_emu_load_rom_file(m_Emulator.get(), rompath.c_str());
-	}
+	LoadTextureFromMemory(GB_LCD_WIDTH, GB_LCD_HEIGHT, &m_PpuTexture);
 }
 
 GeimBoi::App::~App() = default;
