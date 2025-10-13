@@ -1,10 +1,10 @@
 #pragma once
 
-#include <cstdint>
-#include <string>
+#include "Window.hpp"
 
-struct SDL_Window;
-struct SDL_GLContextState;
+#include <cstdint>
+#include <memory>
+
 typedef struct gb_emu gb_emu_t;
 
 namespace GeimBoi {
@@ -12,17 +12,18 @@ int main();
 
 class App {
 private:
-	SDL_Window* m_Window = nullptr;
-	SDL_GLContextState* m_GL = nullptr;
-	gb_emu_t* m_Emulator = nullptr;
+	Window m_Window;
+	std::unique_ptr<gb_emu_t> m_Emulator;
+	bool m_IsLoaded = false;
 	uint16_t m_LastExecutedOpcode = 0;
-	std::string m_RomPath = "";
 
 private:
 	friend int main();
 	App();
 	~App();
 
+	void process_event(const SDL_Event& ev) noexcept;
+	void open_rom(const char* fpath);
 	void reset();
 	void run();
 };

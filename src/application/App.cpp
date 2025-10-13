@@ -1,4 +1,6 @@
 #include "App.hpp"
+#include "Settings.hpp"
+#include "gui/GuiDebugger.hpp"
 
 extern "C" {
 #include "gbCore.h"
@@ -54,14 +56,55 @@ void UpdateTexture(GLuint tex, int width, int height, const unsigned char* data)
 	);
 }
 
+void GeimBoi::App::process_event(const SDL_Event& ev) noexcept
+{
+	switch (ev.type) {
+		case SDL_EVENT_DROP_FILE: {
+			const char* fpath = ev.drop.data;
+			open_rom(fpath);
+			break;
+		}
+
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_KEY_UP: {
+			auto fn = ev.type == SDL_EVENT_KEY_UP ? gb_emu_release_key
+												  : gb_emu_press_key;
+
+			if (ev.key.scancode == SDL_SCANCODE_W) {
+				fn(m_Emulator.get(), GB_INPUT_UP);
+			}
+			if (ev.key.scancode == SDL_SCANCODE_S) {
+				fn(m_Emulator.get(), GB_INPUT_DOWN);
+			}
+			if (ev.key.scancode == SDL_SCANCODE_A) {
+				fn(m_Emulator.get(), GB_INPUT_LEFT);
+			}
+			if (ev.key.scancode == SDL_SCANCODE_D) {
+				fn(m_Emulator.get(), GB_INPUT_RIGHT);
+			}
+
+			if (ev.key.key == SDLK_J) {
+				fn(m_Emulator.get(), GB_INPUT_B);
+			}
+			if (ev.key.key == SDLK_K) {
+				fn(m_Emulator.get(), GB_INPUT_A);
+			}
+			if (ev.key.key == SDLK_RETURN) {
+				fn(m_Emulator.get(), GB_INPUT_START);
+			}
+			if (ev.key.key == SDLK_BACKSPACE) {
+				fn(m_Emulator.get(), GB_INPUT_SELECT);
+			}
+		}
+
+		default: {
+			break;
+		}
+	}
+}
+
 void GeimBoi::App::run()
 {
-	// Main loop
-	bool done = false;
-
-	ImGuiIO& io = ImGui::GetIO();
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
 	auto text_opcode = [&](uint16_t addr) -> int {
 		uint8_t opcode = gb_mmu_read_u8(&m_Emulator->mmu, addr);
 		uint8_t opcode_size = gb_opcode_size(opcode);
@@ -101,57 +144,20 @@ void GeimBoi::App::run()
 
 	bool paused = false;
 
-	while (!done) {
+	auto debugger = GuiDebugger(m_Emulator.get());
+
+	while (!m_Window.should_close()) {
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
 			ImGui_ImplSDL3_ProcessEvent(&event);
-			if (event.type == SDL_EVENT_QUIT)
-				done = true;
-			if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED &&
-				event.window.windowID == SDL_GetWindowID(m_Window))
-				done = true;
-			if (event.type == SDL_EVENT_DROP_FILE) {
-				const char* fpath = event.drop.data;
-				m_RomPath = fpath;
-				reset();
-			}
-			if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP) {
-			    auto fn = event.type == SDL_EVENT_KEY_UP ? gb_emu_release_key : gb_emu_press_key;
-                if (event.key.key == SDLK_W) {
-                    fn(m_Emulator, GB_INPUT_UP);
-                }
-                if (event.key.key == SDLK_S) {
-                    fn(m_Emulator, GB_INPUT_DOWN);
-                }
-                if (event.key.key == SDLK_A) {
-                    fn(m_Emulator, GB_INPUT_LEFT);
-                }
-                if (event.key.key == SDLK_D) {
-                    fn(m_Emulator, GB_INPUT_RIGHT);
-                }
-
-                if (event.key.key == SDLK_J) {
-                    fn(m_Emulator, GB_INPUT_B);
-                }
-                if (event.key.key == SDLK_K) {
-                    fn(m_Emulator, GB_INPUT_A);
-                }
-                if (event.key.key == SDLK_RETURN) {
-                    fn(m_Emulator, GB_INPUT_START);
-                }
-                if (event.key.key == SDLK_BACKSPACE) {
-                    fn(m_Emulator, GB_INPUT_SELECT);
-                }
-			}
+			m_Window.process_event(event);
+			process_event(event);
 		}
 
-		// Start the Dear ImGui frame
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplSDL3_NewFrame();
-		ImGui::NewFrame();
+		m_Window.render_begin();
 
-		if (!paused && !m_RomPath.empty()) {
-			gb_emu_advance_frame(m_Emulator);
+		if (!paused && m_IsLoaded) {
+			gb_emu_advance_frame(m_Emulator.get());
 		}
 
 		UpdateTexture(
@@ -161,59 +167,19 @@ void GeimBoi::App::run()
 			(unsigned char*)m_Emulator->ppu.frame
 		);
 
-		// Our rendering stuff :p
-		ImGui::Begin("PPU");
-		ImGui::Text("T-Cycles 0x%04X", m_Emulator->ppu.t_cycles);
-		ImGui::Text("Enabled: %X", GB_IS_BIT(m_Emulator->ppu.lcdc, 7));
-		ImGui::Text("Mode %u", gb_mmu_read_u8(&m_Emulator->mmu, 0xFF41) & 0x3);
-		ImGui::Image(
-			(ImTextureID)(intptr_t)my_image_texture,
-			ImVec2(GB_LCD_WIDTH * 4, GB_LCD_HEIGHT * 4)
-		);
-		ImGui::End();
-
-		ImGui::Begin("CPU State");
-
+		// GUIs
+		ImGui::Begin("Control");
+		ImGui::Text("Is Game Loaded: %s", m_IsLoaded ? "true" : "false");
 		ImGui::Checkbox("Is paused?`", &paused);
+		if (ImGui::Button("reset")) {
+			reset();
+		}
 
-		ImGui::SeparatorText("Registers");
-		ImGui::Text("AF 0x%04X", GB_REG_AF(m_Emulator->cpu.regs));
-		ImGui::SameLine();
-		ImGui::Text("BC 0x%04X", GB_REG_BC(m_Emulator->cpu.regs));
-		ImGui::Text("DE 0x%04X", GB_REG_DE(m_Emulator->cpu.regs));
-		ImGui::SameLine();
-		ImGui::Text("HL 0x%04X", GB_REG_HL(m_Emulator->cpu.regs));
-		ImGui::Text(
-			"SP 0x%04X [0x%04X]",
-			GB_REG_SP(m_Emulator->cpu.regs),
-			gb_mmu_read_u16(&m_Emulator->mmu, GB_REG_SP(m_Emulator->cpu.regs))
-		);
-		ImGui::Text(
-			"PC 0x%04X [0x%04X]",
-			GB_REG_PC(m_Emulator->cpu.regs),
-			gb_mmu_read_u16(&m_Emulator->mmu, GB_REG_PC(m_Emulator->cpu.regs))
-		);
-
-		ImGui::Text(
-			"FLAGS %c %c %c %c",
-			GB_IS_BIT(GB_REG_F(m_Emulator->cpu.regs), GB_FLAG_ZERO_BIT) ? 'Z'
-																		: '-',
-			GB_IS_BIT(GB_REG_F(m_Emulator->cpu.regs), GB_FLAG_SUBS_BIT) ? 'N'
-																		: '-',
-			GB_IS_BIT(GB_REG_F(m_Emulator->cpu.regs), GB_FLAG_HALF_BIT) ? 'H'
-																		: '-',
-			GB_IS_BIT(GB_REG_F(m_Emulator->cpu.regs), GB_FLAG_CARR_BIT) ? 'C'
-																		: '-'
-		);
-
-		ImGui::Text(
-			"InterruptEnable: %s",
-			m_Emulator->cpu.interrupt_enable ? "true" : "false"
-		);
-		ImGui::Text(
-			"Is halted: %s",
-			m_Emulator->cpu.is_halted ? "true" : "false"
-		);
+		if (ImGui::Button("Execute opcode")) {
+			uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
+			m_LastExecutedOpcode = addr;
+			gb_emu_advance_opcode(m_Emulator.get());
+		}
 
 		ImGui::Text("Last Executed Opcode: ");
 		ImGui::SameLine();
@@ -226,243 +192,57 @@ void GeimBoi::App::run()
 			offset += text_opcode(addr);
 		}
 
-		ImGui::SeparatorText("Control");
-		if (ImGui::Button("Execute opcode")) {
-			uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
-			m_LastExecutedOpcode = addr;
-			gb_emu_advance_opcode(m_Emulator);
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Execute 100x ops")) {
-			for (int i = 0; i < 99; i++) {
-				gb_emu_advance_opcode(m_Emulator);
-			}
-			uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
-			m_LastExecutedOpcode = addr;
-			gb_emu_advance_opcode(m_Emulator);
-		}
-		if (ImGui::Button("Execute 1000x ops")) {
-			for (int i = 0; i < 999; i++) {
-				gb_emu_advance_opcode(m_Emulator);
-			}
-			uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
-			m_LastExecutedOpcode = addr;
-			gb_emu_advance_opcode(m_Emulator);
-		}
-		if (ImGui::Button("Execute 10000x ops")) {
-			for (int i = 0; i < 9999; i++) {
-				uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
-				if (gb_mmu_read_u8(&m_Emulator->mmu, addr) == 0xFB) {
-					break;
-				}
-				gb_emu_advance_opcode(m_Emulator);
-			}
-			uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
-			m_LastExecutedOpcode = addr;
-			gb_emu_advance_opcode(m_Emulator);
-		}
-		static int run_cycles = 0;
-		ImGui::InputInt("RUN CYCLES", &run_cycles);
-		if (ImGui::Button("RUN")) {
-            for (int i = 0; i < (run_cycles-1); i++) {
-     			uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
-     			if (gb_mmu_read_u8(&m_Emulator->mmu, addr) == 0xFB) {
-        				break;
-     			}
-     			gb_emu_advance_opcode(m_Emulator);
-      		}
-      		uint16_t addr = GB_REG_PC(m_Emulator->cpu.regs);
-      		m_LastExecutedOpcode = addr;
-      		gb_emu_advance_opcode(m_Emulator);
-		}
-
-		if (ImGui::Button("reset")) {
-		    reset();
-		}
-
-		if (ImGui::Button("INT VBLANK")) {
-			gb_cpu_request_interrupt(&m_Emulator->cpu, GB_INTERRUPT_VBLANK);
-		}
-
 		ImGui::End();
 
-		ImGui::Begin("Cartridge");
-		ImGui::Text("Mapper: %u", gb_cart_mapper_type(&m_Emulator->cart));
-		ImGui::Text("Rom banks: %u", m_Emulator->cart.rom_banks);
-		ImGui::Text("Ram banks: %u", m_Emulator->cart.ram_banks);
-		ImGui::Text("MBC1 mode: %u", m_Emulator->cart.mapper_data.mbc1.banking_mode);
-		ImGui::Text("MBC1 bank (low): %u", m_Emulator->cart.mapper_data.mbc1.rom_bank_low);
-		ImGui::Text("MBC1 bank (high): %u", m_Emulator->cart.mapper_data.mbc1.rom_bank_high);
+		ImGui::Begin("Display");
+		ImGui::Image(
+			(ImTextureID)(intptr_t)my_image_texture,
+			ImVec2(GB_LCD_WIDTH * 4, GB_LCD_HEIGHT * 4)
+		);
 		ImGui::End();
+
+		debugger.draw();
 
 		static MemoryEditor rom_memory = [&]() {
 			MemoryEditor mem;
 			mem.UserData = reinterpret_cast<void*>(this);
 			mem.ReadFn = [](auto, size_t addr, void* void_emu) -> ImU8 {
-				const auto* emu = reinterpret_cast<App*>(void_emu)->m_Emulator;
+				const auto* emu =
+					reinterpret_cast<App*>(void_emu)->m_Emulator.get();
 				return gb_mmu_read_u8(&emu->mmu, (uint16_t)addr);
 			};
 			mem.WriteFn = [](auto, size_t addr, ImU8 byte, void* void_emu) {
-                auto* emu = reinterpret_cast<App*>(void_emu)->m_Emulator;
+				auto* emu = reinterpret_cast<App*>(void_emu)->m_Emulator.get();
 				gb_mmu_write_u8(&emu->mmu, (uint16_t)addr, (u8)byte);
 			};
 			return mem;
 		}();
 		rom_memory.DrawWindow("GameBoy memory", nullptr, 0x10000);
 
-		// Rendering
-		ImGui::Render();
-		glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-		glClearColor(
-			clear_color.x * clear_color.w,
-			clear_color.y * clear_color.w,
-			clear_color.z * clear_color.w,
-			clear_color.w
-		);
-		glClear(GL_COLOR_BUFFER_BIT);
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-			SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
-			SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
-			ImGui::UpdatePlatformWindows();
-			ImGui::RenderPlatformWindowsDefault();
-			SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
-		}
-
-		SDL_GL_SwapWindow(m_Window);
+		m_Window.render_present();
 	}
 }
 
-GeimBoi::App::App()
+GeimBoi::App::App() : m_Emulator(std::make_unique<gb_emu_t>()) { reset(); }
+
+void GeimBoi::App::open_rom(const char* fpath)
 {
-	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
-		GB_FATAL("Could not initialize SDL3! Message: '%s'", SDL_GetError());
-		return;
-	}
-
-	// Decide GL+GLSL versions
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-	// GL ES 2.0 + GLSL 100 (WebGL 1.0)
-	const char* glsl_version = "#version 100";
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#elif defined(IMGUI_IMPL_OPENGL_ES3)
-	// GL ES 3.0 + GLSL 300 es (WebGL 2.0)
-	const char* glsl_version = "#version 300 es";
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#elif defined(__APPLE__)
-	// GL 3.2 Core + GLSL 150
-	const char* glsl_version = "#version 150";
-	SDL_GL_SetAttribute(
-		SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG
-	); // Always required on Mac
-	SDL_GL_SetAttribute(
-		SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE
-	);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-#else
-	// GL 3.0 + GLSL 130
-	const char* glsl_version = "#version 130";
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-	SDL_GL_SetAttribute(
-		SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE
-	);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#endif
-
-	// Create window with graphics context
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-	float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
-	SDL_WindowFlags window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE |
-								   SDL_WINDOW_HIDDEN |
-								   SDL_WINDOW_HIGH_PIXEL_DENSITY;
-	m_Window = SDL_CreateWindow(
-		"Dear ImGui SDL3+OpenGL3 example",
-		(int)(1280 * main_scale),
-		(int)(800 * main_scale),
-		window_flags
-	);
-	if (m_Window == nullptr) {
-		printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
-		return;
-	}
-	m_GL = SDL_GL_CreateContext(m_Window);
-	if (m_GL == nullptr) {
-		printf("Error: SDL_GL_CreateContext(): %s\n", SDL_GetError());
-		return;
-	}
-
-	SDL_GL_MakeCurrent(m_Window, m_GL);
-	SDL_GL_SetSwapInterval(1); // Enable vsync
-	SDL_SetWindowPosition(
-		m_Window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED
-	);
-	SDL_ShowWindow(m_Window);
-
-	// Setup Dear ImGui context
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
-	// Setup Dear ImGui style
-	ImGui::StyleColorsDark();
-
-	// Setup scaling
-	ImGuiStyle& style = ImGui::GetStyle();
-	style.ScaleAllSizes(main_scale);
-	style.FontScaleDpi = main_scale;
-	style.FontSizeBase = 12.0f;
-	io.ConfigDpiScaleFonts = true;
-	io.ConfigDpiScaleViewports = true;
-
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-		style.WindowRounding = 0.0f;
-		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-	}
-
-	ImGui_ImplSDL3_InitForOpenGL(m_Window, m_GL);
-	ImGui_ImplOpenGL3_Init(glsl_version);
-
+	GeimBoi::Settings::get().general.last_rompath = std::string(fpath);
 	reset();
 }
 
 void GeimBoi::App::reset()
 {
 	if (m_Emulator) {
-		gb_emu_delete(m_Emulator);
+		gb_emu_deinit(m_Emulator.get());
 	}
 
-	m_Emulator = gb_emu_create();
-	if (!m_RomPath.empty()) {
-		gb_emu_load_rom_file(m_Emulator, m_RomPath.c_str());
+	gb_emu_init(m_Emulator.get());
+	const auto& rompath = Settings::get().general.last_rompath;
+	m_IsLoaded = false;
+	if (!rompath.empty()) {
+		m_IsLoaded = gb_emu_load_rom_file(m_Emulator.get(), rompath.c_str());
 	}
 }
 
-GeimBoi::App::~App()
-{
-    if (m_Emulator) {
-        gb_emu_delete(m_Emulator);
-    }
-
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplSDL3_Shutdown();
-	ImGui::DestroyContext();
-
-	SDL_GL_DestroyContext(m_GL);
-	SDL_DestroyWindow(m_Window);
-	SDL_Quit();
-}
+GeimBoi::App::~App() = default;

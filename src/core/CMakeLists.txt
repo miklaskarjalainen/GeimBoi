@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.0.0)
+cmake_minimum_required(VERSION 3.14.7)
 
 project(geimboi-core C)
 
@@ -50,13 +50,11 @@ endif()
 
 # Compiler warnings
 if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
-    message(WARNING "clang")
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wshadow -Wconversion -Wpedantic -Werror)
     if (GB_TESTS)
         target_compile_options(tests_core PRIVATE -Wall -Wextra -Wshadow -Wconversion -Wpedantic -Werror)
     endif()
 elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    message(WARNING "gnu")
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wshadow -Wconversion -Wpedantic -Werror)
     if (GB_TESTS)
         target_compile_options(tests_core PRIVATE -Wall -Wextra -Wshadow -Wconversion -Wpedantic -Werror)
