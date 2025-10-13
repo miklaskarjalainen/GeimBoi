@@ -6,7 +6,6 @@
 #include "log.h"
 
 #include <stddef.h>
-#include <stdio.h>
 
 #define PPU_SET_MODE(ppu, mode) (ppu)->stat = ((ppu)->stat & 0xFC) | (mode)
 
@@ -33,57 +32,6 @@ void gb_ppu_init(gb_ppu_t* ppu, struct gb_mmu* mmu)
 	ppu->lcdc = 0x80;
 	ppu->t_cycles = 0;
 	ppu->mmu = mmu;
-}
-
-struct gb_tile_data {
-	u8 data[8][8][3];
-};
-
-struct gb_tile_data get_as_tile(u8* begin)
-{
-	struct gb_tile_data d = {0};
-
-	for (int y = 0; y < 8; y++) {
-		u8 row1 = *(begin + y * 2);
-		u8 row2 = *(begin + y * 2 + 1);
-
-		for (int x = 0; x < 8; x++) {
-			u8 pixel1 = GB_IS_BIT(row1, (7 - x));
-			u8 pixel2 = (u8)(GB_IS_BIT(row2, (7 - x)) << 1);
-
-			switch (pixel1 | pixel2) {
-				case 0x0: {
-					d.data[y][x][0] = 12;
-					d.data[y][x][1] = 12;
-					d.data[y][x][2] = 12;
-					break;
-				}
-				case 0x1: {
-					d.data[y][x][0] = 102;
-					d.data[y][x][1] = 102;
-					d.data[y][x][2] = 102;
-					break;
-				}
-				case 0x2: {
-					d.data[y][x][0] = 198;
-					d.data[y][x][1] = 198;
-					d.data[y][x][2] = 198;
-					break;
-				}
-				case 0x3: {
-					d.data[y][x][0] = 0xFF;
-					d.data[y][x][1] = 0xFF;
-					d.data[y][x][2] = 0xFF;
-					break;
-				}
-				default: {
-					printf("?");
-				}
-			}
-		}
-	}
-
-	return d;
 }
 
 typedef struct gb_color {
@@ -256,7 +204,7 @@ static inline void _gb_render_objects(gb_ppu_t* ppu)
 
 		// visible?
 		if ((visible_ly < oam.pos_y) ||
-			visible_ly >= (oam.pos_y + sprite_height)) {
+			(visible_ly >= (oam.pos_y + sprite_height))) {
 			continue;
 		}
 
@@ -291,7 +239,6 @@ static inline void _gb_render_objects(gb_ppu_t* ppu)
 		if (!oam.pos_x || oam.pos_x >= 168) {
 			continue;
 		}
-
 		if (sprite_height == 16) {
 			oam.tile_idx &= (u8) ~(0x1);
 		}
