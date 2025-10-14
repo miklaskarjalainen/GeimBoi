@@ -16,6 +16,8 @@
 
 #define GB_ADDR_BG_PALETTE (0xFF47)
 
+static inline int _gb_max(int a, int b) { return a >= b ? a : b; }
+
 void gb_ppu_init(gb_ppu_t* ppu, struct gb_mmu* mmu)
 {
 
@@ -126,13 +128,13 @@ struct gb_oam_entry _gb_get_oam(gb_ppu_t* ppu, u8 entry)
 
 static inline void _gb_render_window(gb_ppu_t* ppu)
 {
-	const u8 window_x = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_WX) - 7;
+	const i16 window_x = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_WX) - 7;
 	{
 		const u8 bg_enable = GB_IS_BIT(ppu->lcdc, 0);
 		const u8 window_enable = GB_IS_BIT(ppu->lcdc, 5);
 
 		if (!window_enable || !ppu->window_ly_eq || !bg_enable ||
-			window_x >= 160) {
+			window_x > 160) {
 			return;
 		}
 	}
@@ -141,10 +143,9 @@ static inline void _gb_render_window(gb_ppu_t* ppu)
 	const u16 bg_addr = GB_IS_BIT(ppu->lcdc, 6) ? 0x9C00 : 0x9800;
 
 	const u8 bg_palette = GB_CPU_MEM(ppu->mmu->cpu, GB_ADDR_BG_PALETTE);
-	// const u8 y_pos = ppu->ly - window_y;
 	const u16 tile_row = (u16)((ppu->window_scanline / 8) * 32);
 
-	for (u8 lx = window_x; lx < 160; lx++) {
+	for (u8 lx = (u8)_gb_max(window_x, 0); lx <= 160; lx++) {
 		const u8 x_pixel = (u8)(lx - window_x);
 		const u16 tile_column = x_pixel / 8;
 
