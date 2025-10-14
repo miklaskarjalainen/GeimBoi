@@ -42,8 +42,8 @@ static inline gb_color_t _gb_bg_pixel_color(u8 palette_index, u8 bg_palette)
 {
 	static gb_color_t s_Colors[4] = {
 		{.r = 0xFF, .g = 0xFF, .b = 0xFF}, // Black
-		{.r = 0x55, .g = 0x55, .b = 0x55},
 		{.r = 0xAA, .g = 0xAA, .b = 0xAA},
+		{.r = 0x55, .g = 0x55, .b = 0x55},
 		{.r = 0x00, .g = 0x00, .b = 0x00}, // White
 	};
 	GB_ASSERT(palette_index < 4, "invalid palette index");
@@ -87,11 +87,11 @@ static inline void _gb_render_background(gb_ppu_t* ppu)
 
 		// Fetch the row of pixels for the tile
 		const u8 tile_line = scroll_y % 8;
-		const u8 data1 =
-			gb_mmu_read_u8(ppu->mmu, (u16)(tile_location + (tile_line * 2)));
-		const u8 data2 = gb_mmu_read_u8(
-			ppu->mmu, (u16)(tile_location + (tile_line * 2) + 1)
+		const u8 data1 = gb_mmu_read_u8(
+			ppu->mmu, (u16)(tile_location + (tile_line * 2)) + 1
 		);
+		const u8 data2 =
+			gb_mmu_read_u8(ppu->mmu, (u16)(tile_location + (tile_line * 2)));
 
 		// Get the color of the pixel
 		const u8 colour_bit = 7 - (scroll_x & 7);
@@ -156,11 +156,11 @@ static inline void _gb_render_window(gb_ppu_t* ppu)
 
 		// Fetch the row of pixels for the tile
 		const u8 tile_line = ppu->window_scanline % 8;
-		const u8 data1 =
-			gb_mmu_read_u8(ppu->mmu, (u16)(tile_location + (tile_line * 2)));
-		const u8 data2 = gb_mmu_read_u8(
+		const u8 data1 = gb_mmu_read_u8(
 			ppu->mmu, (u16)(tile_location + (tile_line * 2) + 1)
 		);
+		const u8 data2 =
+			gb_mmu_read_u8(ppu->mmu, (u16)(tile_location + (tile_line * 2)));
 
 		// Get the color of the pixel
 		const u8 colour_bit = 7 - (x_pixel & 7);
@@ -252,8 +252,8 @@ static inline void _gb_render_objects(gb_ppu_t* ppu)
 		tile_y *= 2;
 
 		const u32 tile_index = oam.tile_idx * 16;
-		const u8 data1 = obj_tiles[tile_index + tile_y];
-		const u8 data2 = obj_tiles[tile_index + tile_y + 1];
+		const u8 data1 = obj_tiles[tile_index + tile_y + 1];
+		const u8 data2 = obj_tiles[tile_index + tile_y];
 		const u8 palette = GB_IS_BIT(oam.flags, 4) ? palette1 : palette0;
 		const u8 bg_priority = GB_IS_BIT(oam.flags, 7);
 
