@@ -1,5 +1,6 @@
 # Prerequisites
 *.d
+*.idx
 
 # Compiled Object files
 *.slo
