@@ -72,29 +72,29 @@ void GeimBoi::App::process_event(const SDL_Event& ev) noexcept
 			auto fn = ev.type == SDL_EVENT_KEY_UP ? gb_emu_release_key
 												  : gb_emu_press_key;
 
-			if (ev.key.scancode == SDL_SCANCODE_W) {
+			if (ev.key.scancode == Settings::get().controls.up) {
 				fn(m_Emulator.get(), GB_INPUT_UP);
 			}
-			if (ev.key.scancode == SDL_SCANCODE_S) {
+			if (ev.key.scancode == Settings::get().controls.down) {
 				fn(m_Emulator.get(), GB_INPUT_DOWN);
 			}
-			if (ev.key.scancode == SDL_SCANCODE_A) {
+			if (ev.key.scancode == Settings::get().controls.left) {
 				fn(m_Emulator.get(), GB_INPUT_LEFT);
 			}
-			if (ev.key.scancode == SDL_SCANCODE_D) {
+			if (ev.key.scancode == Settings::get().controls.right) {
 				fn(m_Emulator.get(), GB_INPUT_RIGHT);
 			}
 
-			if (ev.key.key == SDLK_J) {
+			if (ev.key.scancode == Settings::get().controls.b) {
 				fn(m_Emulator.get(), GB_INPUT_B);
 			}
-			if (ev.key.key == SDLK_K) {
+			if (ev.key.scancode == Settings::get().controls.a) {
 				fn(m_Emulator.get(), GB_INPUT_A);
 			}
-			if (ev.key.key == SDLK_RETURN) {
+			if (ev.key.scancode == Settings::get().controls.start) {
 				fn(m_Emulator.get(), GB_INPUT_START);
 			}
-			if (ev.key.key == SDLK_BACKSPACE) {
+			if (ev.key.scancode == Settings::get().controls.select) {
 				fn(m_Emulator.get(), GB_INPUT_SELECT);
 			}
 		}
