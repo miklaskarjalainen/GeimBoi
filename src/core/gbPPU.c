@@ -247,7 +247,7 @@ static inline void _gb_render_objects(gb_ppu_t* ppu)
 		const u8 flip_y = GB_IS_BIT(oam.flags, 6);
 		i32 tile_y = visible_ly - oam.pos_y;
 		if (flip_y) {
-			tile_y = sprite_height - tile_y;
+			tile_y = sprite_height - tile_y - 1;
 		}
 		tile_y *= 2;
 
