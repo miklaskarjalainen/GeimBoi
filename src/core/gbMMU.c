@@ -1,17 +1,18 @@
 #include "gbMMU.h"
+#include "gbCart.h"
 #include "gbPPU.h"
 #include "gbSM83.h"
-#include "gbCart.h"
 #include "log.h"
 
 void gb_mmu_init(
 	gb_mmu_t* mmu, struct gb_cart* cart, struct gb_sm83* cpu, struct gb_ppu* ppu
-) {
-    *mmu = (gb_mmu_t){ 0 };
+)
+{
+	*mmu = (gb_mmu_t){0};
 
-    mmu->cart = cart;
-    mmu->cpu = cpu;
-    mmu->ppu = ppu;
+	mmu->cart = cart;
+	mmu->cpu = cpu;
+	mmu->ppu = ppu;
 }
 
 u16 gb_mmu_read_u16(const gb_mmu_t* mmu, u16 addr)
@@ -26,18 +27,21 @@ u8 gb_mmu_read_u8(const gb_mmu_t* mmu, u16 addr)
 	GB_ASSERT(mmu, "nullptr");
 	GB_ASSERT(mmu->cart, "nullptr");
 	if (addr < 0x8000) {
-		return mmu->cart->read(mmu->cart, addr);
+		return mmu->cart->read_rom(mmu->cart, addr);
+	}
+	if (addr >= 0xA000 && addr <= 0xBFFF) {
+		return mmu->cart->read_ram(mmu->cart, addr);
 	}
 
 	// Joypad
 	if (addr == GB_ADDR_P1) {
 		const u8 joy = GB_CPU_MEM(mmu->cpu, GB_ADDR_P1);
 		u8 buttons = 0xF;
-        if (GB_IS_BIT(joy, 5)) {
-            buttons &= mmu->cpu->keys_down;
+		if (GB_IS_BIT(joy, 5)) {
+			buttons &= mmu->cpu->keys_down;
 		}
-        if (GB_IS_BIT(joy, 4)) {
-            buttons &= mmu->cpu->keys_down >> 4;
+		if (GB_IS_BIT(joy, 4)) {
+			buttons &= mmu->cpu->keys_down >> 4;
 		}
 		return joy | buttons;
 	}
@@ -68,7 +72,11 @@ u8 gb_mmu_read_u8(const gb_mmu_t* mmu, u16 addr)
 void gb_mmu_write_u8(gb_mmu_t* mmu, u16 addr, u8 data)
 {
 	if (addr < 0x8000) {
-	    mmu->cart->write(mmu->cart, addr, data);
+		mmu->cart->write_rom(mmu->cart, addr, data);
+		return;
+	}
+	if (addr >= 0xA000 && addr <= 0xBFFF) {
+		mmu->cart->write_ram(mmu->cart, addr, data);
 		return;
 	}
 
@@ -86,7 +94,7 @@ void gb_mmu_write_u8(gb_mmu_t* mmu, u16 addr, u8 data)
 
 	// Timer registers
 	if (addr == GB_ADDR_DIV) {
-	    mmu->cpu->timer_div_increment = 0;
+		mmu->cpu->timer_div_increment = 0;
 		mmu->cpu->memory[GB_ADDR_DIV - 0x8000] = 0;
 		return;
 	}
@@ -138,8 +146,8 @@ void gb_mmu_push_u8(gb_mmu_t* mmu, u8 data)
 
 void gb_mmu_push_u16(gb_mmu_t* mmu, u16 data)
 {
-    gb_mmu_push_u8(mmu, (u8)(data >> 8));
-    gb_mmu_push_u8(mmu, (u8)(data & 0xFF));
+	gb_mmu_push_u8(mmu, (u8)(data >> 8));
+	gb_mmu_push_u8(mmu, (u8)(data & 0xFF));
 }
 
 u8 gb_mmu_pop_u8(gb_mmu_t* mmu)

@@ -7,6 +7,9 @@ option(GB_TESTS on)
 
 # Define the backend library
 add_library(${PROJECT_NAME}
+    mbc/MBC0.c
+    mbc/MBC1.c
+
     gbCore.h
     gbCart.c gbCart.h
     gbEmu.c gbEmu.h
