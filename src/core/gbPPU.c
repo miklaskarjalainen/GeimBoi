@@ -374,6 +374,10 @@ static void clock_vblank(gb_ppu_t* ppu)
 
 	if (ppu->ly == 153) {
 		ppu->ly = 0;
+		if (GB_IS_BIT(ppu->lcdc, 5)) {
+			ppu->window_ly_eq |=
+				(u8)(0 == *GB_CPU_MEM(&ppu->mmu->cpu, GB_ADDR_WY));
+		}
 		PPU_SET_MODE(ppu, PPU_MODE_OAM);
 		if (GB_IS_BIT(ppu->stat, 3)) {
 			gb_cpu_request_interrupt(ppu->mmu->cpu, GB_INTERRUPT_LCD);
