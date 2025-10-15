@@ -54,6 +54,7 @@ void GeimBoi::GuiDebugger::draw_cpu()
 	ImGui::Text(
 		"Double Speed: %s", m_Emulator->cpu.double_speed ? "true" : "false"
 	);
+	ImGui::Text("CGB Mode: %s", m_Emulator->cgb_mode ? "true" : "false");
 	ImGui::End();
 }
 
@@ -81,5 +82,56 @@ void GeimBoi::GuiDebugger::draw_ppu()
 	ImGui::Text("T-Cycles 0x%04X", m_Emulator->ppu.t_cycles);
 	ImGui::Text("Enabled: %X", GB_IS_BIT(m_Emulator->ppu.lcdc, 7));
 	ImGui::Text("Mode %u", gb_mmu_read_u8(&m_Emulator->mmu, 0xFF41) & 0x3);
+
+	ImGui::SeparatorText("CGB BGPI");
+	for (int i = 0; i < 16; i++) {
+		ImGui::Text(
+			"[%i]: 0x%02x",
+			i * 4,
+			m_Emulator->ppu.cgb.background_palette[i * 2 + 1]
+		);
+		ImGui::SameLine();
+		ImGui::Text(
+			"[%i]: 0x%02x",
+			i * 4 + 1,
+			m_Emulator->ppu.cgb.background_palette[i * 4 + 1]
+		);
+		ImGui::SameLine();
+		ImGui::Text(
+			"[%i]: 0x%02x",
+			i * 4 + 2,
+			m_Emulator->ppu.cgb.background_palette[i * 4 + 2]
+		);
+		ImGui::SameLine();
+		ImGui::Text(
+			"[%i]: 0x%02x",
+			i * 4 + 3,
+			m_Emulator->ppu.cgb.background_palette[i * 4 + 3]
+		);
+	}
+	ImGui::SeparatorText("CGB OBPI");
+	for (int i = 0; i < 16; i++) {
+		ImGui::Text(
+			"[%i]: 0x%02x", i * 4, m_Emulator->ppu.cgb.object_palette[i * 2 + 1]
+		);
+		ImGui::SameLine();
+		ImGui::Text(
+			"[%i]: 0x%02x",
+			i * 4 + 1,
+			m_Emulator->ppu.cgb.object_palette[i * 4 + 1]
+		);
+		ImGui::SameLine();
+		ImGui::Text(
+			"[%i]: 0x%02x",
+			i * 4 + 2,
+			m_Emulator->ppu.cgb.object_palette[i * 4 + 2]
+		);
+		ImGui::SameLine();
+		ImGui::Text(
+			"[%i]: 0x%02x",
+			i * 4 + 3,
+			m_Emulator->ppu.cgb.object_palette[i * 4 + 3]
+		);
+	}
 	ImGui::End();
 }

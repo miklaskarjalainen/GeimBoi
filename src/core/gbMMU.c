@@ -43,11 +43,11 @@ u8 gb_mmu_read_u8(const gb_mmu_t* mmu, u16 addr)
 	if (addr == GB_ADDR_P1) {
 		const u8 joy = GB_CPU_MEM(mmu->cpu, GB_ADDR_P1);
 		u8 buttons = 0xF;
-		if (GB_IS_BIT(joy, 5)) {
-			buttons &= mmu->cpu->keys_down;
-		}
 		if (GB_IS_BIT(joy, 4)) {
 			buttons &= mmu->cpu->keys_down >> 4;
+		}
+		if (GB_IS_BIT(joy, 5)) {
+			buttons &= mmu->cpu->keys_down;
 		}
 		return joy | buttons;
 	}
@@ -77,6 +77,18 @@ u8 gb_mmu_read_u8(const gb_mmu_t* mmu, u16 addr)
 	}
 	if (addr == 0xFF45) {
 		return mmu->ppu->lyc;
+	}
+
+	// CGB
+	if (mmu->emu->cgb_mode) {
+		if (addr == GB_ADDR_BGPD) {
+			const u8 index = GB_CPU_MEM(mmu->cpu, GB_ADDR_BGPI) & 0x3F;
+			return mmu->ppu->cgb.background_palette[index];
+		}
+		if (addr == GB_ADDR_OBPD) {
+			const u8 index = GB_CPU_MEM(mmu->cpu, GB_ADDR_OBPI) & 0x3F;
+			return mmu->ppu->cgb.object_palette[index];
+		}
 	}
 
 	return mmu->cpu->memory[addr - 0x8000];
@@ -149,6 +161,31 @@ void gb_mmu_write_u8(gb_mmu_t* mmu, u16 addr, u8 data)
 	if (addr == 0xFF45) {
 		mmu->cpu->mmu->ppu->lyc = data;
 		return;
+	}
+
+	// CGB
+	if (mmu->emu->cgb_mode) {
+		if (addr == GB_ADDR_BGPD || addr == GB_ADDR_OBPD) {
+			const u16 index_addr = (u16)(addr - 1U);
+			const u8 index_data = GB_CPU_MEM(mmu->cpu, index_addr);
+
+			const u8 palette_index = index_data & 0x3F;
+			const u8 auto_increment = GB_GET_BIT(index_data, 7);
+
+			if (addr == GB_ADDR_BGPD) {
+				mmu->ppu->cgb.background_palette[palette_index] = data;
+			}
+			else {
+				mmu->ppu->cgb.object_palette[palette_index] = data;
+			}
+
+			if (auto_increment) {
+				const u8 incremented = (palette_index + 1) & 0x3F;
+				const u8 data_incremented = auto_increment | incremented;
+				GB_CPU_MEM(mmu->cpu, index_addr) = data_incremented;
+			}
+			return;
+		}
 	}
 
 	mmu->cpu->memory[addr - 0x8000] = data;

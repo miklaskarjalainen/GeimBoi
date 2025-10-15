@@ -20,7 +20,6 @@ static inline int _gb_max(int a, int b) { return a >= b ? a : b; }
 
 void gb_ppu_init(gb_ppu_t* ppu, struct gb_mmu* mmu)
 {
-
 	for (int y = 0; y < GB_LCD_HEIGHT; y++) {
 		for (int x = 0; x < GB_LCD_WIDTH; x++) {
 			ppu->frame[y][x][0] = (u8)(255);
@@ -34,6 +33,12 @@ void gb_ppu_init(gb_ppu_t* ppu, struct gb_mmu* mmu)
 	ppu->lcdc = 0x80;
 	ppu->t_cycles = 0;
 	ppu->mmu = mmu;
+
+	// cgb
+	for (u8 i = 0; i < GB_ARRAY_LEN(ppu->cgb.background_palette); i++) {
+		ppu->cgb.background_palette[i] = 0U;
+		ppu->cgb.object_palette[i] = 0U;
+	}
 }
 
 typedef struct gb_color {

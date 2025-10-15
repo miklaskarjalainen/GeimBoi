@@ -205,6 +205,9 @@ void GeimBoi::App::reset()
 	m_IsLoaded = false;
 	if (!rompath.empty()) {
 		m_IsLoaded = gb_emu_load_rom_file(m_Emulator.get(), rompath.c_str());
+		const u8 cgb = m_Emulator->cart.rom[0x143] == 0x80 ||
+					   m_Emulator->cart.rom[0x143] == 0xC0;
+		m_Emulator->cgb_mode = cgb;
 
 		// Load SAV
 		std::string game_name = gb_cart_get_name(&m_Emulator->cart);

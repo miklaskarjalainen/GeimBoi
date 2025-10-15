@@ -18,6 +18,11 @@ typedef struct gb_ppu {
 	u8 window_ly_eq : 1; // Has window's ly ever been ly?
 	u8 window_scanline;
 
+	struct {
+		u8 background_palette[64];
+		u8 object_palette[64];
+	} cgb;
+
 	struct gb_mmu* mmu;
 } gb_ppu_t;
 

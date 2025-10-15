@@ -13,6 +13,10 @@
 
 // CGB registers
 #define GB_ADDR_SPEED_SW (0xFF4D) // Speed Switch (KEY1)
+#define GB_ADDR_BGPI (0xFF68)	  // Background color palette index
+#define GB_ADDR_BGPD (0xFF69)	  // Background color palette data
+#define GB_ADDR_OBPI (0xFF6A)	  // Object color palette index
+#define GB_ADDR_OBPD (0xFF6B)	  // Object color palette data
 
 #define GB_ADDR_P1 (0xFF00)	  // Joypad input
 #define GB_ADDR_DIV (0xFF04)  // Divider register
