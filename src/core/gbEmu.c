@@ -26,7 +26,7 @@ void gb_emu_init(gb_emu_t* emu, int cgb_mode)
 {
 	memset((void*)emu, 0, sizeof(gb_emu_t));
 
-	emu->cgb_mode = cgb_mode & 0x1;
+	emu->cgb_mode = (u8)cgb_mode & 0x1U;
 	gb_mmu_init(&emu->mmu, &emu->cart, &emu->cpu, &emu->ppu, emu);
 	gb_cart_init(&emu->cart);
 	gb_cpu_init(&emu->cpu, &emu->mmu);
