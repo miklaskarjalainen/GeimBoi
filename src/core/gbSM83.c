@@ -91,43 +91,43 @@ void gb_cpu_request_interrupt(gb_sm83_t* cpu, u8 interrupt)
 
 void gb_cpu_clock_timers(gb_sm83_t* cpu, u8 m_cycles)
 {
-    // Increment internal timers
-    {
-        cpu->timer_div_increment += m_cycles;
-        cpu->timer_tima_increment += m_cycles;
-    }
+	// Increment internal timers
+	{
+		cpu->timer_div_increment += m_cycles;
+		cpu->timer_tima_increment += m_cycles;
+	}
 
-    // Handle DIV register
-    {
-        const u8 increment_rate = MACHINE_CLOCK / TIMER_CLOCK;
-        if (cpu->timer_div_increment >= increment_rate) {
-            cpu->timer_div_increment -= 1;
-            cpu->memory[GB_ADDR_DIV - 0x8000] += 1;
-        }
-    }
+	// Handle DIV register
+	{
+		const u8 increment_rate = MACHINE_CLOCK / TIMER_CLOCK;
+		if (cpu->timer_div_increment >= increment_rate) {
+			cpu->timer_div_increment -= 1;
+			cpu->memory[GB_ADDR_DIV - 0x8000] += 1;
+		}
+	}
 
-    // Handle TIMA register
-    {
-        const u8 TAC = cpu->memory[GB_ADDR_TAC - 0x8000];
-        if (!GB_IS_BIT(TAC, 2)) {
-            return;
-        }
+	// Handle TIMA register
+	{
+		const u8 TAC = cpu->memory[GB_ADDR_TAC - 0x8000];
+		if (!GB_IS_BIT(TAC, 2)) {
+			return;
+		}
 
-        // How often the TIMA should be incremented (m-cycles)
-        static const u16 TIMA_increment[4] = {256, 4, 16, 64};
-        const u16 increment = TIMA_increment[TAC & 0x3];
+		// How often the TIMA should be incremented (m-cycles)
+		static const u16 TIMA_increment[4] = {256, 4, 16, 64};
+		const u16 increment = TIMA_increment[TAC & 0x3];
 
-        if (cpu->timer_tima_increment >= increment) {
-            u8* tima = &cpu->memory[GB_ADDR_TIMA - 0x8000];
-            cpu->timer_tima_increment -= increment;
+		if (cpu->timer_tima_increment >= increment) {
+			u8* tima = &cpu->memory[GB_ADDR_TIMA - 0x8000];
+			cpu->timer_tima_increment -= increment;
 
-            if (*tima != 0xFF) {
-                *tima += 1;
-                return;
-            }
+			if (*tima != 0xFF) {
+				*tima += 1;
+				return;
+			}
 
-            *tima = cpu->memory[GB_ADDR_TMA - 0x8000];
-            gb_cpu_request_interrupt(cpu, GB_INTERRUPT_TIMER);
-        }
-    }
+			*tima = cpu->memory[GB_ADDR_TMA - 0x8000];
+			gb_cpu_request_interrupt(cpu, GB_INTERRUPT_TIMER);
+		}
+	}
 }

@@ -1,10 +1,10 @@
 #ifndef _GB_CONSOLE_H
 #define _GB_CONSOLE_H
 
-#include "gbSM83.h"
 #include "gbCart.h"
 #include "gbMMU.h"
 #include "gbPPU.h"
+#include "gbSM83.h"
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -13,28 +13,32 @@
  * @see gb_emu_press_input, gb_emu_release_input
  */
 typedef enum gb_input {
-    GB_INPUT_RIGHT = GB_BIT(0),
-    GB_INPUT_LEFT = GB_BIT(1),
-    GB_INPUT_UP = GB_BIT(2),
-    GB_INPUT_DOWN = GB_BIT(3),
-    GB_INPUT_A = GB_BIT(4),
-    GB_INPUT_B = GB_BIT(5),
-    GB_INPUT_SELECT = GB_BIT(6),
-    GB_INPUT_START = GB_BIT(7)
+	GB_INPUT_RIGHT = GB_BIT(0),
+	GB_INPUT_LEFT = GB_BIT(1),
+	GB_INPUT_UP = GB_BIT(2),
+	GB_INPUT_DOWN = GB_BIT(3),
+	GB_INPUT_A = GB_BIT(4),
+	GB_INPUT_B = GB_BIT(5),
+	GB_INPUT_SELECT = GB_BIT(6),
+	GB_INPUT_START = GB_BIT(7)
 } gb_input_e;
 
 typedef struct gb_emu {
-    gb_sm83_t cpu;
-    gb_cart_t cart;
-    gb_ppu_t ppu;
-    gb_mmu_t mmu;
+	gb_sm83_t cpu;
+	gb_cart_t cart;
+	gb_ppu_t ppu;
+	gb_mmu_t mmu;
+
+	u8 cgb_mode : 1;
 } gb_emu_t;
 
 /**
  * @brief Crients the emulator on the heap. And initializes it.
+ * @params cgb_mode 0 - dmg, 1 - cgb
  * @see gb_emu_init.
  */
-gb_emu_t* gb_emu_create(void);
+gb_emu_t* gb_emu_create(int cgb_mode);
+
 /**
  * @brief Deinitialises and frees the emulator
  * @see gb_emu_deinit.
@@ -43,9 +47,10 @@ void gb_emu_delete(gb_emu_t* emu);
 
 /**
  * @brief initializes on an already allocated memory.
+ * @params cgb_mode 0 - dmg, 1 - cgb
  * @see gb_emu_create.
  */
-void gb_emu_init(gb_emu_t* emu);
+void gb_emu_init(gb_emu_t* emu, int cgb_mode);
 /**
  * @brief deinitialises the emulator.
  * @warning DOES NOT FREE THE SOURCE PTR. Use `gb_emu_delete` instead!

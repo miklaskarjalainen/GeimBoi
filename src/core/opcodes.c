@@ -1,5 +1,6 @@
 #include "gbCart.h"
 #include "gbEmu.h"
+#include "gbMMU.h"
 #include "gbPPU.h"
 #include "gbReg.h"
 #include "gbSM83.h"
@@ -64,11 +65,11 @@ static inline void _gb_adc(gb_sm83_t* cpu, u8 data)
 
 static inline void _gb_sbc(gb_sm83_t* cpu, u8 data)
 {
-    const u8 sub_carry = GB_IS_BIT(GB_REG_F(cpu->regs), GB_FLAG_CARR_BIT);
+	const u8 sub_carry = GB_IS_BIT(GB_REG_F(cpu->regs), GB_FLAG_CARR_BIT);
 	const u16 sub_amount = (u16)data + sub_carry;
 	const u16 result = (u16)GB_REG_A(cpu->regs) - sub_amount;
 
-	const u8 half  = (GB_REG_A(cpu->regs) & 0xF) < ((data & 0xF) + sub_carry);
+	const u8 half = (GB_REG_A(cpu->regs) & 0xF) < ((data & 0xF) + sub_carry);
 	const u8 carry = GB_REG_A(cpu->regs) < sub_amount;
 
 	GB_REG_F(cpu->regs) = GB_FLAG_SUBS;
@@ -111,7 +112,7 @@ static inline void _gb_and(gb_sm83_t* cpu, u8 data)
 static inline void _gb_sub(gb_sm83_t* cpu, u8 data)
 {
 	const u16 result = (u16)GB_REG_A(cpu->regs) - data;
-	const u8 half  = (GB_REG_A(cpu->regs) & 0xF) < ((data & 0xF));
+	const u8 half = (GB_REG_A(cpu->regs) & 0xF) < ((data & 0xF));
 	const u8 carry = GB_REG_A(cpu->regs) < data;
 
 	GB_REG_F(cpu->regs) = GB_FLAG_SUBS;
@@ -133,19 +134,20 @@ static inline void _gb_add_u16(gb_sm83_t* cpu, u16 data)
 	GB_REG_HL(cpu->regs) = (u16)result;
 }
 
-static inline void _gb_rr(gb_sm83_t* cpu, u8* reg) {
-    const u8 carry = (GB_REG_F(cpu->regs) & GB_FLAG_CARR) != 0;
-    GB_REG_F(cpu->regs) = GB_IS_BIT(*reg, 0) ? GB_FLAG_CARR : 0;
+static inline void _gb_rr(gb_sm83_t* cpu, u8* reg)
+{
+	const u8 carry = (GB_REG_F(cpu->regs) & GB_FLAG_CARR) != 0;
+	GB_REG_F(cpu->regs) = GB_IS_BIT(*reg, 0) ? GB_FLAG_CARR : 0;
 
-    *reg >>= 1;
-    *reg |= (carry << 7);
+	*reg >>= 1;
+	*reg |= (carry << 7);
 
-    GB_REG_F(cpu->regs) |= *reg == 0 ? GB_FLAG_ZERO : 0;
+	GB_REG_F(cpu->regs) |= *reg == 0 ? GB_FLAG_ZERO : 0;
 }
 
 static inline void _gb_rlc(gb_sm83_t* cpu, u8* reg)
 {
-    const u8 carry = GB_IS_BIT(*reg, 7);
+	const u8 carry = GB_IS_BIT(*reg, 7);
 	GB_REG_F(cpu->regs) = carry ? GB_FLAG_CARR : 0;
 	*reg <<= 1;
 	*reg |= carry;
@@ -154,7 +156,7 @@ static inline void _gb_rlc(gb_sm83_t* cpu, u8* reg)
 
 static inline void _gb_rrc(gb_sm83_t* cpu, u8* reg)
 {
-    const u8 carry = GB_IS_BIT(*reg, 0);
+	const u8 carry = GB_IS_BIT(*reg, 0);
 	GB_REG_F(cpu->regs) = carry ? GB_FLAG_CARR : 0;
 	*reg >>= 1;
 	*reg |= (carry << 7);
@@ -163,8 +165,8 @@ static inline void _gb_rrc(gb_sm83_t* cpu, u8* reg)
 
 static inline void _gb_rl(gb_sm83_t* cpu, u8* reg)
 {
-    const u8 do_carry = (GB_REG_F(cpu->regs) & GB_FLAG_CARR) != 0;
-    const u8 has_carry = GB_IS_BIT(*reg, 7);
+	const u8 do_carry = (GB_REG_F(cpu->regs) & GB_FLAG_CARR) != 0;
+	const u8 has_carry = GB_IS_BIT(*reg, 7);
 
 	*reg <<= 1;
 	*reg |= do_carry;
@@ -175,8 +177,8 @@ static inline void _gb_rl(gb_sm83_t* cpu, u8* reg)
 
 static inline void _gb_sra(gb_sm83_t* cpu, u8* reg)
 {
-    const u8 do_carry = GB_GET_BIT(*reg, 7);
-    const u8 has_carry = GB_GET_BIT(*reg, 0);
+	const u8 do_carry = GB_GET_BIT(*reg, 7);
+	const u8 has_carry = GB_GET_BIT(*reg, 0);
 
 	*reg >>= 1;
 	*reg |= do_carry;
@@ -184,7 +186,6 @@ static inline void _gb_sra(gb_sm83_t* cpu, u8* reg)
 	GB_REG_F(cpu->regs) = has_carry ? GB_FLAG_CARR : 0;
 	GB_REG_F(cpu->regs) |= (*reg) == 0 ? GB_FLAG_ZERO : 0;
 }
-
 
 static inline void _gb_srl(gb_sm83_t* cpu, u8* reg)
 {
@@ -230,47 +231,40 @@ static inline void _gb_call(gb_sm83_t* cpu)
 
 static inline void _gb_daa(gb_sm83_t* cpu)
 {
-    const u8 flags = GB_REG_F(cpu->regs);
-    u16 reg_a = GB_REG_A(cpu->regs);
+	const u8 flags = GB_REG_F(cpu->regs);
+	u16 reg_a = GB_REG_A(cpu->regs);
 
-    // Handle addition
-    if ( !(GB_IS_BIT(flags, GB_FLAG_SUBS_BIT)) )
-    {
-        if ( GB_IS_BIT(flags, GB_FLAG_HALF_BIT) || ((reg_a & 0xF) > 9))
-        {
-            reg_a += 0x6;
-        }
+	// Handle addition
+	if (!(GB_IS_BIT(flags, GB_FLAG_SUBS_BIT))) {
+		if (GB_IS_BIT(flags, GB_FLAG_HALF_BIT) || ((reg_a & 0xF) > 9)) {
+			reg_a += 0x6;
+		}
 
-        if ( GB_IS_BIT(flags, GB_FLAG_CARR_BIT) || (reg_a > 0x9F))
-        {
-            reg_a += 0x60;
-            GB_REG_F(cpu->regs) |= GB_FLAG_CARR;
-        }
-    }
-    // Substract
-    else
-    {
-        if ( GB_IS_BIT(flags, GB_FLAG_HALF_BIT) )
-        {
-            reg_a -= 0x6;
-        }
+		if (GB_IS_BIT(flags, GB_FLAG_CARR_BIT) || (reg_a > 0x9F)) {
+			reg_a += 0x60;
+			GB_REG_F(cpu->regs) |= GB_FLAG_CARR;
+		}
+	}
+	// Substract
+	else {
+		if (GB_IS_BIT(flags, GB_FLAG_HALF_BIT)) {
+			reg_a -= 0x6;
+		}
 
-        if ( GB_IS_BIT(flags, GB_FLAG_CARR_BIT) )
-        {
-            reg_a -= 0x60;
-        }
-    }
+		if (GB_IS_BIT(flags, GB_FLAG_CARR_BIT)) {
+			reg_a -= 0x60;
+		}
+	}
 
-    // Reset Flags
-    GB_REG_F(cpu->regs) &= (u8)~(GB_FLAG_ZERO);
-    GB_REG_F(cpu->regs) &= (u8)~(GB_FLAG_HALF);
+	// Reset Flags
+	GB_REG_F(cpu->regs) &= (u8) ~(GB_FLAG_ZERO);
+	GB_REG_F(cpu->regs) &= (u8) ~(GB_FLAG_HALF);
 
-    if ( (reg_a & 0xFF) == 0U)
-    {
-        GB_REG_F(cpu->regs) |= GB_FLAG_ZERO;
-    }
+	if ((reg_a & 0xFF) == 0U) {
+		GB_REG_F(cpu->regs) |= GB_FLAG_ZERO;
+	}
 
-    GB_REG_A(cpu->regs) = (u8)reg_a;
+	GB_REG_A(cpu->regs) = (u8)reg_a;
 }
 
 static u8 _gb_emu_execute_cb(gb_sm83_t* cpu);
@@ -296,8 +290,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		/* RLCA */ case 0x07: {
 			u8 carry = GB_IS_BIT(GB_REG_A(cpu->regs), 7) != 0;
 			GB_REG_F(cpu->regs) = carry ? GB_FLAG_CARR : 0;
-			GB_REG_A(cpu->regs) =
-				(u8)((GB_REG_A(cpu->regs) << 1) | carry);
+			GB_REG_A(cpu->regs) = (u8)((GB_REG_A(cpu->regs) << 1) | carry);
 			return 1;
 		}
 
@@ -305,8 +298,7 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 			u8 has_carry = GB_IS_BIT(GB_REG_A(cpu->regs), 7) != 0;
 			u8 do_carry = (GB_REG_F(cpu->regs) & GB_FLAG_CARR) != 0;
 			GB_REG_F(cpu->regs) = has_carry ? GB_FLAG_CARR : 0;
-			GB_REG_A(cpu->regs) =
-				(u8)((GB_REG_A(cpu->regs) << 1) | do_carry);
+			GB_REG_A(cpu->regs) = (u8)((GB_REG_A(cpu->regs) << 1) | do_carry);
 			return 1;
 		}
 
@@ -470,10 +462,12 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		}
 
 		/* LD (a16), SP */ case 0x08: {
-		    u16 addr = gb_mmu_read_u16(cpu->mmu, GB_REG_PC(cpu->regs));
+			u16 addr = gb_mmu_read_u16(cpu->mmu, GB_REG_PC(cpu->regs));
 			GB_REG_PC(cpu->regs) += 2;
 			gb_mmu_write_u8(cpu->mmu, addr, (u8)GB_REG_SP(cpu->regs));
-			gb_mmu_write_u8(cpu->mmu, addr + 1, (u8)(GB_REG_SP(cpu->regs) >> 8));
+			gb_mmu_write_u8(
+				cpu->mmu, addr + 1, (u8)(GB_REG_SP(cpu->regs) >> 8)
+			);
 			return 5;
 		}
 
@@ -503,7 +497,9 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		/* LD (HL), d8 */ case 0x36: {
 			u16 read_addr = GB_REG_PC(cpu->regs)++;
 			u16 write_addr = GB_REG_HL(cpu->regs);
-			gb_mmu_write_u8(cpu->mmu, write_addr, gb_mmu_read_u8(cpu->mmu, read_addr));
+			gb_mmu_write_u8(
+				cpu->mmu, write_addr, gb_mmu_read_u8(cpu->mmu, read_addr)
+			);
 			return 3;
 		}
 
@@ -1249,36 +1245,36 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		}
 
 		/* ADD SP, s8 */ case 0xE8: {
-		    const i8 imm = gb_mmu_read_i8(cpu->mmu, GB_REG_PC(cpu->regs));
-		    const u16 reg = GB_REG_SP(cpu->regs);
+			const i8 imm = gb_mmu_read_i8(cpu->mmu, GB_REG_PC(cpu->regs));
+			const u16 reg = GB_REG_SP(cpu->regs);
 			const u16 result = (u16)(reg + imm);
 
 			GB_REG_PC(cpu->regs) += 1;
 
 			GB_REG_F(cpu->regs) = 0;
 			if ((reg & 0xF) + (imm & 0xF) > 0xF) {
-			    GB_REG_F(cpu->regs) |= GB_FLAG_HALF;
+				GB_REG_F(cpu->regs) |= GB_FLAG_HALF;
 			}
 			if ((reg & 0xFF) + (imm & 0xFF) > 0xFF) {
-			    GB_REG_F(cpu->regs) |= GB_FLAG_CARR;
+				GB_REG_F(cpu->regs) |= GB_FLAG_CARR;
 			}
 			GB_REG_SP(cpu->regs) = result;
 			return 4;
 		}
 
 		/* LD HL, (SP+s8) */ case 0xF8: {
-		    const i8 imm = gb_mmu_read_i8(cpu->mmu, GB_REG_PC(cpu->regs));
-		    const u16 reg = GB_REG_SP(cpu->regs);
+			const i8 imm = gb_mmu_read_i8(cpu->mmu, GB_REG_PC(cpu->regs));
+			const u16 reg = GB_REG_SP(cpu->regs);
 			const u16 result = (u16)(reg + imm);
 
 			GB_REG_PC(cpu->regs) += 1;
 
 			GB_REG_F(cpu->regs) = 0;
 			if ((reg & 0xF) + (imm & 0xF) > 0xF) {
-			    GB_REG_F(cpu->regs) |= GB_FLAG_HALF;
+				GB_REG_F(cpu->regs) |= GB_FLAG_HALF;
 			}
 			if ((reg & 0xFF) + (imm & 0xFF) > 0xFF) {
-			    GB_REG_F(cpu->regs) |= GB_FLAG_CARR;
+				GB_REG_F(cpu->regs) |= GB_FLAG_CARR;
 			}
 			GB_REG_HL(cpu->regs) = result;
 			return 3;
@@ -1566,28 +1562,28 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		}
 
 		/* DI */ case 0xF3: {
-		    cpu->interrupt_enable = 0;
+			cpu->interrupt_enable = 0;
 			return 1;
 		}
 
 		/* EI */ case 0xFB: {
-		    cpu->interrupt_enable = 1;
+			cpu->interrupt_enable = 1;
 			return 1;
 		}
 
 		/* HALT */ case 0x76: {
-		    // Halt bug?
-		    if (!cpu->interrupt_enable) {
+			// Halt bug?
+			if (!cpu->interrupt_enable) {
 				const u8 IE = GB_CPU_MEM(cpu, GB_ADDR_IE);
 				const u8 IF = GB_CPU_MEM(cpu, GB_ADDR_IF);
 				if ((IE & IF & GB_INTERRUPT_MASK) != 0) {
-				    cpu->halt_bugged = 1;
-				    return 1;
+					cpu->halt_bugged = 1;
+					return 1;
 				}
 			}
 
-		    cpu->is_halted = 1;
-		    return 1;
+			cpu->is_halted = 1;
+			return 1;
 		}
 
 		/* STOP */ case 0x10: {
@@ -1646,8 +1642,8 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		}
 
 		/* DAA */ case 0x27: {
-		    _gb_daa(cpu);
-		    return 1;
+			_gb_daa(cpu);
+			return 1;
 		}
 
 		/* CB PREFIX */ case 0xCB: {

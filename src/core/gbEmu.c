@@ -37,7 +37,7 @@ void gb_emu_deinit(gb_emu_t* emu) { (void)emu; }
 
 bool gb_emu_load_rom_bytes(gb_emu_t* emu, const u8* rom, size_t length)
 {
-    gb_cart_load(&emu->cart, rom, length);
+	gb_cart_load(&emu->cart, rom, length);
 	return true;
 }
 
@@ -66,12 +66,13 @@ bool gb_emu_load_rom_file(gb_emu_t* emu, const char* fpath)
 	return r;
 }
 
-void gb_emu_advance_frame(gb_emu_t* emu) {
-    const u32 FrameCycles = 70221 / 4;
-    while (emu->cpu.m_cycles < FrameCycles) {
-        gb_emu_advance_opcode(emu);
-    }
-    emu->cpu.m_cycles -= FrameCycles;
+void gb_emu_advance_frame(gb_emu_t* emu)
+{
+	const u32 FrameCycles = 70221 / 4;
+	while (emu->cpu.m_cycles < FrameCycles) {
+		gb_emu_advance_opcode(emu);
+	}
+	emu->cpu.m_cycles -= FrameCycles;
 }
 
 void gb_emu_advance_opcode(gb_emu_t* emu)
@@ -86,30 +87,30 @@ void gb_emu_advance_opcode(gb_emu_t* emu)
 
 void gb_emu_press_key(gb_emu_t* emu, gb_input_e input)
 {
-    // 0 -> pressed (the same way it works on the gameboy)
-    // 1 -> unpressed
+	// 0 -> pressed (the same way it works on the gameboy)
+	// 1 -> unpressed
 
-    const u8 changed = (emu->cpu.keys_down & input) != 0;
-    if (!changed) {
-        return;
-    }
+	const u8 changed = (emu->cpu.keys_down & input) != 0;
+	if (!changed) {
+		return;
+	}
 
-    const u8 p1 = gb_mmu_read_u8(&emu->mmu, GB_ADDR_P1);
-    const u8 is_dpad = (input & 0x0F) != 0;
-    const u8 is_action = (input & 0xF0) != 0;
-    emu->cpu.keys_down &= (u8)~input;
+	const u8 p1 = gb_mmu_read_u8(&emu->mmu, GB_ADDR_P1);
+	const u8 is_dpad = (input & 0x0F) != 0;
+	const u8 is_action = (input & 0xF0) != 0;
+	emu->cpu.keys_down &= (u8)~input;
 
-    if (GB_IS_BIT(p1, 5) && is_dpad) {
-        gb_cpu_request_interrupt(&emu->cpu, GB_INTERRUPT_JOYPAD);
-    }
-    else if ((GB_IS_BIT(p1, 4) && is_action)) {
-        gb_cpu_request_interrupt(&emu->cpu, GB_INTERRUPT_JOYPAD);
-    }
+	if (GB_IS_BIT(p1, 5) && is_dpad) {
+		gb_cpu_request_interrupt(&emu->cpu, GB_INTERRUPT_JOYPAD);
+	}
+	else if ((GB_IS_BIT(p1, 4) && is_action)) {
+		gb_cpu_request_interrupt(&emu->cpu, GB_INTERRUPT_JOYPAD);
+	}
 }
 
 void gb_emu_release_key(gb_emu_t* emu, gb_input_e input)
 {
-    // 0 -> pressed (the same way it works on the gameboy)
-    // 1 -> unpressed
-    emu->cpu.keys_down |= (u8)input;
+	// 0 -> pressed (the same way it works on the gameboy)
+	// 1 -> unpressed
+	emu->cpu.keys_down |= (u8)input;
 }
