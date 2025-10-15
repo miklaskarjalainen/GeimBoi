@@ -35,9 +35,10 @@ typedef struct gb_sm83 {
 	gb_reg16_t regs[GB_REG_COUNT];
 	u8 memory[0x8000]; // 0x8000 - 0xFFFF
 
-	u8 interrupt_enable:1;
-	u8 is_halted:1;
-	u8 halt_bugged:1;
+	u8 interrupt_enable : 1;
+	u8 is_halted : 1;
+	u8 halt_bugged : 1;
+	u8 double_speed : 1;
 
 	u16 timer_div_increment;
 	u16 timer_tima_increment;

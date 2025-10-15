@@ -2,16 +2,14 @@
 #include "gbEmu.h"
 #include "log.h"
 
-#define CGB_MODE 0
-
 void gb_cpu_init(gb_sm83_t* cpu, struct gb_mmu* mmu)
 {
-    *cpu = (gb_sm83_t){ 0 };
-    cpu->mmu = mmu;
-    cpu->keys_down = 0xFF;
+	*cpu = (gb_sm83_t){0};
+	cpu->mmu = mmu;
+	cpu->keys_down = 0xFF;
 
-    // CGB initial values
-	if (CGB_MODE) {
+	// CGB initial values
+	if (mmu->emu->cgb_mode) {
 		GB_REG_AF(cpu->regs) = 0x1180;
 		GB_REG_BC(cpu->regs) = 0x0000;
 		GB_REG_DE(cpu->regs) = 0xFF56;

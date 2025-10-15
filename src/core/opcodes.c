@@ -1591,17 +1591,46 @@ u8 gb_cpu_execute_opcode(gb_sm83_t* cpu)
 		}
 
 		/* STOP */ case 0x10: {
-		    // @TODO: CGB
+			// @TODO: CGB
 
 			const u8 IE = GB_CPU_MEM(cpu, GB_ADDR_IE);
 			const u8 IF = GB_CPU_MEM(cpu, GB_ADDR_IF);
+
+			/*
+			JOY
+			if (gb_mmu_read_u8(cpu->mmu, GB_ADDR_P1)) {
+			}
+			*/
+
 			// reset timers
 			gb_mmu_write_u8(cpu->mmu, GB_ADDR_DIV, 0x00);
-			cpu->is_halted = 1; // @TODO: proper "stop mode"
-			if ((IE & IF) != 0) {
-			    GB_REG_PC(cpu->regs) += 1;
+
+			const u8 pending_speed_switch =
+				cpu->mmu->emu->cgb_mode &&
+				(gb_mmu_read_u8(cpu->mmu, GB_ADDR_SPEED_SW) & 0x1);
+
+			if (!pending_speed_switch) {
+				cpu->is_halted = 1; // @TODO: proper "stop mode"
+				if ((IE & IF) == 0) {
+					GB_REG_PC(cpu->regs) += 1;
+				}
+				return 1;
 			}
-		    return 1;
+
+			const u32 speed_switch_cycles =
+				(128 * 1024 - 76) / 4; //@TODO: verify
+			cpu->double_speed = !cpu->double_speed;
+			cpu->m_cycles += speed_switch_cycles;
+
+			if ((IE & IF) == 0) {
+				GB_REG_PC(cpu->regs) += 1;
+				cpu->is_halted = 1;
+				// @TODO: 0x20000 t-cycles
+				return 0;
+			}
+
+			// @TODO: IME disabled
+			return 0;
 		}
 
 		/* LD (C), A */ case 0xE2: {

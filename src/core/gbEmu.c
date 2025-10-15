@@ -9,10 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-gb_emu_t* gb_emu_create(void)
+gb_emu_t* gb_emu_create(int cgb_mode)
 {
 	gb_emu_t* emu = malloc(sizeof(gb_emu_t));
-	gb_emu_init(emu);
+	gb_emu_init(emu, cgb_mode);
 	return emu;
 }
 
@@ -22,11 +22,12 @@ void gb_emu_delete(gb_emu_t* emu)
 	free(emu);
 }
 
-void gb_emu_init(gb_emu_t* emu)
+void gb_emu_init(gb_emu_t* emu, int cgb_mode)
 {
 	memset((void*)emu, 0, sizeof(gb_emu_t));
 
-	gb_mmu_init(&emu->mmu, &emu->cart, &emu->cpu, &emu->ppu);
+	emu->cgb_mode = cgb_mode & 0x1;
+	gb_mmu_init(&emu->mmu, &emu->cart, &emu->cpu, &emu->ppu, emu);
 	gb_cart_init(&emu->cart);
 	gb_cpu_init(&emu->cpu, &emu->mmu);
 	gb_ppu_init(&emu->ppu, &emu->mmu);

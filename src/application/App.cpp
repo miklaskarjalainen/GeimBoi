@@ -200,7 +200,7 @@ void GeimBoi::App::reset()
 		gb_emu_deinit(m_Emulator.get());
 	}
 
-	gb_emu_init(m_Emulator.get());
+	gb_emu_init(m_Emulator.get(), 1);
 	const auto& rompath = Settings::get().general.last_rompath;
 	m_IsLoaded = false;
 	if (!rompath.empty()) {

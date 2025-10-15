@@ -51,6 +51,9 @@ void GeimBoi::GuiDebugger::draw_cpu()
 		m_Emulator->cpu.interrupt_enable ? "true" : "false"
 	);
 	ImGui::Text("Is halted: %s", m_Emulator->cpu.is_halted ? "true" : "false");
+	ImGui::Text(
+		"Double Speed: %s", m_Emulator->cpu.double_speed ? "true" : "false"
+	);
 	ImGui::End();
 }
 

@@ -1,11 +1,16 @@
 #include "gbMMU.h"
 #include "gbCart.h"
+#include "gbEmu.h"
 #include "gbPPU.h"
 #include "gbSM83.h"
 #include "log.h"
 
 void gb_mmu_init(
-	gb_mmu_t* mmu, struct gb_cart* cart, struct gb_sm83* cpu, struct gb_ppu* ppu
+	gb_mmu_t* mmu,
+	struct gb_cart* cart,
+	struct gb_sm83* cpu,
+	struct gb_ppu* ppu,
+	struct gb_emu* emu
 )
 {
 	*mmu = (gb_mmu_t){0};
@@ -13,6 +18,7 @@ void gb_mmu_init(
 	mmu->cart = cart;
 	mmu->cpu = cpu;
 	mmu->ppu = ppu;
+	mmu->emu = emu;
 }
 
 u16 gb_mmu_read_u16(const gb_mmu_t* mmu, u16 addr)
@@ -46,6 +52,16 @@ u8 gb_mmu_read_u8(const gb_mmu_t* mmu, u16 addr)
 		return joy | buttons;
 	}
 
+	if (addr == GB_ADDR_SPEED_SW) {
+		if (mmu->emu->cgb_mode) {
+			u8 bits = 0x7E;
+			bits |= mmu->cpu->double_speed << 7;
+			bits |= GB_GET_BIT(GB_CPU_MEM(mmu->cpu, GB_ADDR_SPEED_SW), 0);
+			return bits;
+		}
+		return 0xFF;
+	}
+
 	if (addr >= 0xFEA0 && addr <= 0xFEFF) {
 		return 0xFF;
 	}
@@ -77,6 +93,11 @@ void gb_mmu_write_u8(gb_mmu_t* mmu, u16 addr, u8 data)
 	}
 	if (addr >= 0xA000 && addr <= 0xBFFF) {
 		mmu->cart->write_ram(mmu->cart, addr, data);
+		return;
+	}
+
+	if (addr == GB_ADDR_SPEED_SW && mmu->emu->cgb_mode) {
+		GB_CPU_MEM(mmu->cpu, GB_ADDR_SPEED_SW) |= data & 0x1;
 		return;
 	}
 
