@@ -194,3 +194,32 @@ int gb_verify_checksums(const gb_cart_t* cart)
 	r += _gb_verify_global(cart) ? 0 : 2;
 	return r;
 }
+
+size_t
+gb_cart_read_battery(const gb_cart_t* cart, u8* buffer, size_t buffer_size)
+{
+	if (!buffer) {
+		return 0;
+	}
+
+	const size_t used_ram = cart->ram_banks * 0x2000;
+	size_t i = 0;
+	for (; i < buffer_size && i < used_ram; i++) {
+		buffer[i] = cart->ram[i];
+	}
+	return i;
+}
+
+size_t gb_cart_write_battery(gb_cart_t* cart, u8* buffer, size_t buffer_size)
+{
+	if (!buffer) {
+		return 0;
+	}
+
+	const size_t used_ram = cart->ram_banks * 0x2000;
+	size_t i = 0;
+	for (; i < buffer_size && i < used_ram; i++) {
+		cart->ram[i] = buffer[i];
+	}
+	return i;
+}

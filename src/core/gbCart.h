@@ -67,5 +67,19 @@ bool gb_cart_cgb_flag(const gb_cart_t* cart);
  * @brief 0 - success, 1 - header mismatch, 2 - rom mismatch, 3 - both.
  */
 int gb_verify_checksums(const gb_cart_t* cart);
-
+/*
+ * @brief copies the contents of on board ram into a buffer.
+ * (Usually hosting the save file)
+ * @warning To guarantee that all of ram can be copied,
+ * use a buffer size of ram_banks * 0x2000.
+ * @returns the number of bytes copied.
+ */
+size_t
+gb_cart_read_battery(const gb_cart_t* cart, u8* buffer, size_t buffer_size);
+/*
+ * @brief copies the contents of buffer into ram .
+ * (Usually hosting the save file)
+ * @returns the number of bytes copied.
+ */
+size_t gb_cart_write_battery(gb_cart_t* cart, u8* buffer, size_t buffer_size);
 #endif

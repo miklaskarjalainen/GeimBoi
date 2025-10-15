@@ -1,5 +1,4 @@
 #include "App.hpp"
-#include "SDL3/SDL_timer.h"
 #include "Settings.hpp"
 #include "gui/GuiDebugger.hpp"
 
@@ -12,6 +11,7 @@ extern "C" {
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
 #include <chrono>
+#include <fstream>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
@@ -180,6 +180,23 @@ void GeimBoi::App::open_rom(const char* fpath)
 void GeimBoi::App::reset()
 {
 	if (m_Emulator) {
+		// Save SAV
+		u8* buffer = new u8[GB_MAX_RAMSIZE];
+
+		size_t copied =
+			gb_cart_read_battery(&m_Emulator->cart, buffer, GB_MAX_RAMSIZE);
+
+		if (copied) {
+			std::string game_name = gb_cart_get_name(&m_Emulator->cart);
+			std::ofstream file{
+				game_name + ".sav", std::ios::out | std::ios::binary
+			};
+			file.write((const char*)buffer, copied);
+			GB_INFO("Writing save file! Bytes %zu written!", copied);
+		}
+
+		delete[] buffer;
+
 		gb_emu_deinit(m_Emulator.get());
 	}
 
@@ -188,6 +205,22 @@ void GeimBoi::App::reset()
 	m_IsLoaded = false;
 	if (!rompath.empty()) {
 		m_IsLoaded = gb_emu_load_rom_file(m_Emulator.get(), rompath.c_str());
+
+		// Load SAV
+		std::string game_name = gb_cart_get_name(&m_Emulator->cart);
+		std::ifstream file{game_name + ".sav", std::ios::in | std::ios::binary};
+		if (file.is_open()) {
+			GB_INFO("Trying to load %i", file.is_open());
+			u8* buffer = new u8[GB_MAX_RAMSIZE];
+
+			file.read((char*)buffer, GB_MAX_RAMSIZE);
+
+			size_t copied = gb_cart_write_battery(
+				&m_Emulator->cart, buffer, GB_MAX_RAMSIZE
+			);
+			GB_INFO("Loading save file! Bytes %zu copied!", copied);
+			delete[] buffer;
+		}
 	}
 }
 
@@ -269,4 +302,4 @@ GeimBoi::App::App() : m_Emulator(std::make_unique<gb_emu_t>())
 	LoadTextureFromMemory(GB_LCD_WIDTH, GB_LCD_HEIGHT, &m_PpuTexture);
 }
 
-GeimBoi::App::~App() = default;
+GeimBoi::App::~App() { reset(); }
