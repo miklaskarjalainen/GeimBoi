@@ -57,20 +57,23 @@ static inline u8 _gb_first_bit_pos(u8 num)
 
 void gb_cpu_poll_interrupts(gb_sm83_t* cpu)
 {
-	const u8 IE = gb_mmu_read_u8(cpu->mmu, GB_ADDR_IE);
-	const u8 IF = gb_mmu_read_u8(cpu->mmu, GB_ADDR_IF);
-	u8 ints = (IE & IF) & GB_INTERRUPT_MASK;
+	const u8 IF = gb_mmu_read_u8(cpu->mmu, GB_ADDR_IF) & GB_INTERRUPT_MASK;
 
+	// Interrupt was raised, but they were disabled.
+	if (IF != 0 && !cpu->interrupt_enable) {
+		cpu->m_cycles += cpu->is_halted;
+		cpu->is_halted = false;
+		return;
+	}
+
+	const u8 IE = gb_mmu_read_u8(cpu->mmu, GB_ADDR_IE) & GB_INTERRUPT_MASK;
+	u8 ints = IE & IF;
 	if (!ints) {
 		return;
 	}
 
 	cpu->m_cycles += cpu->is_halted;
 	cpu->is_halted = false;
-
-	if (!cpu->interrupt_enable) {
-		return;
-	}
 
 	const u8 INT = _gb_first_bit_pos(ints);
 	_gb_cpu_serve_interrupt(cpu, INT);
