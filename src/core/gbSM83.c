@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 #include "gbSM83.h"
 #include "gbEmu.h"
 #include "log.h"

@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
+
 #ifndef _GB_SM83_H
 #define _GB_SM83_H
 

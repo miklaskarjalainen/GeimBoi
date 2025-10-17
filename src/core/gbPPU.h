@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
+
 #ifndef _GB_PPU_H
 #define _GB_PPU_H
 

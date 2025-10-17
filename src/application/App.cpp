@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 #include "App.hpp"
 #include "Settings.hpp"
 #include "gui/GuiDebugger.hpp"

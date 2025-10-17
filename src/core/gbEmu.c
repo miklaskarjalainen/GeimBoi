@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 #include "gbEmu.h"
 #include "gbCart.h"
 #include "gbMMU.h"

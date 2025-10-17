@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 #include "Window.hpp"
 #include "SDL3/SDL_video.h"
 #include "log.h"

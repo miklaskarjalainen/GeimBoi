@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 #include "gbDisassembler.h"
 
 static const char* s_OpcodeAsm[0x100] = {
