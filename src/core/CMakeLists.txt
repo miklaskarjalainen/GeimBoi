@@ -11,6 +11,7 @@ option(GB_TESTS on)
 add_library(${PROJECT_NAME}
     mbc/MBC0.c
     mbc/MBC1.c
+    mbc/MBC3.c
 
     gbCore.h
     gbCart.c gbCart.h

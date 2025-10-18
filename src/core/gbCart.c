@@ -3,10 +3,12 @@
 #include "gbCart.h"
 #include "log.h"
 
+// TODO: remove
 #include <stdlib.h>
 
 extern void _gb_mbc0_reset(gb_cart_t* cart);
 extern void _gb_mbc1_reset(gb_cart_t* cart);
+extern void _gb_mbc3_reset(gb_cart_t* cart);
 
 static u16 gb_cart_read_u16_be(const gb_cart_t* cart, u16 addr)
 {
@@ -84,8 +86,12 @@ void gb_cart_load(gb_cart_t* cart, const u8* rom, size_t len)
 			_gb_mbc1_reset(cart);
 			break;
 		}
+		case GB_MAPPER_MBC3: {
+			_gb_mbc3_reset(cart);
+			break;
+		}
 		default: {
-			GB_FATAL("Unsupported mapper! %i", cart->rom[0x147]);
+			GB_FATAL("Unsupported mapper! 0x%X", cart->rom[0x147]);
 		}
 	}
 

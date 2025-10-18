@@ -8,6 +8,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include <time.h>
+
 /*
  * The maximum possible size of a GB/(C) rom is 8 MiB.
  */
@@ -41,6 +43,16 @@ typedef struct gb_cart {
 			u8 banking_mode : 1;
 			u8 ram_bank : 2;
 		} mbc1;
+		struct {
+			u8 rom_bank : 7;
+			u8 ram_rtc_bank : 4; // 00-07 (RAM) 08-0C (RTC)
+			u8 ram_rtc_enable : 1;
+			struct {
+				u8 latch_data;
+				time_t last_latch;
+				u8 sec, min, hour, day;
+			} rtc;
+		} mbc3;
 	} mapper_data;
 } gb_cart_t;
 
