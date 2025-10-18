@@ -102,10 +102,10 @@ void gb_emu_press_key(gb_emu_t* emu, gb_input_e input)
 	const u8 is_action = (input & 0xF0) != 0;
 	emu->cpu.keys_down &= (u8)~input;
 
-	if (GB_IS_BIT(p1, 5) && is_dpad) {
+	if (!GB_IS_BIT(p1, 4) && is_dpad) {
 		gb_cpu_request_interrupt(&emu->cpu, GB_INTERRUPT_JOYPAD);
 	}
-	else if ((GB_IS_BIT(p1, 4) && is_action)) {
+	else if ((!GB_IS_BIT(p1, 5) && is_action)) {
 		gb_cpu_request_interrupt(&emu->cpu, GB_INTERRUPT_JOYPAD);
 	}
 }

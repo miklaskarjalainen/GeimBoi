@@ -43,15 +43,15 @@ u8 gb_mmu_read_u8(const gb_mmu_t* mmu, u16 addr)
 
 	// Joypad
 	if (addr == GB_ADDR_P1) {
-		const u8 joy = GB_CPU_MEM(mmu->cpu, GB_ADDR_P1);
-		u8 buttons = 0xF;
-		if (GB_IS_BIT(joy, 4)) {
-			buttons &= mmu->cpu->keys_down >> 4;
-		}
-		if (GB_IS_BIT(joy, 5)) {
+		const u8 joy = GB_CPU_MEM(mmu->cpu, GB_ADDR_P1) & 0x30;
+		u8 buttons = 0x0F;
+		if (!GB_IS_BIT(joy, 4)) {
 			buttons &= mmu->cpu->keys_down;
 		}
-		return joy | buttons;
+		if (!GB_IS_BIT(joy, 5)) {
+			buttons &= mmu->cpu->keys_down >> 4;
+		}
+		return joy | (buttons & 0xF) | 0xC0;
 	}
 
 	if (addr == GB_ADDR_SPEED_SW) {

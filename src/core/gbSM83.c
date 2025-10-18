@@ -83,8 +83,7 @@ void gb_cpu_poll_interrupts(gb_sm83_t* cpu)
 
 void gb_cpu_request_interrupt(gb_sm83_t* cpu, u8 interrupt)
 {
-	u8 unhandled = cpu->memory[GB_ADDR_IF - 0x8000];
-	cpu->memory[GB_ADDR_IF - 0x8000] = interrupt | unhandled;
+	cpu->memory[GB_ADDR_IF - 0x8000] |= interrupt;
 }
 
 // Hz
