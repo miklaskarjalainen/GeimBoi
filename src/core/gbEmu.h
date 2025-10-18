@@ -3,6 +3,7 @@
 #ifndef _GB_CONSOLE_H
 #define _GB_CONSOLE_H
 
+#include "gbAPU.h"
 #include "gbCart.h"
 #include "gbMMU.h"
 #include "gbPPU.h"
@@ -26,6 +27,7 @@ typedef enum gb_input {
 } gb_input_e;
 
 typedef struct gb_emu {
+    gb_apu_t apu;
 	gb_sm83_t cpu;
 	gb_cart_t cart;
 	gb_ppu_t ppu;

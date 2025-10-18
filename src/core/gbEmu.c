@@ -29,7 +29,8 @@ void gb_emu_init(gb_emu_t* emu, int cgb_mode)
 	memset((void*)emu, 0, sizeof(gb_emu_t));
 
 	emu->cgb_mode = (u8)cgb_mode & 0x1U;
-	gb_mmu_init(&emu->mmu, &emu->cart, &emu->cpu, &emu->ppu, emu);
+	gb_apu_init(&emu->apu);
+	gb_mmu_init(&emu->mmu, &emu->apu, &emu->cart, &emu->cpu, &emu->ppu, emu);
 	gb_cart_init(&emu->cart);
 	gb_cpu_init(&emu->cpu, &emu->mmu);
 	gb_ppu_init(&emu->ppu, &emu->mmu);
@@ -82,6 +83,7 @@ void gb_emu_advance_opcode(gb_emu_t* emu)
 	gb_cpu_poll_interrupts(&emu->cpu);
 
 	const u8 cycles = emu->cpu.is_halted ? 1 : gb_cpu_execute_opcode(&emu->cpu);
+	gb_apu_clock(&emu->cpu, cycles * 4);
 	gb_cpu_clock_timers(&emu->cpu, cycles);
 	gb_ppu_clock(&emu->ppu, cycles * 4);
 	emu->cpu.m_cycles += cycles;

@@ -9,6 +9,7 @@
 
 void gb_mmu_init(
 	gb_mmu_t* mmu,
+	struct gb_apu* apu,
 	struct gb_cart* cart,
 	struct gb_sm83* cpu,
 	struct gb_ppu* ppu,
@@ -17,6 +18,7 @@ void gb_mmu_init(
 {
 	*mmu = (gb_mmu_t){0};
 
+	mmu->apu = apu;
 	mmu->cart = cart;
 	mmu->cpu = cpu;
 	mmu->ppu = ppu;
@@ -78,6 +80,16 @@ u8 gb_mmu_read_u8(const gb_mmu_t* mmu, u16 addr)
 		return mmu->ppu->ly;
 	}
 	if (addr == 0xFF45) {
+		return mmu->ppu->lyc;
+	}
+
+	// APU
+	if (addr == GB_ADDR_NR52) {
+		u8 out = mmu->apu->enabled << 7;
+		out |= mmu->apu->channel1.active << 0;
+		out |= mmu->apu->channel2.active << 1;
+		out |= mmu->apu->channel3.active << 2;
+		out |= mmu->apu->channel4.active << 3;
 		return mmu->ppu->lyc;
 	}
 

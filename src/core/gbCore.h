@@ -7,6 +7,7 @@
 extern "C" {
 #endif
 
+#include "gbAPU.h"
 #include "gbCart.h"
 #include "gbDisassembler.h"
 #include "gbEmu.h"

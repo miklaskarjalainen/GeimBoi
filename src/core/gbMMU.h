@@ -13,6 +13,17 @@
 #define GB_ADDR_WY (0xFF4A)	  // Window Y
 #define GB_ADDR_WX (0xFF4B)	  // Window X
 
+// APU registers
+#define GB_ADDR_NR50 (0xFF24) // Master Volume & VIN panning
+#define GB_ADDR_NR51 (0xFF25) // Sound Panning
+#define GB_ADDR_NR52 (0xFF26) // Audio master control
+
+#define GB_ADDR_NR10 (0xFF10) // Channel 1 sweep
+#define GB_ADDR_NR11 (0xFF11) // Channel 1 length timer & duty cycle
+#define GB_ADDR_NR12 (0xFF12) // Channel 1 volume & envelope
+#define GB_ADDR_NR13 (0xFF13) // Channel 1 period low
+#define GB_ADDR_NR14 (0xFF14) // Channel 1 period high & control
+
 // CGB registers
 #define GB_ADDR_SPEED_SW (0xFF4D) // Speed Switch (KEY1)
 #define GB_ADDR_BGPI (0xFF68)	  // Background color palette index
@@ -32,6 +43,7 @@
  * @brief Maps gameboy's 16-bit address space to the correct components.
  */
 typedef struct gb_mmu {
+	struct gb_apu* apu;
 	struct gb_cart* cart;
 	struct gb_sm83* cpu;
 	struct gb_ppu* ppu;
@@ -40,6 +52,7 @@ typedef struct gb_mmu {
 
 void gb_mmu_init(
 	gb_mmu_t* mmu,
+	struct gb_apu* apu,
 	struct gb_cart* cart,
 	struct gb_sm83* cpu,
 	struct gb_ppu* ppu,

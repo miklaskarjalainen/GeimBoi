@@ -13,6 +13,7 @@ add_library(${PROJECT_NAME}
     mbc/MBC1.c
     mbc/MBC3.c
 
+    gbAPU.c gbAPU.h
     gbCore.h
     gbCart.c gbCart.h
     gbEmu.c gbEmu.h
